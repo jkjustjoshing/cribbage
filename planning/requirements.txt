@@ -6,6 +6,7 @@ Cribbage game
 	Some sort of ranking/statistics system
 	Ability to forefit or "End in a draw"
 	Stretch goal - tutorial	
+	Stretch goal: breakdown of points for each hand
 Chat
 	Global chat
 		Visible to everyone in the lobby
