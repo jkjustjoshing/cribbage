@@ -1,9 +1,6 @@
 <?php
 	
-	require_once("club.php");
-	require_once("spade.php");
-	require_once("diamond.php");
-	require_once("heart.php");
+	require_once("suits.php");
 		
 	function shape($v_shape, $v_transform){
 		static $v_printed = false;
