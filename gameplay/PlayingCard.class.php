@@ -16,7 +16,7 @@
 			"diamond"
 		);
 
-		function __construct($suit, $number){
+		public function __construct($suit, $number){
 			if(in_array($suit, $suits){
 				$_suit = $suit;
 			}else{
@@ -48,7 +48,22 @@
 			}
 		} // end __construct
 
+		public function getSuit(){
+			return $_suit;
+		}
 
+		public function getNumber(){
+			return $_number;
+		}
+
+		public function toString(){
+			return $_number . " of " . $_suit;
+		}
+
+		public function toSVG(){
+			//TODO
+			return "";
+		}
 
 	}
 
