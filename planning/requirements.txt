@@ -1,0 +1,22 @@
+REQUIREMENTS
+
+Cribbage game
+	Multiple games at a time
+	Only one game with each opponent at a time
+	Some sort of ranking/statistics system
+	Ability to forefit or "End in a draw"
+	Stretch goal - tutorial	
+	Stretch goal: breakdown of points for each hand
+Chat
+	Global chat
+		Visible to everyone in the lobby
+		Only saves previous 10,000 messages
+	In-game chat
+		Only visible to the people part of the game.
+		Only saves previous 1,000 messages
+		Chat persists between players across multiple games
+		Can PM other users as part of this, without challenging, from lobby. Will be part of same chat.
+		Will post game wins and losses
+Challenge System
+	Choose an opponent. Can't be yourself. If game already exists (and isn't open elsewhere) open game. If game exists and is open elsewhere, disable the other instance. If no game exists, challenge the other player
+
