@@ -164,8 +164,70 @@
                 $this->assertNull($card);
             }
 
+			try{
+				$card = new PlayingCard(array(), "spade");
+				$this->assertTrue(false, "Should have been exception thrown");
+			}catch(Exception $e){
+				$this->assertNull($card);
+			}
+	
+			try{
+				$card = new PlayingCard(array(1), "spade");
+				$this->assertTrue(false, "Should have been exception thrown");
+			}catch(Exception $e){
+				$this->assertNull($card);
+			}
 		
 		}
+		
+		function testToString(){
+			echo "testToString()<br />";
+
+			$spade = new PlayingCard(3, "spade");
+			$diamond = new PlayingCard(8, "diamond");
+			$heart = new PlayingCard("K", "heart");
+			$club = new PlayingCard(13, "club");
+
+			$this->assertEqual($spade->toString(), "3 of spades");
+			$this->assertEqual($diamond->toString(), "8 of diamonds");
+			$this->assertEqual($heart->toString(), "K of hearts");
+			$this->assertEqual($club->toString(), "K of clubs");
+
+		}
+
+		function testGetNumber(){
+			echo "testGetNumber()<br />";
+			
+			$one = new PlayingCard(1, "diamond");
+			$two = new PlayingCard(2, "spade");
+			$king = new PlayingCard(13, "spade");
+			$king2 = new PlayingCard("K", "spade");
+			$queen = new PlayingCard("Q", "spade");
+			$jack = new PlayingCard("J", "spade");
+
+			$this->assertEqual($one->getNumber(), 1);
+			$this->assertEqual($two->getNumber(), 2);
+			$this->assertEqual($king->getNumber(), 13);
+			$this->assertEqual($king2->getNumber(), 13);
+			$this->assertEqual($queen->getNumber(), 12);
+			$this->assertEqual($jack->getNumber(), 11);
+		}
+
+		function testGetSuit(){
+			echo "testGetSuit()<br />";
+			
+			$spade = new PlayingCard(3, "spade");
+            $diamond = new PlayingCard(8, "diamond");
+            $heart = new PlayingCard("K", "heart");
+            $club = new PlayingCard(13, "club");
+
+            $this->assertEqual($spade->getSuit(), "spade");
+            $this->assertEqual($diamond->getSuit(), "diamond");
+            $this->assertEqual($heart->getSuit(), "heart");
+            $this->assertEqual($club->getSuit(), "club");	
+
+		}
+
 	}
 
 ?>

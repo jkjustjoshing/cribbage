@@ -48,16 +48,21 @@
 			}
 		} // end __construct
 
-		public static function getSuit(){
+		public function getSuit(){
 			return $this->_suit;
 		}
 
-		public static function getNumber(){
+		public function getNumber(){
 			return $this->_number;
 		}
 
-		public static function toString(){
-			return $this->_number . " of " . $this->_suit;
+		public function toString(){
+			$number = $this->_number;
+			if($number == 11) $number = "J";
+			else if($number == 12) $number = "Q";
+			else if($number == 13) $number = "K";
+
+			return $number . " of " . $this->_suit . "s";
 		}
 
 		public static function toSVG(){
