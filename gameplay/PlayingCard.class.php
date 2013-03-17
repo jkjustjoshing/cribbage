@@ -56,6 +56,14 @@
 			return $this->_number;
 		}
 
+		public function getCountValue(){
+			if($this->_number > 10){
+				return 10;
+			}else{
+				return $this->_number;
+			}
+		}
+
 		public function equals($other){
 			if(!is_object($other)){
 				return false;

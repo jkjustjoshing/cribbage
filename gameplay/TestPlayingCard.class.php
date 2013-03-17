@@ -213,6 +213,24 @@
 			$this->assertEqual($jack->getNumber(), 11);
 		}
 
+		function testGetCountValue(){
+			echo "testGetCountValue()<br />";
+
+			$one = new PlayingCard(1, "diamond");
+            $two = new PlayingCard(2, "spade");
+            $king = new PlayingCard(13, "spade");
+            $king2 = new PlayingCard("K", "spade");
+            $queen = new PlayingCard("Q", "spade");
+            $jack = new PlayingCard("J", "spade");
+
+            $this->assertEqual($one->getCountValue(), 1);
+            $this->assertEqual($two->getCountValue(), 2);
+            $this->assertEqual($king->getCountValue(), 10);
+            $this->assertEqual($king2->getCountValue(), 10);
+            $this->assertEqual($queen->getCountValue(), 10);
+            $this->assertEqual($jack->getCountValue(), 10);
+		}
+
 		function testGetSuit(){
 			echo "testGetSuit()<br />";
 			
