@@ -228,6 +228,31 @@
 
 		}
 
+		function testEquals(){
+			echo "testEquals()<br />";
+
+			$card = new PlayingCard(10, "diamond");
+	
+			$this->assertFalse($card->equals("1"));
+			$this->assertFalse($card->equals(null));
+			$this->assertFalse($card->equals(array()));
+			$this->assertFalse($card->equals(array(1)));
+			$this->assertFalse($card->equals(1));
+	
+			$other = new PlayingCard(9, "club");
+			$this->assertFalse($card->equals($other));
+		
+			$other = new PlayingCard(10, "spade");
+			$this->assertFalse($card->equals($other));
+
+			$other = new PlayingCard(9, "diamond");
+			$this->assertFalse($card->equals($other));
+		
+			$other = new PlayingCard(10, "diamond");
+			$this->assertTrue($card->equals($other));
+		}
+
+
 	}
 
 ?>

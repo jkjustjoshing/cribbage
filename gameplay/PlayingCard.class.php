@@ -56,6 +56,22 @@
 			return $this->_number;
 		}
 
+		public function equals($other){
+			if(!is_object($other)){
+				return false;
+			}
+
+			if(get_class() != get_class($other)){
+				return false;
+			}
+
+			if($this->_number == $other->_number && $this->_suit == $other->_suit){
+				return true;
+			}else{
+				return false;
+			}
+		}
+
 		public function toString(){
 			$number = $this->_number;
 			if($number == 11) $number = "J";
