@@ -9,35 +9,35 @@
 	class PlayingCard{
 		
 		private $_suit, $_number;
-		const SUITS = array(
+		private static $suits = array(
 			"diamond",
 			"club",
 			"heart",
-			"diamond"
+			"spade"
 		);
 
-		public function __construct($suit, $number){
-			if(in_array($suit, $suits){
-				$_suit = $suit;
+		public function __construct($number, $suit){
+			if(in_array($suit, self::$suits)){
+				$this->_suit = $suit;
 			}else{
 				throw new Exception("Card can't be created with suit " . $suit . ".");
 			}
 
 			if(is_int($number) && $number > 0 && $number < 14){
-				$_number = $number;
+				$this->_number = $number;
 			}else if(is_string($number)){
-					if(intval($number) > 0 && intval($number < 14)){
-							$_number = intval($number);
+					if(("".intval($number)) == $number && intval($number) > 0 && intval($number < 14)){
+							$this->_number = intval($number);
 					}else{
 						switch($number){
 							case "J":
-								$_number = 11;
+								$this->_number = 11;
 								break;
 							case "Q":
-								$_number = 12;
+								$this->_number = 12;
 								break;
 							case "K":
-								$_number = 13;
+								$this->_number = 13;
 								break;
 							default:
 								throw new Exception("Card can't be created with a number " . $number . ".");
@@ -48,19 +48,19 @@
 			}
 		} // end __construct
 
-		public function getSuit(){
-			return $_suit;
+		public static function getSuit(){
+			return $this->_suit;
 		}
 
-		public function getNumber(){
-			return $_number;
+		public static function getNumber(){
+			return $this->_number;
 		}
 
-		public function toString(){
-			return $_number . " of " . $_suit;
+		public static function toString(){
+			return $this->_number . " of " . $this->_suit;
 		}
 
-		public function toSVG(){
+		public static function toSVG(){
 			//TODO
 			return "";
 		}
