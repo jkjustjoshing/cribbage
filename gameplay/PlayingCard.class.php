@@ -72,7 +72,7 @@
 			}
 		}
 
-		public function toString(){
+		public function __toString(){
 			$number = $this->_number;
 			if($number == 11) $number = "J";
 			else if($number == 12) $number = "Q";

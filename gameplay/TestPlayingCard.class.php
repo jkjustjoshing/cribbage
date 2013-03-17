@@ -188,10 +188,10 @@
 			$heart = new PlayingCard("K", "heart");
 			$club = new PlayingCard(13, "club");
 
-			$this->assertEqual($spade->toString(), "3 of spades");
-			$this->assertEqual($diamond->toString(), "8 of diamonds");
-			$this->assertEqual($heart->toString(), "K of hearts");
-			$this->assertEqual($club->toString(), "K of clubs");
+			$this->assertEqual($spade->__toString(), "3 of spades");
+			$this->assertEqual($diamond->__toString(), "8 of diamonds");
+			$this->assertEqual($heart->__toString(), "K of hearts");
+			$this->assertEqual($club->__toString(), "K of clubs");
 
 		}
 
