@@ -80,6 +80,10 @@
 			}
 		}
 
+		public static function getAllSuits(){
+			return self::$suits;
+		}
+
 		public function __toString(){
 			$number = $this->_number;
 			if($number == 11) $number = "J";
