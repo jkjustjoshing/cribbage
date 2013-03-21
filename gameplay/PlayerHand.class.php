@@ -3,46 +3,75 @@
 	require_once("PlayingCard.class.php");
 
 	/**
-	 ** PlayerHand class
-	 ** @author Josh Kramer
-	 ** A hand of cards. Either a 6 card delt hand,
-	 ** a hand of 4, or a crib
-	 **/
+	 * PlayerHand class
+	 * @author Josh Kramer
+	 * A hand of cards. Either a 6 card delt hand,
+	 * a hand of 4, or a crib
+	 */
 	class PlayerHand{
 		
+		/**
+		 * An array of the cards stored in the hand
+		 */	
 		private $_cards = array();
+
+		/**
+		 * The score of the hand, and whether or not the score is "dirty".
+		 * This means that if the object is queried for the score twice without
+		 * the hand changing it can use a cached value without recomputing
+		 * it. When the score is not dirty the cut card used for the computation
+		 * is stored, since that changing will change the value of the hand.
+		 */
 		private $_score = 0;
 		private $_scoreDirtyLastCut = null;
+		
+		
+		/**
+		 * Constructor for the hand. No constructors
+		 */
 		public function __construct(){}
 
+		/**
+		 * Adds a playing card to the hand.
+		 * Throws an exception if a non-card is passed
+		 * @param A PlayingCard instance
+		 * @throws InvalidArgumentException if not a PlayingCard instance
+		 */
 		public function add($playingCard){
 			
 			// Set the score as dirty
 			$this->_scoreDirtyLastCut = null;
 
 			if(!is_object($playingCard)){
-				throw new Exception("Tried adding a card to a PlayerHand that is not an object.");
+				throw new InvalidArgumentException("Tried adding a card to a PlayerHand that is not an object.");
 			}
 
 			if(get_class($playingCard) != get_class(new PlayingCard(1, "club"))){
-				throw new Exception("Tried adding a card to a PlayerHand that was not a card.");
+				throw new InvalidArgumentException("Tried adding a card to a PlayerHand that was not a card.");
 			}
 
 			// Confirmed that $playingCard is a card
-			$_cards[] = $playingCard;
+			$this->_cards[] = $playingCard;
 		}
 
+		/**
+		 * Remove a specified playing card from the hand.
+		 * If the card isn't in the hand or is a non-card, exception thrown
+		 * @return The card that was removed
+		 * @throws InvalidArgumentException if passed a non-card value
+		 * @throws UnexpectedValueException if passed a card not in the hand
+		 */
 		public function remove($playingCard){
 
 			// Set the score as dirty
 			$this->_scoreDirtyLastCut = null;
 
 			if(!is_object($playingCard)){
-                throw new Exception("Tried adding a card to a PlayerHand that is not an object.");
+                throw new InvalidArgumentException("Tried adding a card to a PlayerHand that is not an object.");
             }
 
             if(get_class($playingCard) != get_class(new PlayingCard(1, "club"))){
-                throw new Exception("Tried adding a card to a PlayerHand that was not a card.");
+                throw new InvalidArgumentException("Tried adding a card to a PlayerHand that was not a card.");
             }
 
 			foreach($this->_cards as $index=>$card){
@@ -52,9 +81,15 @@
 					return $card;
 				}
 			}
-			return false;
+			
+			throw new UnexpectedValueException("Card " . $playingCard->__toString() . " not in hand");
 		}
 
+		/**
+		 * Calculates the total number of points in a hand, combining in a given
+		 * cut card.
+		 * @return The number of points in the hand with the given cut card
+		 */
 		public function totalPoints($cutCard){
 			if($this->_scoreDirtyLastCut !== null && $cutCard->equals($this->_scoreDirtyLastCut)){
 				// Score not dirty - don't recalculate it
@@ -71,9 +106,9 @@
 				 */
 
 				// Sort the cards first
-				usort($this->_score
+				//usort($this->_score
 
-				$this->_score /* = $newScore */;
+				//$this->_score /* = $newScore */;
 				return $this->_score;
 			}
 		}
@@ -134,11 +169,19 @@
 
 		}
 	
+		/**
+		 * Gets the current number of cards in the hand.
+		 * @return The number of cards in the hand
+		 */
 		public function numberOfCardsInHand(){
 			return count($this->_cards);
 		}
 
-		public getCards(){
+		/**
+		 * Return an array of all the cards in the hand
+		 * @return All the cards in the hand
+		 */
+		public function getCards(){
 			// Make sure we are passing out by value, not by reference
 			$tempArr = $this->_cards;
 			return $tempArr;
