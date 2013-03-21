@@ -1,14 +1,21 @@
 <?
 
 	/**
-	 ** PlayingCard class
-	 ** @author Josh Kramer
-	 ** Models a playing card
-	 **
-	 **/
+	 * PlayingCard class
+	 * @author Josh Kramer
+	 * Models a playing card
+	 *
+	 */
 	class PlayingCard{
 		
+		/**
+		 * The suit and number of the card
+		 */
 		private $_suit, $_number;
+		
+		/**
+		 * All possible suits
+		 */
 		private static $suits = array(
 			"diamond",
 			"club",
@@ -16,6 +23,12 @@
 			"spade"
 		);
 
+		/**
+		 * Constructs a playing card
+		 * @param $number A string or integer of the number of the card (or "J"/"Q"/"K")
+		 * @param $suit A string of the suit
+		 * @throws Exception if the paramaters are out of bounds or invalid
+		 */
 		public function __construct($number, $suit){
 			if(in_array($suit, self::$suits)){
 				$this->_suit = $suit;
@@ -48,14 +61,28 @@
 			}
 		} // end __construct
 
+		/**
+		 * Gets the suit of the card
+		 * @return The suit of the card
+		 */
 		public function getSuit(){
 			return $this->_suit;
 		}
-
+		
+		/**
+		 * Gets the number of the card
+		 * @return The number of the card
+		 */
 		public function getNumber(){
 			return $this->_number;
 		}
 
+		/**
+		 * Gets the count of the card. Returns the
+		 * same value as getNumber() for 1-10, but for
+		 * J, Q, K they also return 10.
+		 * @return The count value of the card for counting to 15
+		 */
 		public function getCountValue(){
 			if($this->_number > 10){
 				return 10;
@@ -64,6 +91,10 @@
 			}
 		}
 
+		/**
+		 * Tests the card's equality to another card
+		 * @return if the cards are equal or not
+		 */
 		public function equals($other){
 			if(!is_object($other)){
 				return false;
@@ -80,10 +111,19 @@
 			}
 		}
 
+		/**
+		 * Gets a list of possible suits
+		 * @return An array of possible suit values
+		 */
 		public static function getAllSuits(){
 			return self::$suits;
 		}
 
+		/**
+		 * toString method returns a string with the type of 
+		 * card. Does not return HTML or SVG. 
+		 * @return A string to identify the card
+		 */
 		public function __toString(){
 			$number = $this->_number;
 			if($number == 11) $number = "J";
@@ -92,7 +132,11 @@
 
 			return $number . " of " . $this->_suit . "s";
 		}
-
+		
+		/**
+		 * Returns a string for the SVG element of the card
+		 * @returns A string for the SVG element of the card
+		 */
 		public static function toSVG(){
 			//TODO
 			return "";
