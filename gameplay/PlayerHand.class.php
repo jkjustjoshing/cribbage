@@ -25,11 +25,34 @@
 		private $_score = 0;
 		private $_scoreDirtyLastCut = null;
 		
+		/**
+		 * Stores if this hand is a crib or not. The only difference
+		 * is how flushes are calculated
+		 */
+		private $_isCrib = false;
 		
 		/**
-		 * Constructor for the hand. No constructors
+		 * Constructor for the hand. Can optionally pass an array of cards that will
+		 * be put into the hand.
+		 * @throws InvalidArgumentException If any items in the passed array are not card objects
 		 */
-		public function __construct(){}
+		public function __construct($cardArray = array()){
+			try{
+				foreach($cardArray as $card){
+					if(!is_object($card)){
+						throw new InvalidArgumentException("Initializing with a non-object card");
+					}else if(get_class($playingCard) != get_class(new PlayingCard(1, "club"))){
+						// Not a card object
+						throw new InvalidArgumentException("Initializing with a non-card object");
+					}
+
+					$this->_cards[] = $tard;
+				}
+			}catch(InvalidArgumentException $e){
+				$this->_cards = array();
+				throw $e;
+			}
+		}
 
 		/**
 		 * Adds a playing card to the hand.
@@ -91,11 +114,16 @@
 		 * @return The number of points in the hand with the given cut card
 		 */
 		public function totalPoints($cutCard){
+			if($this->numberOfCardsInHand() < 4){
+				// Score can't be calculated with a smaller-than-full hand
+				return 0;
+			}
+			
 			if($this->_scoreDirtyLastCut !== null && $cutCard->equals($this->_scoreDirtyLastCut)){
 				// Score not dirty - don't recalculate it
 				return $this->_score;
 			}else{
-				
+				$this->_score = 0;
 				/* 
 				 * TODO count points
 				 *
@@ -105,10 +133,36 @@
 				 * other combos), or all adding up to 15
 				 */
 
+				// Look for flush
+				$suit = $this->_cards[0]->getSuit();
+				$flush = true;
+				foreach($this->_cards as $card){
+					if($card->getSuit() != $suit){
+						$flush = false;
+						break;
+					}
+				}
+				if($flush){
+					if($cutCard->getSuit() == $suit){
+						$this->_score += 5;
+					}else if(!$this->_isCrib){
+						$this->_score += 4;
+					}
+				}
+
+				// Look for knobbs
+				foreach($this->_cards as $card){
+					if($card->getSuit() == $cutCard->getSuit() && $card->getNumber() == 11){
+						$this->_score += 1;
+						break;
+					}
+				}
+
+
 				// Sort the cards first
 				//usort($this->_score
 
-				//$this->_score /* = $newScore */;
+				//$this->_score = $this->recursivePointsSearch(;
 				return $this->_score;
 			}
 		}
