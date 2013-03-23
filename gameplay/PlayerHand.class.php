@@ -213,8 +213,9 @@ if($debug)						echo "run length 0";
 							$thisNumberForMultiplier++;
 						}else{
 							$multiplier *= $multiplierForThisNumber;
-							$this->_score += $runLength * $multiplier;
-							
+							if($runLength >= 3){
+								$this->_score += $runLength * $multiplier;
+							}
 							$thisNumberForMultiplier = $cardsPlusCut[$i]->getNumber();
 							$multiplierForThisNumber = 1;
 							$multiplier = 1;
@@ -227,6 +228,11 @@ if($debug)				echo "runLength - $runLength\n";
 if($debug)				echo "thisNumberForMultiplier - $thisNumberForMultiplier\n";
 						
 				}
+				if($runLength >= 3){
+					$this->_score += $runLength * $multiplier * $multiplierForThisNumber;
+				}
+
+				
 
 				$this->_score += $this->recursivePointsSearch($cardsPlusCut, $debug);
 if($debug)		echo "</pre>";

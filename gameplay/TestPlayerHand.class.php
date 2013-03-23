@@ -84,21 +84,149 @@
 			}
 		}
 
-		function testCardSinglePair(){
-			echo "testCardSinglePair()<br />";
+		function testCardFlushes(){
+			echo "testCardFlushes()<br />";
 
-			$hand = new PlayerHand();
+			// Crib only allow 5 card flush
+			$crib = new PlayerHand(PlayerHand::CRIB);
+            $suit = "club";
+            $otherSuit = "spade";
+            $crib->add(new PlayingCard(2, $suit));
+            $crib->add(new PlayingCard(4, $suit));
+            $crib->add(new PlayingCard(6, $suit));
+            $crib->add(new PlayingCard(8, $suit));
+            	$score = $crib->totalPoints(new PlayingCard(10, $suit));
+            	$this->assertEqual($score, 5);
+            	
+				$score = $crib->totalPoints(new PlayingCard(10, $otherSuit));
+            	$this->assertEqual($score, 0);
+				
+				$crib->remove(new PlayingCard(2, $suit));
+				$crib->add(new PlayingCard(2, $otherSuit));
+				$score = $crib->totalPoints(new PlayingCard(10, $suit));
+				$this->assertEqual($score, 0);
+			
+			// Hand can have 4 or 5 card flush, but only if all 4 are in hand
+			$hand = new PlayerHand(PlayerHand::NOT_CRIB);
+			$suit = "club";
+			$otherSuit = "spade";
+			$hand->add(new PlayingCard(2, $suit));
+			$hand->add(new PlayingCard(4, $suit));
+			$hand->add(new PlayingCard(6, $suit));
+			$hand->add(new PlayingCard(8, $suit));
+				$score = $hand->totalPoints(new PlayingCard(10, $suit));
+				$this->assertEqual($score, 5);
+				
+				$score = $hand->totalPoints(new PlayingCard(10, $otherSuit));
+				$this->assertEqual($score, 4);
+				
+				$hand->remove(new PlayingCard(2, $suit));
+                $hand->add(new PlayingCard(2, $otherSuit));
+                $score = $hand->totalPoints(new PlayingCard(10, $suit));
+                $this->assertEqual($score, 0);
+		}
+
+		function testCardFifteens(){
+			echo "testCardFifteens()<br />";	
+			
+			$hand = new PlayerHand(PlayerHand::NOT_CRIB);
 
 			$hand->add(new PlayingCard(5, "club"));
-			$hand->add(new PlayingCard(5, "spade"));
-			$hand->add(new PlayingCard(3, "heart"));
-			$hand->add(new PlayingCard(6, "diamond"));
+			$hand->add(new PlayingCard(10, "heart"));
+			$hand->add(new PlayingCard(3, "diamond"));
+			$hand->add(new PlayingCard(2, "diamond"));
+			$score = $hand->totalPoints(new PlayingCard(12, "diamond"));
+			$this->assertEqual($score, 8);
+	
+			$hand = new PlayerHand(PlayerHand::NOT_CRIB);
 
-			$score = $hand->totalPoints(new PlayingCard(8, "diamond"));
-			$this->assertEqual($score, 2, "Score should equal 2");
+            $hand->add(new PlayingCard(7, "club"));
+            $hand->add(new PlayingCard(8, "heart"));
+            $hand->add(new PlayingCard(5, "diamond"));
+            $hand->add(new PlayingCard(10, "diamond"));
+            $score = $hand->totalPoints(new PlayingCard(2, "diamond"));
+            $this->assertEqual($score, 6);
+
 
 		}
 
+		function testCardPairs(){
+			echo "testCardPairs()<br />";
+
+			$hand = new PlayerHand(PlayerHand::NOT_CRIB);
+
+            $hand->add(new PlayingCard(5, "club"));
+            $hand->add(new PlayingCard(5, "heart"));
+            $hand->add(new PlayingCard(3, "diamond"));
+            $hand->add(new PlayingCard(3, "spade"));
+            $score = $hand->totalPoints(new PlayingCard(6, "diamond"));
+            $this->assertEqual($score, 4);
+
+
+			$hand = new PlayerHand(PlayerHand::NOT_CRIB);
+
+            $hand->add(new PlayingCard(3, "club"));
+            $hand->add(new PlayingCard(3, "heart"));
+            $hand->add(new PlayingCard(3, "diamond"));
+            $hand->add(new PlayingCard(7, "spade"));
+            $score = $hand->totalPoints(new PlayingCard(7, "diamond"));
+            $this->assertEqual($score, 8);
+
+		}
+		
+
+		function testCardRun(){
+			echo "testCardRun()<br />";
+
+			// 3 card run
+			$hand = new PlayerHand(PlayerHand::NOT_CRIB);
+            $hand->add(new PlayingCard(11, "club"));
+            $hand->add(new PlayingCard(12, "heart"));
+            $hand->add(new PlayingCard(13, "diamond"));
+            $hand->add(new PlayingCard(2, "diamond"));
+            $score = $hand->totalPoints(new PlayingCard(4, "diamond"));
+            $this->assertEqual($score, 3);
+
+
+			$hand = new PlayerHand(PlayerHand::NOT_CRIB);
+            $hand->add(new PlayingCard(10, "club"));
+            $hand->add(new PlayingCard(12, "heart"));
+            $hand->add(new PlayingCard(11, "diamond"));
+            $hand->add(new PlayingCard(13, "diamond"));
+            $score = $hand->totalPoints(new PlayingCard(8, "spade"));
+            $this->assertEqual($score, 4);
+
+
+			$hand = new PlayerHand(PlayerHand::NOT_CRIB);
+            $hand->add(new PlayingCard(12, "club"));
+            $hand->add(new PlayingCard(10, "heart"));
+            $hand->add(new PlayingCard(11, "diamond"));
+            $hand->add(new PlayingCard(13, "diamond"));
+            $score = $hand->totalPoints(new PlayingCard(9, "spade"));
+            $this->assertEqual($score, 5);	
+		}
+
+		function testDoubleRun(){
+			echo "testDoubleRun()<br />";
+
+			$hand = new PlayerHand(PlayerHand::NOT_CRIB);
+            $hand->add(new PlayingCard(10, "club"));
+            $hand->add(new PlayingCard(12, "heart"));
+            $hand->add(new PlayingCard(11, "diamond"));
+            $hand->add(new PlayingCard(13, "diamond"));
+            $score = $hand->totalPoints(new PlayingCard(10, "spade"));
+            $this->assertEqual($score, 10);
+
+
+            $hand = new PlayerHand(PlayerHand::NOT_CRIB);
+            $hand->add(new PlayingCard(5, "club"));
+            $hand->add(new PlayingCard(4, "heart"));
+            $hand->add(new PlayingCard(4, "diamond"));
+            $hand->add(new PlayingCard(3, "diamond"));
+            $score = $hand->totalPoints(new PlayingCard(1, "spade"));
+            $this->assertEqual($score, 8);
+
+		}
 	}
 
 ?>
