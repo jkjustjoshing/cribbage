@@ -227,6 +227,39 @@
             $this->assertEqual($score, 8);
 
 		}
+
+		function testFlushStraightWithKnobbs(){
+			echo "testFlushStraightWithKnobbs()<br />";
+
+			$hand = new PlayerHand(PlayerHand::NOT_CRIB);
+            $hand->add(new PlayingCard(9, "diamond"));
+            $hand->add(new PlayingCard(10, "diamond"));
+            $hand->add(new PlayingCard("J", "diamond"));
+            $hand->add(new PlayingCard("Q", "diamond"));
+            $score = $hand->totalPoints(new PlayingCard("K", "diamond"));
+            $this->assertEqual($score, 11);	
+		}
+
+		function testComplexHands(){
+			echo "testComplexHands()<br />";
+
+			$hand = new PlayerHand(PlayerHand::NOT_CRIB);
+            $hand->add(new PlayingCard(5, "club"));
+            $hand->add(new PlayingCard(4, "heart"));
+            $hand->add(new PlayingCard(5, "diamond"));
+            $hand->add(new PlayingCard(6, "diamond"));
+            $score = $hand->totalPoints(new PlayingCard(6, "spade"));
+            $this->assertEqual($score, 24);
+
+			$hand = new PlayerHand(PlayerHand::NOT_CRIB);
+            $hand->add(new PlayingCard("J", "club"));
+            $hand->add(new PlayingCard("Q", "heart"));
+            $hand->add(new PlayingCard("K", "diamond"));
+            $hand->add(new PlayingCard("5", "diamond"));
+            $score = $hand->totalPoints(new PlayingCard(5, "club"));
+            $this->assertEqual($score, 18);
+
+		}
 	}
 
 ?>

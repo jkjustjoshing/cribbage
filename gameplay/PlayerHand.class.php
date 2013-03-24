@@ -232,10 +232,10 @@ if($debug)				echo "thisNumberForMultiplier - $thisNumberForMultiplier\n";
 					$this->_score += $runLength * $multiplier * $multiplierForThisNumber;
 				}
 
-				
+				// Add any fifteen points
+				$this->_score += $this->recursiveFifteen($cardsPlusCut, $debug);
 
-				$this->_score += $this->recursivePointsSearch($cardsPlusCut, $debug);
-if($debug)		echo "</pre>";
+if($debug)				echo "</pre>";
 				return $this->_score;
 			}
 		}
@@ -245,87 +245,27 @@ if($debug)		echo "</pre>";
 		  * points for each combination.
 		  * Assume all cards are initially sorted
 		 **/
-		private function recursivePointsSearch($currentArray = array(), $debug = false){
-if($debug)			echo "called recursivePointsSearch\n";
-			if(!is_array($currentArray)){
-				throw new Exception('$currentArray must be an array');
-			}
-			
-			$pointAccumulator = 0;
-			// If we are just calling this, reset the keys to the array and order
-if($debug){//          print_r($currentArray);
-	echo "-------------------";
-	foreach($currentArray as $card){
-		echo $card->getNumber() . ", ";
-	}
-	echo "\n";
-	
-}
-			// If the cards are 2, check for a pair
-/*			if(count($currentArray) == 2){
-				$number = -1;
-				foreach($currentArray as $pairCheckCard){
-					if($number == -1){
-						 $number = $pairCheckCard->getNumber();
-					}else if($pairCheckCard->getNumber() == $number){
-						// Pair found!
-						$pointAccumulator += 2;
-					}
-				}
-			}
-*/
+		private function recursiveFifteen($currentArray = array(), $debug = false){
 			// Check for 15
 			$fifteenAccumulator = 0;
 			foreach($currentArray as $fifteenCheckCard){
 				$fifteenAccumulator += $fifteenCheckCard->getCountValue();
 			}
-			if($fifteenAccumulator == 15){
-				$pointAccumulator += 2;
-			}
-if($debug) echo "points post 15 - $pointAccumulator\n";
-/*			// Check for straight
-			if(count($currentArray) >= 3){
-				$run = true;
-				$firstCard = array_slice($currentArray, 0, 1);
-				$lastNumber = $firstCard[0]->getNumber() - 1;
-				foreach($currentArray as $card){
-					if($lastNumber+1 != $card->getNumber()){
-						$run = false;
-						break;
-					}else{
-						++$lastNumber;
-					}
-				}
-				if($run){
-					if(count($currentArray) == 3){
-						$pointAccumulator += 3;
-					}else if(count($currentArray) == 4){
-						$pointAccumulator -= 2; // Already 6 points from the 2x3 card run but should only be 4 total 
-					}else if(count($currentArray) == 5){
-						//Already at 5, shouldn't change
-					}
-				}
-			}	
-*/
-if($debug) echo "points after run - $pointAccumulator\n";
-			if(count($currentArray) == 2){
-if($debug)					echo "2 left\n";
-				// End of points counting, return accumulator
-				return $pointAccumulator;
-			}else{
-if($debug)				echo "recurse...\n";
-				// Remove each possible card and recursively call
-				for($i = 0; $i < 5; ++$i){
-					if(!isset($currentArray[$i])){
-						break; // So we have no duplicate card sets
-					}
-					$tempArray = $currentArray;
-					unset($tempArray[$i]);
-					$pointAccumulator += $this->recursivePointsSearch($tempArray, $debug);
-				}
-				return $pointAccumulator;
-			}
+			if($fifteenAccumulator == 15) return 2;
 
+			if(count($currentArray) == 2) return 0; // End of points counting, no 15 found
+	
+			// Remove each possible card and recursively call
+			$pointAccumulator = 0;
+			for($i = 0; $i < 5; ++$i){
+				if(!isset($currentArray[$i])){
+					break; // So we have no duplicate card sets
+				}
+				$tempArray = $currentArray;
+				unset($tempArray[$i]);
+				$pointAccumulator += $this->recursiveFifteen($tempArray, $debug);
+			}
+			return $pointAccumulator;
 		}
 	
 		/**
