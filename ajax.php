@@ -19,8 +19,10 @@
 		
 		// We have a valid application and method. Require the files
 
-		require(SiteConfiguration::BASE_DIR . 
+		require_once(SiteConfiguration::BASE_DIR . "/businessLogic/" . $application . "php");
 
+		
+				
 	}
 
 
