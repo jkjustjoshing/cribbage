@@ -15,8 +15,9 @@
 		private $email = null;
 		private $receiveNotifications = null;
 		
-		const SALT_LENGTH = 20;
 		const USERNAME_WHITELIST = "/^[a-zA-Z0-9_]+$/";
+		const EMAIL_REGEX = '/^[a-zA-Z0-9_+.-]+@[a-zA-Z0-9_.-]+\.[a-zA-Z]{2,8}$/';
+		const MIN_PASSWORD_CHARS = 8;
 		
 		/**
 		 * login($username, $password)
@@ -33,7 +34,7 @@
 			// Username is safe for database
 			$database = DataLayer::getInstance();
 			
-			$userArray = $database->getUser($username);
+			$userArray = $database->getPlayer($username);
 			
 			if($userArray === false){
 				// Failure
@@ -60,18 +61,50 @@
 			}
 		}
 		
+		
 		/**
-		 * checkPassword($hashedPasswordPlusHash, $enteredPassword)
+		 * createAccount($username, $password, $email)
 		 * 
-		 * Salts the entered password, hashes, 
-		 * and compares to stored password.
+		 * Creates an account with the passed information
+		 * @param $username The user's desired username
+		 * @param $password The password of the user
+		 * @param $email The user's email
+		 * @return string error message on error, empty string on success
 		 */
-		private static function checkPassword($hashedPasswordPlusHash, $enteredPassword){
-			$salt = substr($hashedPasswordPlusHash, self::SALT_LENGTH * -1);
+		public static function createAccount($username, $password, $email){
+			if(!preg_match(self::USERNAME_WHITELIST, $username)){
+				// Username doesn't match whitelist.
+				return "Username had invalid characters.";
+			}
 			
-			$hashedPassword = sha1($enteredPassword . $salt);
+			if(!preg_match(self::EMAIL_REGEX, $email)){
+				// Email doesn't match email format.
+				return "Email is not valid.";
+			}
 			
-			return ($hashedPassword . $salt) == $hashedPasswordPlusHash;
+			if(strlen($password) < self::MIN_PASSWORD_CHARS){
+				// Password isn't long enough
+				return "Password is not long enough.";
+			}
+			
+			// Inputs are good - check database and add
+			$database = DataLayer::getInstance();
+			
+			if($database->getPlayer($username) !== false){
+				// Got data back - username already exists
+				return "That username already exists. Please choose another one.";
+			}
+			
+			// Username doesn't already exist - hash password and add all to database!!
+			$hashedPassword = self::saltAndHash($password);
+			$success = $database->createPlayer($username, $hashedPassword, $email);
+		
+			if($success){
+				return "";
+			}else{
+				return "There was an error. Please try again or contact the administrator.";
+			}
+				
 		}
 
 	}

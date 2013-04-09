@@ -29,12 +29,13 @@
 		}	
 	}else if(isset($_POST["signup"])){
 		// Signing up - add account
+		
+		$createAccount = Player::createAccount($_POST["username"], $_POST["password"], $_POST["email"]);
+		
 		$errorMessage = "Adding an account is not supported just yet.";
 		
 	}
 	
-	$numChars = 8;
-
 ?><!DOCTYPE html>
 <html>
   <head>
@@ -56,7 +57,7 @@
  		}
  		
  		function checkEmail(which){
-			var valid = /^[a-zA-Z0-9_.-]+@[a-zA-Z0-9_.-]+\.[a-zA-Z]{2,8}$/.exec($(which).val());
+			var valid = <?php echo Player::EMAIL_REGEX; ?>.exec($(which).val());
 			var color;
 			if(!valid){
 				color = "#f77";
@@ -64,14 +65,14 @@
 				color = "white";
 			}
 			
-			if(this.keypress === undefined) $(which).on("keyup", function(){checkEmail(this);});
-			this.keypress = true;
+			if(this.keyup_email === undefined) $(which).on("keyup", function(){checkEmail(this);});
+			this.keyup_email = true;
 			
 			$(which).css("background", color);
 		}
  		
  		function checkPassword(which){
-			var valid = /^[a-zA-Z0-9_]{<?php echo $numChars; ?>,}$/.exec($(which).val());
+			var valid = /^[a-zA-Z0-9_]{<?php echo Player::MIN_PASSWORD_CHARS; ?>,}$/.exec($(which).val());
 			var color;
 			if(!valid){
 				color = "#f77";
@@ -79,8 +80,23 @@
 				color = "white";
 			}
 			
-			if(this.keypress === undefined) $(which).on("keypress", function(){checkPassword(this);});
-			this.keypress = true;
+			if(this.keyup_password === undefined) $(which).on("keyup", function(){checkPassword(this);});
+			this.keyup_password = true;
+			
+			$(which).css("background", color);
+		}
+		
+		function checkUsername(which){
+			var valid = <?php echo Player::USERNAME_WHITELIST; ?>.exec($(which).val());
+			var color;
+			if(!valid){
+				color = "#f77";
+			}else{
+				color = "white";
+			}
+			
+			if(this.keyup_username === undefined) $(which).on("keyup", function(){checkUsername(this);});
+			this.keyup_username = true;
 			
 			$(which).css("background", color);
 		}
@@ -88,6 +104,7 @@
  		$(document).ready(function(){
  			$("form.signup #email").on("blur", function(){checkEmail(this);});
  			$("form.signup #password").on("blur", function(){checkPassword(this)});
+ 			$("form.signup #username").on("blur", function(){checkUsername(this)});
  			
  			<?php
  				if(isset($_POST["signup"])) echo 'toggleSignup(true);';
@@ -156,7 +173,7 @@
 		}
 ?>
     	<label for="username"><div>username</div><input id="username" name="username" type="text" class="input-block-level input" placeholder="only letters, numbers, and underscores" /></label>
-    	<label for="password"><div>password</div><input id="password" name="password" type="password" class="input-block-level input" placeholder="at least <?php echo $numChars; ?> characters" /></label>	
+    	<label for="password"><div>password</div><input id="password" name="password" type="password" class="input-block-level input" placeholder="at least <?php echo Player::MIN_PASSWORD_CHARS; ?> characters" /></label>	
     	<label for="email"><div>email</div><input id="email" name="email" type="text" class="input-block-level input" placeholder="must be valid" /></label>
     	<button class="btn btn-large btn-primary" type="submit">Create account</button>
     	<a class="alternateLink" href="javascript://" onclick="toggleSignup()">I have an account</a>

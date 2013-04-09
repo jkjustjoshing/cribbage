@@ -7,8 +7,9 @@
 		PRIMARY KEY(id),
 		username VARCHAR(30),
 		email VARCHAR(100),
-		password CHAR(50), " . //--possibly change based on salt length
-		"receiveNotifications BOOLEAN
+		password CHAR(60), " . //--possibly change based on salt length
+		"receiveNotifications BOOLEAN, 
+		UNIQUE KEY(username)
 	);";
 	
 	$queries["chats"] = "CREATE TABLE IF NOT EXISTS chats(
@@ -53,46 +54,51 @@
 	
 	
 
-	function addTables($mysqli){
-		global $queries;
-	
-		if($mysqli == null){
-			echo "fail";
-		}
-		echo "Adding tables<ul>";
-		foreach($queries as $table=>$query){
-			$mysqli->query($query) or die($mysqli->error);
-			echo "<li>" . $table . "</li>";
-		}
-		echo "</ul>";
-		
-	}
-	
-	function dropAllTables($mysqli){
-		$queries = array_reverse($GLOBALS["queries"]);
-	
-		echo "Dropping tables:<ul>";
-		foreach($queries as $key=>$query){
-			$mysqli->query("drop table " . $key . ";");
-			echo "<li>drop table " . $key . ";</li>";
-		}
-		echo "</li>";
-		
-	}
-	
+	function addTables($print = false){
 	$mysqli = new mysqli(
 								SiteConfig::DATABASE_SERVER, 
 								SiteConfig::DATABASE_USER, 
 								SiteConfig::DATABASE_PASSWORD, 
 								SiteConfig::DATABASE_DATABASE);
+		global $queries;
+	
+		if($mysqli == null){
+			echo "fail";
+		}
+		if($print) echo "Adding tables<ul>";
+		foreach($queries as $table=>$query){
+			$mysqli->query($query) or die($mysqli->error);
+			if($print) echo "<li>" . $table . "</li>";
+		}
+		if($print) echo "</ul>";
+		$mysqli->close();
+		
+	}
+	
+	function dropAllTables($print = false){
+	$mysqli = new mysqli(
+								SiteConfig::DATABASE_SERVER, 
+								SiteConfig::DATABASE_USER, 
+								SiteConfig::DATABASE_PASSWORD, 
+								SiteConfig::DATABASE_DATABASE);
+		$queries = array_reverse($GLOBALS["queries"]);
+	
+		if($print) echo "Dropping tables:<ul>";
+		foreach($queries as $key=>$query){
+			$mysqli->query("drop table " . $key . ";");
+			if($print) echo "<li>drop table " . $key . ";</li>";
+		}
+		if($print) echo "</li>";
+		$mysqli->close();
+		
+	}
 		
 	
 	if(isset($_GET["drop"])){
-		dropAllTables($mysqli);
+		dropAllTables(true);
 	}
 	if(isset($_GET["add"])){
-		addTables($mysqli);
+		addTables(true);
 	}
 	
-	$mysqli->close();
 ?>

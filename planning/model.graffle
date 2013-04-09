@@ -26,7 +26,7 @@
 	<key>MasterSheets</key>
 	<array/>
 	<key>ModificationDate</key>
-	<string>2013-04-08 01:30:14 +0000</string>
+	<string>2013-04-09 22:35:17 +0000</string>
 	<key>Modifier</key>
 	<string>Josh Kramer</string>
 	<key>NotesVisible</key>
@@ -1091,7 +1091,7 @@ CANCEL}</string>
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{155.5992, 225.93648}, {17, 14}}</string>
+					<string>{{155.59923, 225.93646}, {17, 14}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>FitText</key>
@@ -1150,7 +1150,7 @@ CANCEL}</string>
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{227.43443, 203.6512}, {16, 14}}</string>
+					<string>{{227.4344, 203.65121}, {16, 14}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>FitText</key>
@@ -1217,8 +1217,8 @@ CANCEL}</string>
 					<integer>16</integer>
 					<key>Points</key>
 					<array>
-						<string>{154.886, 241.83398}</string>
-						<string>{264.72784, 203.16602}</string>
+						<string>{154.88603, 241.83397}</string>
+						<string>{264.72781, 203.16603}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -3007,8 +3007,8 @@ timestamp: TIMESTAMP}</string>
 					<integer>116</integer>
 					<key>Points</key>
 					<array>
-						<string>{1272.677, 327.02368}</string>
-						<string>{1174.4976, 317.27426}</string>
+						<string>{1272.677, 327.02383}</string>
+						<string>{1174.4976, 317.27451}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -5048,7 +5048,7 @@ postChat(userID, opponentID, message)}</string>
 						</dict>
 						<dict>
 							<key>Bounds</key>
-							<string>{{145, 62}, {309.5, 210}}</string>
+							<string>{{145, 62}, {309.5, 238}}</string>
 							<key>Class</key>
 							<string>ShapedGraphic</string>
 							<key>FitText</key>
@@ -5092,7 +5092,9 @@ putInCrib(userID, opponentID, card1, card2)\
 deal(userID, opponentID)\
 \
 getPlayer(username)\
-getPlayer(userID)}</string>
+getPlayer(userID)\
+addPlayer(username, password, email)\
+checkPassword(userID, enteredPassword)}</string>
 								<key>VerticalPad</key>
 								<integer>0</integer>
 							</dict>
