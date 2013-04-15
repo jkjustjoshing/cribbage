@@ -7,15 +7,16 @@
 		PRIMARY KEY(id),
 		username VARCHAR(30),
 		email VARCHAR(100),
-		password CHAR(60), " . //--possibly change based on salt length
+		password CHAR(40), 
+		salt CHAR(20)," . //--possibly change based on salt length
 		"receiveNotifications BOOLEAN, 
 		UNIQUE KEY(username)
 	);";
 	
 	$queries["chats"] = "CREATE TABLE IF NOT EXISTS chats(
+		id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
 		player1ID INT NOT NULL,
 		player2ID INT NOT NULL,
-		PRIMARY KEY(player1ID, player2ID),
 		poster INT NOT NULL,
 		FOREIGN KEY(poster) REFERENCES players(id),
 		content VARCHAR(1000),

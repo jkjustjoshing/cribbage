@@ -33,38 +33,83 @@
 			return self::$instance;
 		}
 		
-		public function getChats($userID, $opponentID, $lastSeenTimestamp){
+		public function getChats($userID, $opponentID, $lastSeenTimestamp = null){
 			$sql = "SELECT 
 				poster, content, timestamp 
 				FROM chats 
-				WHERE player1ID=? AND player2ID=? AND timestamp > ? 
-				ORDER BY timestamp";
+				WHERE player1ID=? AND player2ID=? ";
+			if($lastSeenTimestamp !== null) $sql .= " AND timestamp > ? ";
+			$sql .= "ORDER BY timestamp ";
+			if($lastSeenTimestamp === null) $sql .= " LIMIT 50 ";
 			
-			$chatRoom = new ChatRoom();
-			
+					
 			if($stmt = $this->mysqli->prepare($sql)){
 				
 				//Bind paramaters
 				//smaller ID is first
 				
-				$ordered = $userID < $opponentID;
-				$stmt->bind_param("iii", ($ordered ? $userID : $opponentID), ($ordered ? $opponentID : $userID), $lastSeenTimestamp);
+				if( $userID < $opponentID){
+					$player1 = $userID;
+					$player2 = $opponentID;
+				}else{
+					$player1 = $opponentID;
+					$player2 = $userID;
+				}
 				
+				
+				if($lastSeenTimestamp !== null){
+					$stmt->bind_param("iii", $player1, $player2, $lastSeenTimestamp);
+				}else{
+					$stmt->bind_param("ii", $player1, $player2);
+				}
 				$stmt->execute();
 				
 				$stmt->bind_result($poster, $content, $timestamp);
 				
+				$chatArr = array();
 				while($stmt->fetch()){
-					$chatItem = new ChatItem($poster, $content, $timestamp);
-					$chatRoom->addItem($chatItem);
+					$chatItem = array("poster"=>$poster, "content"=>$content, "timestamp"=>$timestamp);
+					$chatArr[] = $chatItem;
 				}
+				
+				return $chatArr;
 			}
 			
-			return $chatRoom;
+			return false;
 		}
 
-		public function postChat($userID, $opponentID, $message){
-		
+		public function postChat($userID, $opponentID, $message){			
+			$sql = "INSERT INTO chats (player1ID, player2ID, poster, content, timestamp) VALUES (?, ?, ?, ?, ?)";
+			
+			if($stmt = $this->mysqli->prepare($sql)){
+				
+				if( $userID < $opponentID){
+					$player1 = $userID;
+					$player2 = $opponentID;
+				}else{
+					$player1 = $opponentID;
+					$player2 = $userID;
+				}
+				
+				$timestamp = date( 'Y-m-d H:i:s', time());
+				
+				//////////////////////////////////////////////
+				/// MUST VALIDATE INPUT!!!!
+				////////////////////////////////////////////
+				
+				//Bind paramater of username			
+				$stmt->bind_param("sssss", 
+					$player1, 
+					$player2, 
+					$userID,
+					$message,
+					$timestamp);
+				
+				$stmt->execute();
+				
+				return $this->mysqli->insert_id !== 0;
+				
+			}
 		}
 		
 		/**
@@ -79,7 +124,6 @@
 		public function getPlayer($playerIdentifier){
 			
 			$integer = is_int($playerIdentifier);
-			
 			$sql = "SELECT 
 				id, username, email, receiveNotifications
 				FROM players ";
@@ -87,7 +131,6 @@
 			else $sql .= " WHERE username=?";
 			
 			if($stmt = $this->mysqli->prepare($sql)){
-				
 				//Bind paramater of username				
 				$stmt->bind_param(($integer ? "i" : "s"), $playerIdentifier);
 				
@@ -95,23 +138,26 @@
 				
 				$stmt->bind_result($id, $username, $email, $receiveNotifications);
 				
-				if($stmt->num_rows != 1){
-					// Either 0 or more than 1 user (should never happen)
+				if($stmt->fetch() === null){
+					// No results exist
 					return false;
 				}
 				
-				// Only one result set should be fetched
-				$stmt->fetch();
-				
-				return array("id"=>$id, 
+				$arr = array("id"=>$id, 
 				             "username"=>$username, 
 				             "email"=>$email, 
 				             "receiveNotifications"=>$receiveNotifications
 				             );
+
+				if($stmt->fetch() !== null){
+					// There was more than 1 result
+					return false;
+				}
+
+				return $arr;
 				
 			}
 			
-			echo "FAILLLL";
 			return false;
 			
 		}
@@ -130,14 +176,14 @@
 		 */
 		public function addPlayer($username, $password, $email){
 			
-			$hashedPassword = self::saltAndHash($password);
+			$passwordComponents = self::saltAndHash($password);
 			
-			$sql = "INSERT INTO players (username, password, email, receiveNotifications) VALUES (?, ?, ?, true)";
+			$sql = "INSERT INTO players (username, password, salt, email, receiveNotifications) VALUES (?, ?, ?, ?, true)";
 			
 			if($stmt = $this->mysqli->prepare($sql)){
 				
 				//Bind paramater of username				
-				$stmt->bind_param("sss", $username, $hashedPassword, $email);
+				$stmt->bind_param("ssss", $username, $passwordComponents["password"], $passwordComponents["salt"], $email);
 				
 				$stmt->execute();
 				
@@ -158,9 +204,9 @@
 		 * @return boolean, whether or not the user entered the correct password
 		 */
 		public function checkPassword($username, $enteredPassword){
-			
+					
 			$sql = "SELECT 
-				password
+				password, salt
 				FROM players WHERE username=?";
 
 			if($stmt = $this->mysqli->prepare($sql)){
@@ -170,16 +216,14 @@
 				
 				$stmt->execute();
 				
-				$stmt->bind_result($storedPassword);
+				$stmt->bind_result($storedPassword, $salt);
 				
 				// Only one result set should be fetched
 				$stmt->fetch();
-				
-				$salt = substr($storedPassword, self::SALT_LENGTH * -1);
 						
 				$hashedPassword = sha1($enteredPassword . $salt);
-			
-				return ($hashedPassword . $salt) == $storedPassword;
+						
+				return $hashedPassword == $storedPassword;
 				
 			}else{
 				// Database error, assume password is wrong
@@ -193,6 +237,8 @@
 		 * 
 		 * Takes a user entered password, generates salt, hashes password,
 		 * and returns hash with salt already appended
+		 * @param $newPassword The password to salt
+		 * @return array with keys "password" with the hashed password and "salt" with the salt
 		 */
 		private function saltAndHash($newPassword){
 			$possibleCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
@@ -202,9 +248,11 @@
 				$saltString .= substr($possibleCharacters, mt_rand(0, strlen($possibleCharacters)), 1);
 			}
 			
+			$saltString = "";
+			
 			$hashedPassword = sha1($newPassword . $saltString);
 						
-			return $hashedPassword . $saltString;
+			return array("password"=>$hashedPassword, "salt"=>$saltString);
 		}
 
 		public function __destruct(){

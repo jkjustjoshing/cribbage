@@ -48,7 +48,7 @@
 			// is working.
 			
 		}
-		
+	
 		function testGetPlayer(){
 			echo "testGetPlayer()<br />";
 			
@@ -64,8 +64,9 @@
 			
 			$playerArr = $database->getPlayer($username);
 			
-			if($playerArr == false){
+			if($playerArr === false){
 				$this->assertTrue(false);
+				return;
 			}
 			
 			$this->assertEqual($playerArr["username"], $username);
@@ -76,7 +77,25 @@
 			$newPlayerArr = $database->getPlayer($id);
 			$this->assertEqual($newPlayerArr["username"], $username);
 			$this->assertEqual($newPlayerArr["email"], $email);
+		
+		}
+		
+		function testChats(){
+			echo "testChats() - Incomplete without injection attempt<br />";
 			
+			$this->start();
+			
+			$database = DataLayer::getInstance();
+			
+			$database->addPlayer("josh", "josh", "josh@josh.josh");
+			$database->addPlayer("sam", "sam", "josh@josh.josh");
+			$database->addPlayer("max", "max", "josh@josh.josh");
+			
+			$joshArr = $database->getPlayer("josh");
+			$samArr = $database->getPlayer("sam");
+			$database->postChat($joshArr["id"], $samArr["id"], "this is josh. I think sam is an idiot");
+			$database->postChat($samArr["id"], $joshArr["id"], "this is sam. I know josh is an idiot");
+			print_r($database->getChats($joshArr["id"], $samArr["id"]));
 			
 		}
 
