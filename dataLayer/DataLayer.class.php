@@ -107,7 +107,12 @@
 				
 				$stmt->execute();
 				
-				return $this->mysqli->insert_id !== 0;
+				if($this->mysqli->insert_id === 0){
+					//fail, throw exception
+					throw new DatabaseException("New chat was not successfully posted to database. " .
+					                            "User - $userID, Opponent - $opponentID, " .
+					                            "Message - '$message'");
+				}
 				
 			}
 		}
@@ -261,5 +266,15 @@
 
 	}
 
+
+	class DatabaseException extends Exception{
+		public __construct($message, $code = 0, Exception $previous = null){
+			parent::__construct($message, $code, $previous);
+		}
+		
+		public __toString(){
+			return __CLASS__ . ": [{$this->code}]: {$this->message}\n";
+		}
+	}
 
 ?>

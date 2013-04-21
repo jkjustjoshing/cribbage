@@ -1,5 +1,6 @@
 <?php
 	require_once(dirname(__FILE__) . "/../../../../SiteConfig.class.php");
+	require_once(dirname(__FILE__) . "/DataLayer.class.php");
 
 	$queries = array();
 	$queries["players"] = "CREATE TABLE IF NOT EXISTS players(
@@ -8,8 +9,10 @@
 		username VARCHAR(30),
 		email VARCHAR(100),
 		password CHAR(40), 
-		salt CHAR(20)," . //--possibly change based on salt length
-		"receiveNotifications BOOLEAN, 
+		salt CHAR(".DataLayer::SALT_LENGTH."),
+		receiveNotifications BOOLEAN,
+		lobbyHeartbeat DATETIME
+		
 		UNIQUE KEY(username)
 	);";
 	
@@ -18,6 +21,8 @@
 		player1ID INT NOT NULL,
 		player2ID INT NOT NULL,
 		poster INT NOT NULL,
+		FOREIGN KEY(player1ID) REFERENCES players(id),
+		FOREIGN KEY(player2ID) REFERENCES players(id),
 		FOREIGN KEY(poster) REFERENCES players(id),
 		content VARCHAR(1000),
 		timestamp DATETIME
@@ -50,6 +55,15 @@
 		PRIMARY KEY(deckID, cardIndex),
 		playingCardID INT,
 		FOREIGN KEY(playingCardID) REFERENCES playingcards(id)
+	);";
+	
+	$queries["challenges"] = "CREATE TABLE IF NOT EXISTS challenges(
+		challengerID INT NOT NULL,
+		challengeeID INT NOT NULL, 
+		time DATETIME,
+		PRIMARY KEY(challengerID, challengeeID),
+		FOREIGN KEY(challengerID) REFERENCES players(id),
+		FOREIGN KEY(challengeeID) REFERENCES players(id)
 	);";
 	
 	

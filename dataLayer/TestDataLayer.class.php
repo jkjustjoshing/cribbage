@@ -93,9 +93,20 @@
 			
 			$joshArr = $database->getPlayer("josh");
 			$samArr = $database->getPlayer("sam");
-			$database->postChat($joshArr["id"], $samArr["id"], "this is josh. I think sam is an idiot");
-			$database->postChat($samArr["id"], $joshArr["id"], "this is sam. I know josh is an idiot");
-			print_r($database->getChats($joshArr["id"], $samArr["id"]));
+			
+			$joshMessage = "this is josh. I think sam is an idiot";
+			$samMessage = "this is sam. I know josh is an idiot";
+			$database->postChat($joshArr["id"], $samArr["id"], $joshMessage);
+			$database->postChat($samArr["id"], $joshArr["id"], $samMessage);
+			
+			
+			$chats1 = $database->getChats($joshArr["id"], $samArr["id"]);
+			
+			$this->assertTrue($chats1[0]["poster"], $joshArr["id"]);
+			$this->assertTrue($chats1[0]["content"], $joshMessage);
+			
+			$this->assertTrue($chats1[1]["poster"], $samArr["id"]);
+			$this->assertTrue($chats1[1]["content"], $samMessage);			
 			
 		}
 
