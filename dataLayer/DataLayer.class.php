@@ -252,9 +252,7 @@
 			for($i = 0; $i < self::SALT_LENGTH; ++$i){
 				$saltString .= substr($possibleCharacters, mt_rand(0, strlen($possibleCharacters)), 1);
 			}
-			
-			$saltString = "";
-			
+						
 			$hashedPassword = sha1($newPassword . $saltString);
 						
 			return array("password"=>$hashedPassword, "salt"=>$saltString);
@@ -268,11 +266,11 @@
 
 
 	class DatabaseException extends Exception{
-		public __construct($message, $code = 0, Exception $previous = null){
+		public function __construct($message, $code = 0, Exception $previous = null){
 			parent::__construct($message, $code, $previous);
 		}
 		
-		public __toString(){
+		public function __toString(){
 			return __CLASS__ . ": [{$this->code}]: {$this->message}\n";
 		}
 	}

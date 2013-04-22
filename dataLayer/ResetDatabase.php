@@ -66,8 +66,34 @@
 		FOREIGN KEY(challengeeID) REFERENCES players(id)
 	);";
 	
+	$queries["statuses"] = "CREATE TABLE IF NOT EXISTS statuses(
+		id INT PRIMARY KEY,
+		value VARCHAR(15)
+	);";
+	
+	$queries["gamespaces"] = "CREATE TABLE IF NOT EXISTS gamespaces(
+		id INT NOT NULL PRIMARY KEY,
+		player1ID INT NOT NULL,
+		FOREIGN KEY(player1ID) REFERENCES players(id),
+		player2ID INT NOT NULL,
+		FOREIGN KEY(player2ID) REFERENCES players(id),
+		player1Score TINYINT DEFAULT 0,
+		player2Score TINYINT DEFAULT 0,
+		deckID INT NOT NULL,
+		FOREIGN KEY(deckID) REFERENCES carddecks(deckID),
+		cribID INT NOT NULL,
+		FOREIGN KEY(cribID) REFERENCES playerhand(id),
+		turnID INT NOT NULL,
+		FOREIGN KEY(turnID) REFERENCES players(id),
+		dealerID INT NOT NULL,
+		FOREIGN KEY(dealerID) REFERENCES players(id),
+		statusID INT NOT NULL,
+		FOREIGN KEY(statusID) REFERENCES statuses(id)
+	);";
 	
 	
+	$queries["populateStatuses"] = 
+		"INSERT INTO statuses (value) VALUES ('INVITED'), ('IN_PROGRESS'), ('FINISHED'), ('FOREFIT'), ('CANCEL');";
 
 	function addTables($print = false){
 	$mysqli = new mysqli(

@@ -11,7 +11,7 @@
 			$errorMessage = "There was an error. Please log in again.";
 		}else{
 			// Already logged in
-			header("Location: home.php");
+			header("Location: lobby.php");
 		}
 	}else if(isset($_POST["signin"])){
 		// Logging in - try logging in
@@ -25,7 +25,7 @@
 		}else{
 			//Successful login!
 			SecurityToken::create($login->id);
-			header("Location: home.php");
+			header("Location: lobby.php");
 		}	
 	}else if(isset($_POST["signup"])){
 		// Signing up - add account

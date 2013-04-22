@@ -10,14 +10,27 @@
 	 */
 	class Player{
 		
-		private $id = null;
-		private $username = null;
-		private $email = null;
-		private $receiveNotifications = null;
+		public $id = null;
+		public $email = null;
+		public $receiveNotifications = null;
 		
 		const USERNAME_WHITELIST = "/^[a-zA-Z0-9_]+$/";
 		const EMAIL_REGEX = '/^[a-zA-Z0-9_+.-]+@[a-zA-Z0-9_.-]+\.[a-zA-Z]{2,8}$/';
 		const MIN_PASSWORD_CHARS = 8;
+		
+		
+		public function __construct($id = null){
+			if($id !== null){
+				$database = DataLayer::getInstance();
+			
+				$userArray = $database->getPlayer($id);
+				
+				$this->id = $id;
+				$this->username = $userArray["username"];
+				$this->email = $userArray["email"];
+				$this->receiveNotifications = $userArray["receiveNotifications"];
+			}
+		}
 		
 		/**
 		 * login($username, $password)
@@ -34,18 +47,14 @@
 			// Username is safe for database
 			$database = DataLayer::getInstance();
 			
-			$userArray = $database->getPlayer($username);
-			
-			if($userArray === false){
-				// Failure
-				return false;
-			}
-			
+
 			// Check password
-			if(self::checkPassword($userArray["password"], $password)){
+			if($database->checkPassword($username, $password)){
 				
 				// Password is correct
 				// Setup Player object, set security token
+				$userArray = $database->getPlayer($username);
+				
 				$player = new Player();
 				$player->id = $userArray["id"];
 				$player->username = $userArray["username"];
@@ -96,8 +105,7 @@
 			}
 			
 			// Username doesn't already exist - hash password and add all to database!!
-			$hashedPassword = self::saltAndHash($password);
-			$success = $database->createPlayer($username, $hashedPassword, $email);
+			$success = $database->addPlayer($username, $password, $email);
 		
 			if($success){
 				return "";
