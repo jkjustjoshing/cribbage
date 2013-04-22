@@ -25,24 +25,32 @@ function createChatItem(name, time, message){
 var chatTimestamp;
 
 $(document).ready(function(){
-	$chat = $(".conversation");
 
-	for(var i = 0; i < 30; ++i){
-		$chat.append(createChatItem("josh", "yesterday", "well hello there!"));
-		$chat.append(createChatItem("kristen", "yesterday", "well hello there!"));
-		$chat.append(createChatItem("josh", "today", "well hello there!"));
-		$chat.append(createChatItem("kristen", "today", "hi!"));
-		$chat.append(createChatItem("josh", "yesterday", "well hello there!"));
-	}
 	
 	setInterval(function(){
+		
+		data = {"opponentID": window.opponentID, "playerID":window.playerID};
+		if(chatTimestamp !== undefined){
+			data.lastSeenTimestamp = chatTimestamp;
+		}
+	
 		ajaxCall("get", 
 			{
 				application: "chat",
 				method: "getChat", 
-				data: {"opponentID": window.opponentID, "playerID":window.playerID}
+				data: data
 			}, function(data){
-				console.log(data);
+				var $chat = $(".conversation");
+				for(var i = 0; i < data.length; ++i){
+					var chatItem = data[i];
+					$chat.append(createChatItem(chatItem["posterID"], chatItem["timestamp"], chatItem["content"]));
+					chatTimestamp = chatItem["timestamp"];
+				}
+				
+				// Scroll the chat window to the bottom
+				$chat.animate({"scrollTop": $chat[0].scrollHeight}, "slow");
+
+				
 			}
 		);
 	}, 1000);

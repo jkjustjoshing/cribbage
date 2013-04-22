@@ -41,6 +41,7 @@
 			$sql .= "ORDER BY timestamp ";
 			if($lastSeenTimestamp === null) $sql .= " LIMIT 50 ";
 			
+			echo $sql;
 						
 			if($stmt = $this->mysqli->prepare($sql)){
 				
