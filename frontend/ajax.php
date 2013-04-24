@@ -26,12 +26,16 @@
 
 				
 		// Must take single parameter (possibly array), and return json
-		$result = @call_user_func($method, $data);
+		$methodResult = @call_user_func($method, $data);
 		
+		$result = array();
+		$result["info"] = array("time" => time());
+		$result[$application] = $methodResult;
 		if($result){
 			//might need the header cache stuff
 			header("Content-Type:text/plain");
-			echo $result;
+			
+			echo json_encode($result, JSON_HEX_TAG);
 		}
 	}
 ?>

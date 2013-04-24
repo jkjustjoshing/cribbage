@@ -32,17 +32,15 @@
 			return self::$instance;
 		}
 		
-		public function getChats($userID, $opponentID, $lastSeenTimestamp = null){
+		public function getChats($userID, $opponentID, $lastSeenID = null){
 			$sql = "SELECT 
-				poster, content, timestamp 
+				id, poster, content, timestamp 
 				FROM chats 
 				WHERE player1ID=? AND player2ID=? ";
-			if($lastSeenTimestamp !== null) $sql .= " AND timestamp > ? ";
-			$sql .= "ORDER BY timestamp ";
-			if($lastSeenTimestamp === null) $sql .= " LIMIT 50 ";
-			
-			echo $sql;
-						
+			if($lastSeenID !== null) $sql .= " AND id > ? ";
+			$sql .= "ORDER BY timestamp DESC ";
+			if($lastSeenID === null) $sql .= " LIMIT 50 ";
+									
 			if($stmt = $this->mysqli->prepare($sql)){
 				
 				//Bind paramaters
@@ -57,18 +55,21 @@
 				}
 				
 				
-				if($lastSeenTimestamp !== null){
-					$stmt->bind_param("iii", $player1, $player2, $lastSeenTimestamp);
+				if($lastSeenID !== null){
+					$stmt->bind_param("iii", $player1, $player2, $lastSeenID);
 				}else{
 					$stmt->bind_param("ii", $player1, $player2);
 				}
 				$stmt->execute();
 				
-				$stmt->bind_result($poster, $content, $timestamp);
+				$stmt->bind_result($id, $poster, $content, $timestamp);
 				
 				$chatArr = array();
 				while($stmt->fetch()){
-					$chatItem = array("poster"=>$poster, "content"=>$content, "timestamp"=>$timestamp);
+				
+					$timestamp = strtotime( $timestamp );
+				
+					$chatItem = array("id"=>$id, "poster"=>$poster, "content"=>$content, "timestamp"=>$timestamp);
 					$chatArr[] = $chatItem;
 				}
 				
@@ -79,6 +80,12 @@
 		}
 
 		public function postChat($userID, $opponentID, $message){			
+			
+			// If this is being called statically
+			if(!isset($this)){
+				throw Exception("Calling DataLayer->postChat statically");
+			}
+			
 			$sql = "INSERT INTO chats (player1ID, player2ID, poster, content, timestamp) VALUES (?, ?, ?, ?, ?)";
 			
 			if($stmt = $this->mysqli->prepare($sql)){
@@ -91,14 +98,14 @@
 					$player2 = $userID;
 				}
 				
-				$timestamp = date( 'Y-m-d H:i:s', time());
-				
 				//////////////////////////////////////////////
 				/// MUST VALIDATE INPUT!!!!
 				////////////////////////////////////////////
 				
+				$timestamp = date("Y-m-d H:i:s", time());
+				
 				//Bind paramater of username			
-				$stmt->bind_param("sssss", 
+				$stmt->bind_param("iiiss", 
 					$player1, 
 					$player2, 
 					$userID,
@@ -106,7 +113,7 @@
 					$timestamp);
 				
 				$stmt->execute();
-				
+				echo "$userID userID, $opponentID opponentID, $message message";
 				if($this->mysqli->insert_id === 0){
 					//fail, throw exception
 					throw new DatabaseException("New chat was not successfully posted to database. " .

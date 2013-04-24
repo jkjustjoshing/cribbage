@@ -31,8 +31,11 @@
   padding: 0; }
 
 .chatItem {
-  border: 1px solid red;
   margin: 5px 0px; }
+  .chatItem:nth-child(odd) {
+    background: white; }
+  .chatItem:nth-child(even) {
+    background: #ccc; }
 
 .chatItem .name {
   font-style: italic;
@@ -44,5 +47,4 @@
   padding: 2px; }
 
 .chatItem .message {
-  clear: left;
-  background: #eee; }
+  clear: left; }

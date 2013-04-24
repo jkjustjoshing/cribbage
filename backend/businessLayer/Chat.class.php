@@ -9,11 +9,13 @@
 	 */
 	class ChatItem{
 		
+		public $id;
 		public $chatContent;
 		public $posterID;
 		public $timestamp;
 		
-		public function __construct($posterID, $chatContent, $timestamp){
+		public function __construct($id, $posterID, $chatContent, $timestamp){
+			$this->id = $id;
 			$this->chatContent = $chatContent;
 			$this->posterID = $posterID;
 			$this->timestamp = $timestamp;
@@ -30,11 +32,13 @@
 			return 
 				$this->chatContent == $other->chatContent &&
 				$this->posterID == $other->posterID &&
-				$this->timestamp == $other->timestamp;
+				$this->timestamp == $other->timestamp &&
+				$this->id == $other->id;
 		}
 		
 		public function toArray(){
 			return array(
+				"id" => $this->id,
 				"posterID" => $this->posterID,
 				"timestamp" => $this->timestamp,
 				"content" => $this->chatContent
@@ -43,7 +47,13 @@
 		}
 		
 		public static function post($userID, $opponentID, $chatContent){
-			DataLayer::postChat($userID, $opponentID, $chatContent);
+			$database = DataLayer::getInstance();
+			try{
+				$database->postChat($userID, $opponentID, $chatContent);
+				return true;
+			}catch(DatabaseException $e){
+				return false;
+			}
 		}
 		
 	}
@@ -102,15 +112,15 @@
 		}
 		// end iterator code taken from http://php.net/manual/en/language.oop5.iterations.php
 		
-		public static function getChatRoom($userID, $opponentID, $lastSeenTimestamp = null){
+		public static function getChatRoom($userID, $opponentID, $lastSeenID = null){
 			
 			$room = new ChatRoom($userID, $opponentID);
 			
 			$database = DataLayer::getInstance();
-			$chatArr = $database->getChats($userID, $opponentID, $lastSeenTimestamp);
+			$chatArr = $database->getChats($userID, $opponentID, $lastSeenID);
 
 			foreach($chatArr as $chat){
-				$chatItem = new ChatItem($chat["poster"], $chat["content"], $chat["timestamp"]);
+				$chatItem = new ChatItem($chat["id"], $chat["poster"], $chat["content"], $chat["timestamp"]);
 				
 				$room->addItem($chatItem);
 			}

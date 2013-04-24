@@ -6,30 +6,39 @@
 	
 		$opponentID = $data["opponentID"];
 		$playerID = $data["playerID"];
-		$lastSeenTimestamp = $data["lastSeenTimestamp"];
-		
-		$room = ChatRoom::getChatRoom(intval($playerID), intval($opponentID), $lastSeenTimestamp);
+		$lastSeenID = $data["lastSeenID"];
 		$chatArr = array();
+
+		// If the player is looking for a room other than the lobby, 
+		// check the cookie ID
+		if($opponentID !== 0 || $playerID !== 0){
+			if(!SecurityToken::checkId($playerID)){
+				return $chatArr;
+			}
+		}
+		
+		$room = ChatRoom::getChatRoom(intval($playerID), intval($opponentID), $lastSeenID);
 		
 		foreach($room as $chat){
 			$chatArr[] = $chat->toArray();
 		}
 		
-		return json_encode($chatArr, JSON_HEX_TAG);
+		return $chatArr;
 		
 	}
-	/*
-	class ChatController{
+	
+	function postChat($data){
+		$opponentID = $data["opponentID"];
+		$playerID = $data["playerID"];
+		$content = $data["content"];
 		
-
-		public static getChats($userID, $opponentID, $lastTimestamp){
-
+		if(SecurityToken::checkId($playerID)){
+			$post = ChatItem::post(intval($playerID), intval($opponentID), $content);
 		}
-
-		public static postChat($userID, $opponentID, $message){
-
-		}
-
+		
+		$chatArr = getChat($data);
+		
+		return $chatArr;
+		
 	}
-*/
 ?>

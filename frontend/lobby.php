@@ -10,6 +10,8 @@
 			// Show login screen with error message
 			header("Location: login.php");
 		}
+	}else{
+		header("Location: login.php");
 	}
 	
 ?><!DOCTYPE html>
@@ -22,8 +24,10 @@
 		<script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
 		
 		<script type="text/javascript">
-			window.opponentID = <?php echo $_GET["o"]; ?>;
-			window.playerID = <?php echo $_GET["p"]; ?>;
+			window.opponentID = 
+				{"id" : <?php echo $_GET["o"]; ?>};
+			window.playerID = 
+				{"id" : <?php echo $userID; ?> };
 			
 		</script>
 		
@@ -39,7 +43,7 @@
 				<div class="conversation">
 				
 				</div>
-				<form class="send" action="" method="post" onsubmit="return false">
+				<form class="send" action="" method="post" onsubmit="return sendChat(this);">
 					<input type="text" name="text" />
 				</form>
 			</div>

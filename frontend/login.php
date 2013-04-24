@@ -4,8 +4,10 @@
 	require_once(BACKEND_DIRECTORY . "/SecurityToken.class.php");
 	require_once(BACKEND_DIRECTORY . "/businessLayer/Player.class.php");
 		
+	
 	if(SecurityToken::isTokenSet()){
 		$userID = SecurityToken::extract();
+
 		if($userID === false){
 			// Token was set, but something was wrong. Logged out.
 			// Show login screen with error message

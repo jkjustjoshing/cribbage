@@ -37,7 +37,14 @@
 }
 
 .chatItem {
-	border:1px solid red;
+	&:nth-child(odd){
+		background:white;
+	}
+	
+	&:nth-child(even){
+		background:#ccc;
+	}
+	
 	margin:5px 0px;
 }
 
@@ -54,5 +61,4 @@
 
 .chatItem .message {
 	clear:left;
-	background:#eee;
 }

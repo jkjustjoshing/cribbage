@@ -146,6 +146,20 @@
 
 			}
 		}
+		
+		public static function checkId($idToCheck){
+			if(!self::isTokenSet()){
+				return false;
+			}
+			
+			$tokenID = self::extract();
+			
+			if($tokenID === false || $idToCheck !== $tokenID){
+				return false;
+			}
+			
+			return true;
+		}
 
 	}
 
