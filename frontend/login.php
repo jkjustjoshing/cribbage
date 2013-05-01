@@ -34,8 +34,11 @@
 		// Signing up - add account
 		
 		$createAccount = Player::createAccount($_POST["username"], $_POST["password"], $_POST["email"]);
-		
-		$errorMessage = "Adding an account is not supported just yet.";
+		if($createAccount === true){
+			$errorMessage = "Account created. Please log on with your new username and password.";
+		}else{
+			$errorMessage = $createAccount;
+		}
 		
 	}
 	
@@ -46,7 +49,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<!-- Bootstrap -->
     <link href="bootstrap/css/bootstrap.min.css" rel="stylesheet" media="screen">
- 	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+ 	<script src="js/jquery.min.js"></script>
  	<script type="text/javascript">
  	//<![CDATA[
 		function toggleSignup(startup){
@@ -110,7 +113,7 @@
  			$("form.signup #username").on("blur", function(){checkUsername(this)});
  			
  			<?php
- 				if(isset($_POST["signup"])) echo 'toggleSignup(true);';
+ 				if(isset($_POST["signup"]) && $createAccount !== true) echo 'toggleSignup(true);';
  			?>
  		});
 

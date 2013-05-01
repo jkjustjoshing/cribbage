@@ -47,7 +47,7 @@
 		}
 		
 		public static function post($userID, $opponentID, $chatContent){
-			$database = DataLayer::getInstance();
+			$database = DataLayer::getChatInstance();
 			try{
 				$database->postChat($userID, $opponentID, $chatContent);
 				return true;
@@ -113,10 +113,11 @@
 		// end iterator code taken from http://php.net/manual/en/language.oop5.iterations.php
 		
 		public static function getChatRoom($userID, $opponentID, $lastSeenID = null){
-			
+
 			$room = new ChatRoom($userID, $opponentID);
 			
-			$database = DataLayer::getInstance();
+			$database = DataLayer::getChatInstance();
+			
 			$chatArr = $database->getChats($userID, $opponentID, $lastSeenID);
 
 			foreach($chatArr as $chat){

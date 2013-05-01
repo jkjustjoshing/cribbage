@@ -1,24 +1,110 @@
-function Chat(container){
-	this.container = $(container);
+function Chat(container, opponentID){
+	this.$container = $(container);
+	this.opponentID = opponentID;
 	
-	
-	// Create elements for chat
-	var ele = this.container.get();	
-	var conversation = document.createElement("div");
-	conversation.setAttribute("class", "conversation");
-	var form = document.createElement("form");
-	form.setAttribute("class", "send");
-	form.setAttribute("onsubmit", function(){
-		return sendChat(this);
+	var which = this;
+
+	this.$container.children("form").on("submit", function(){
+		return which.sendChat(this);
 	});
-	var input = document.createElement("input");
-	input.setAttribute("type", "text");
-	input.setAttribute("name", "text");
-	form.appendChild(input);
-	ele.appendChild(conversation);
-	ele.appendChild(form);
 	
+	setInterval(function(){	
+		data = {"opponentID": which.opponentID, "playerID":window.player["id"]};
+		if(which.lastSeenID !== undefined){
+			data.lastSeenID = which.lastSeenID;
+		}	
+		ajaxCall("get", 
+			{
+				application: "chat",
+				method: "getChat", 
+				data: data
+			}, function(data){which.receiveChats(data);}
+		);
+	}, 2000);
+		
 }
+
+Chat.prototype.createChatItem = function(name, time, message){
+	var container = document.createElement("div");
+	container.setAttribute("class", "chatItem");
+	
+	var nameEle = document.createElement("div");
+	nameEle.setAttribute("class", "name");
+	$(nameEle).text(name)
+	
+	var timeEle = document.createElement("div");
+	timeEle.setAttribute("class", "time");
+	$(timeEle).text(getTimeString(time))
+	
+	var messageEle = document.createElement("div");
+	messageEle.setAttribute("class", "message");
+	$(messageEle).text(message);
+	
+	container.appendChild(nameEle);
+	container.appendChild(timeEle);
+	container.appendChild(messageEle);
+	
+	return container;
+}
+
+Chat.prototype.sendChat = function(whichFormEle){
+	data = {"opponentID": this.opponentID, "playerID":window.player["id"], "content":$(whichFormEle).children("input").val()};
+	if(this.lastSeenID !== undefined){
+		data.lastSeenID = this.lastSeenID;
+	}
+	
+	var which = this;
+
+	ajaxCall("post",
+		{
+			application: "chat",
+			method: "postChat", 
+			data: data
+		}, function(data){ if(which.receiveChats(data)) $(whichFormEle).children("input").val(""); }
+	);
+
+	return false;
+}
+
+Chat.prototype.receiveChats = function(data){
+	var returnVal = true;
+
+	window.currentTime = data["info"]["time"];
+	data = data["chat"];
+	
+	if(data["error"] != undefined){
+		alert(data["error"]);
+		returnVal = false;
+	}
+	
+	var $chat = this.$container.children(".conversation");
+	
+	for(var i = data.length-1; i >= 0; --i){
+		var chatItem = data[i];
+		$chat.append(this.createChatItem(window.playerInfo[chatItem["posterID"]], chatItem["timestamp"], chatItem["content"]));
+		this.lastSeenID = chatItem["id"];
+	}
+	
+	// Scroll the chat window to the bottom
+	if(data.length !== 0){
+		$chat.animate({"scrollTop": $chat[0].scrollHeight}, "slow");
+	}
+	
+	return returnVal;
+}
+
+Chat.prototype.setChallenge = function(challenge){
+	if(this.opponentID == 0){
+		alert("Can't challenge the lobby.");
+	}else{
+		this.challenge = challenge;
+	}
+}
+
+Chat.prototype.updateChallengeMessage = function(){
+	this.$container.children(".challenge").html(this.challenge.getMessage());
+}
+
 
 function getTimeString(postTime){
 
@@ -63,93 +149,4 @@ function getTimeString(postTime){
 	str += (jsDate.getHours() < 12)? 'am' : 'pm' ;
 	
 	return str;
-}
-
-function createChatItem(name, time, message){
-	var container = document.createElement("div");
-	container.setAttribute("class", "chatItem");
-	
-	var nameEle = document.createElement("div");
-	nameEle.setAttribute("class", "name");
-	$(nameEle).text(name)
-	
-	var timeEle = document.createElement("div");
-	timeEle.setAttribute("class", "time");
-	$(timeEle).text(getTimeString(time))
-	
-	var messageEle = document.createElement("div");
-	messageEle.setAttribute("class", "message");
-	$(messageEle).text(message);
-	
-	container.appendChild(nameEle);
-	container.appendChild(timeEle);
-	container.appendChild(messageEle);
-	
-	return container;
-}
-
-var chatID;
-var pause = false;
-$(document).ready(function(){
-
-	
-	setInterval(function(){
-		
-		if(pause){
-			pause = false;
-			return;
-		}
-		
-		data = {"opponentID": window.opponentID["id"], "playerID":window.playerID["id"]};
-		if(chatID !== undefined){
-			data.lastSeenID = chatID;
-		}
-	
-		ajaxCall("get", 
-			{
-				application: "chat",
-				method: "getChat", 
-				data: data
-			}, receiveChats
-		);
-	}, 2000);
-	
-});
-
-function sendChat(which){
-	
-	pause = true;
-	
-	data = {"opponentID": window.opponentID["id"], "playerID":window.playerID["id"], "content":$(which).children("input").val()};
-	if(chatID !== undefined){
-		data.lastSeenID = chatID;
-	}
-		
-	ajaxCall("get", 
-		{
-			application: "chat",
-			method: "postChat", 
-			data: data
-		}, receiveChats
-	);
-
-	return false;
-}
-
-function receiveChats(data){
-	window.currentTime = data["info"]["time"];
-	data = data["chat"];
-	var $chat = $($(".conversation"));
-	alert(data.length);
-	for(var i = data.length-1; i >= 0; --i){
-		var chatItem = data[i];
-		alert(chatItem);
-		$chat.append(createChatItem(chatItem["posterID"], chatItem["timestamp"], chatItem["content"]));
-		chatID = chatItem["id"];
-	}
-	
-	// Scroll the chat window to the bottom
-	if(data.length !== 0){
-		$chat.animate({"scrollTop": $chat[0].scrollHeight}, "slow");
-	}
 }

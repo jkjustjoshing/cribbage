@@ -1,17 +1,3 @@
-/*
-<div class="chat" id="otherChat" style="position:absolute;left:0px;bottom:0px;height:150px;">
-	<div class="head">
-		<div class="name"></div>
-		<div class="challenge"></div>
-	</div>
-	<div class="body">
-		<div class="conversation"></div>
-		<form class="send" action="" method="post">
-			<input type="text" name="text" />
-		</form>
-	</div>
-</div>
-*/
 .chat#lobbyChat {
   position: fixed;
   right: 0px;

@@ -18,24 +18,35 @@
 		$data = $_POST["data"];
 	}
 	
+	$result = array();
+	$result["info"] = array("time" => time());
 
 	if(is_array(SiteConfig::$POSSIBLE_METHODS[$application]) && in_array($method, SiteConfig::$POSSIBLE_METHODS[$application])){
 		
 		// We have a valid application and method. Require the files
 		require_once(BACKEND_DIRECTORY . "/controller/" . $application . ".php");
 
-				
-		// Must take single parameter (possibly array), and return json
-		$methodResult = @call_user_func($method, $data);
+		// Function must take single parameter (possibly array), and return an array!
+		$resultArr = @call_user_func($method, $data);
 		
-		$result = array();
-		$result["info"] = array("time" => time());
-		$result[$application] = $methodResult;
-		if($result){
-			//might need the header cache stuff
-			header("Content-Type:text/plain");
-			
-			echo json_encode($result, JSON_HEX_TAG);
+		if(is_array($resultArr)){
+			// The result is an array of the data
+			$result[$application] = $resultArr;
+		}else{
+			// The result is actually a string containing an error message
+			$result[$application] = array("error" => $resultArr);
 		}
+		
+	}else{
+		$result[$application] = array("error" => "The " . $application . " method '" . $method . "' doesn't exist.");
 	}
+	
+	
+	
+		
+	//might need the header cache stuff
+	header("Content-Type:text/plain");
+		
+	echo json_encode($result, JSON_HEX_TAG);
+	
 ?>

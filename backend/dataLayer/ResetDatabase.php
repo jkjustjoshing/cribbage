@@ -9,7 +9,7 @@
 		username VARCHAR(30),
 		email VARCHAR(100),
 		password CHAR(40), 
-		salt CHAR(".DataLayer::SALT_LENGTH."),
+		salt CHAR(".PlayerDataLayer::SALT_LENGTH."),
 		receiveNotifications BOOLEAN,
 		lobbyHeartbeat DATETIME,
 		
@@ -18,8 +18,8 @@
 	
 	$queries["chats"] = "CREATE TABLE IF NOT EXISTS chats(
 		id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-		player1ID INT NOT NULL,
-		player2ID INT NOT NULL,
+		player1ID INT,
+		player2ID INT,
 		poster INT NOT NULL,
 		FOREIGN KEY(player1ID) REFERENCES players(id),
 		FOREIGN KEY(player2ID) REFERENCES players(id),
@@ -28,25 +28,11 @@
 		timestamp DATETIME
 	);";
 	
-	$queries["suits"] = "CREATE TABLE IF NOT EXISTS suits(
-		id INT NOT NULL AUTO_INCREMENT,
-		PRIMARY KEY(id),
-		value VARCHAR(7)
-	);";
-	
-	$queries["numbers"] = "CREATE TABLE IF NOT EXISTS numbers(
-		id INT NOT NULL AUTO_INCREMENT,
-		PRIMARY KEY(id),
-		value TINYINT
-	);";
-	
 	$queries["playingcards"] = "CREATE TABLE IF NOT EXISTS playingcards(
 		id INT NOT NULL AUTO_INCREMENT,
 		PRIMARY KEY(id),
-		suitID INT NOT NULL,
-		FOREIGN KEY(suitID) REFERENCES suits(id),
-		numberID INT NOT NULL,
-		FOREIGN KEY(numberID) REFERENCES numbers(id)
+		suit VARCHAR(8) NOT NULL,
+		number INT NOT NULL
 	);";
 	
 	$queries["carddecks"] = "CREATE TABLE IF NOT EXISTS carddecks(
@@ -57,19 +43,16 @@
 		FOREIGN KEY(playingCardID) REFERENCES playingcards(id)
 	);";
 	
-	$queries["challenges"] = "CREATE TABLE IF NOT EXISTS challenges(
-		challengerID INT NOT NULL,
-		challengeeID INT NOT NULL, 
-		time DATETIME,
-		PRIMARY KEY(challengerID, challengeeID),
-		FOREIGN KEY(challengerID) REFERENCES players(id),
-		FOREIGN KEY(challengeeID) REFERENCES players(id)
-	);";
+	$queries["gamestatuses"] = "CREATE TABLE IF NOT EXISTS gamestatuses(
+		id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+		value VARCHAR(15)
+		);";
 	
-	$queries["statuses"] = "CREATE TABLE IF NOT EXISTS statuses(
+	$queries["playerhands"] = "CREATE TABLE IF NOT EXISTS playerhands(
 		id INT NOT NULL AUTO_INCREMENT,
-		value VARCHAR(15),
-		 PRIMARY KEY(id)
+		playingcardID INT NOT NULL,
+		PRIMARY KEY(id, playingcardID),
+		inHand TINYINT
 	);";
 	
 	$queries["gamespaces"] = "CREATE TABLE IF NOT EXISTS gamespaces(
@@ -87,13 +70,73 @@
 		FOREIGN KEY(turnID) REFERENCES players(id),
 		dealerID INT NOT NULL,
 		FOREIGN KEY(dealerID) REFERENCES players(id),
-		statusID INT NOT NULL,
-		FOREIGN KEY(statusID) REFERENCES statuses(id)
+		gamestatusID INT NOT NULL,
+		FOREIGN KEY(gamestatusID) REFERENCES gamestatuses(id)
 	);";
 	
+	$queries["playedcards"] = "CREATE TABLE IF NOT EXISTS playedcards(
+		gamespaceID INT NOT NULL,
+		FOREIGN KEY(gamespaceID) REFERENCES gamespaces(id),
+		cardOrder INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+		playingcardID INT NOT NULL,
+		FOREIGN KEY(playingcardID) REFERENCES playingcards(id), 
+		playedByID INT NOT NULL,
+		FOREIGN KEY(playedByID) REFERENCES players(id)
+	);";
 	
-	$queries["populateStatuses"] = 
-		"INSERT INTO statuses (value) VALUES ('INVITED'), ('IN_PROGRESS'), ('FINISHED'), ('FOREFIT'), ('CANCEL');";
+	$queries["challengestatuses"] = "CREATE TABLE IF NOT EXISTS challengestatuses(
+		id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+		value VARCHAR(15)
+	);";
+	
+	$queries["challenges"] = "CREATE TABLE IF NOT EXISTS challenges(
+		challengerID INT NOT NULL,
+		FOREIGN KEY(challengerID) REFERENCES players(id),
+		challengeeID INT NOT NULL,
+		FOREIGN KEY(challengeeID) REFERENCES players(id),
+		PRIMARY KEY(challengeeID, challengerID),
+		challengestatusID INT NOT NULL,
+		FOREIGN KEY(challengestatusID) REFERENCES challengestatuses(id)
+	);";
+	
+	$queries["populategamestatuses"] = 
+		"INSERT INTO gamestatuses (value) VALUES 
+			('INVITED'), 
+			('IN_PROGRESS'), 
+			('FINISHED'), 
+			('FOREFIT'), 
+			('CANCEL');";
+
+	$queries["populatechallengestatuses"] =
+		"INSERT INTO challengestatuses (value) values ";
+	
+	$first = true;
+	foreach(ChallengeDataLayer::$STATUS as $status){
+		if($first) $first = false;
+		else $queries["populatechallengestatuses"] .= ", ";
+		$queries["populatechallengestatuses"] .= "('" . $status . "')";
+	}
+
+
+	$queries["populateCards"] = 
+		"INSERT INTO playingcards (suit, number) VALUES	";
+		
+	$suits = array(
+			"diamond",
+			"club",
+			"heart",
+			"spade"
+	);
+		
+	$first = true;
+	foreach($suits as $suit){
+		for($i = 1; $i <= 13; ++$i){
+			if(!$first) $queries["populateCards"] .= ", ";
+			else $first = false;
+			
+			$queries["populateCards"] .= "('" . $suit . "', " . $i . ")";
+		}
+	}
 
 	function addTables($print = false){
 	$mysqli = new mysqli(

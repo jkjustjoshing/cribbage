@@ -27,7 +27,15 @@
 						"pickCutIndex", 
 						"playCard", 
 						"putInCrib", 
-						"deal"));
+						"deal"),
+			"challenge" => array(
+						"getChallenges", 
+						"challenge",
+						"updateChallengeStatus"
+						)
+						
+						
+						);
 
 
 	}

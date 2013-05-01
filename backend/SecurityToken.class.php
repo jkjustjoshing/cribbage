@@ -142,7 +142,7 @@
 					return false;
 				}
 
-				return $userID;
+				return intval($userID);
 
 			}
 		}
@@ -153,7 +153,7 @@
 			}
 			
 			$tokenID = self::extract();
-			
+
 			if($tokenID === false || $idToCheck !== $tokenID){
 				return false;
 			}

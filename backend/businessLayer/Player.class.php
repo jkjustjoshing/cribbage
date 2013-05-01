@@ -21,7 +21,7 @@
 		
 		public function __construct($id = null){
 			if($id !== null){
-				$database = DataLayer::getInstance();
+				$database = DataLayer::getPlayerInstance();
 			
 				$userArray = $database->getPlayer($id);
 				
@@ -45,7 +45,7 @@
 			}
 			
 			// Username is safe for database
-			$database = DataLayer::getInstance();
+			$database = DataLayer::getPlayerInstance();
 			
 
 			// Check password
@@ -97,7 +97,7 @@
 			}
 			
 			// Inputs are good - check database and add
-			$database = DataLayer::getInstance();
+			$database = DataLayer::getPlayerInstance();
 			
 			if($database->getPlayer($username) !== false){
 				// Got data back - username already exists
@@ -108,7 +108,7 @@
 			$success = $database->addPlayer($username, $password, $email);
 		
 			if($success){
-				return "";
+				return true;
 			}else{
 				return "There was an error. Please try again or contact the administrator.";
 			}
