@@ -25,15 +25,7 @@
 		<script type="text/javascript" src="js/jquery.min.js"></script>
 		
 		<script type="text/javascript">
-			window.player = 
-				{"id" : <?php echo $userID; ?> };
-			window.opponent = 
-				{"id" :  (window.player.id == 6 ? 5 : 6)}; // Send a 0 for the opponent ID to get the lobby
-			
-			window.playerInfo = {
-				6:"joshjosh1",
-				5:"joshjosh"
-			};
+			window.player = {"id":<?php echo $userID; ?>};
 		</script>
 		
 		<!-- My scripts/styles -->
@@ -43,32 +35,35 @@
 		<link type="text/css" rel="stylesheet" href="css/chat.css" />
 		<script type="text/javascript">
 			$(document).ready(function(){
-				window.chats = {};
+				window.chats = [];
 				window.chats[0] = new Chat($("#lobbyChat"), 0);
-				window.chats[window.opponent.id] = new Chat($("#otherChat"), window.opponent.id);
+				window.chats.size = function(){
+					var length = 0;
+					for(var i = 0; i < window.chats.length; ++i){
+						if(window.chats[i] !== undefined){
+							++length;
+						}
+					}
+					return length;
+				}
 			});
 		</script>
 		
 	</head>
 	<body>
-		<div class="container">
-			<div class="chat" id="lobbyChat">
-				<div class="conversation">
-				
-				</div>
-				<form class="send" action="" method="post">
-					<input type="text" name="text" />
-				</form>
+		<div id="lobbyContainer">
+			<div id="onlinePlayers">
+				<h2>Online Players</h2>
+				<ul></ul>
 			</div>
-			<div class="chat" id="otherChat" style="position:absolute;left:0px;bottom:0px;height:150px;">
-				<div class="challenge"></div>
-				<div class="conversation">
-				
-				</div>
-				<form class="send" action="" method="post">
-					<input type="text" name="text" />
-				</form>
+		</div>
+		<div class="chat" id="lobbyChat">
+			<div class="conversation">
+			
 			</div>
+			<form class="send" action="" method="post">
+				<input type="text" name="text" autocomplete="off" />
+			</form>
 		</div>
 	</body>
 </html>

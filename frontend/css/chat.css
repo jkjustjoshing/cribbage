@@ -23,19 +23,26 @@
   padding: 0; }
 
 .chat {
-  position: fixed;
-  right: 0px;
-  top: 0px;
-  height: 100%;
+  position: absolute;
+  bottom: 0px;
+  float: left;
+  height: 300px;
   width: 200px;
   border: 2px solid red;
   margin: 0;
   padding: 0; }
 
 .chat .challenge {
-  border: 2px solid green; }
+  border: 2px solid green;
+  height: 40px; }
 
 .chat .conversation {
+  overflow: auto;
+  height: -moz-calc(100% - 65px);
+  height: -webkit-calc(100% - 65px);
+  height: calc(100% - 65px); }
+
+#lobbyChat .conversation {
   overflow: auto;
   height: -moz-calc(100% - 25px);
   height: -webkit-calc(100% - 25px);
@@ -75,3 +82,16 @@
 
 .chatItem .message {
   clear: left; }
+
+#lobbyContainer {
+  position: fixed;
+  left: 0px;
+  top: 0px;
+  height: 100%;
+  padding: 0px; }
+
+#onlinePlayers {
+  float: left;
+  height: 100%;
+  width: 200px;
+  border: 1px solid black; }

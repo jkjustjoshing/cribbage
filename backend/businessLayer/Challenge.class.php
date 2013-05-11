@@ -70,10 +70,6 @@
 			$database = DataLayer::getChallengeInstance();
 			return $database->updateChallengeStatus($challengerID, $challengeeID, $newStatus);
 		}
-		
-		public function getLobbyPlayers(){
-			$database = DataLayer::getChallengeInstance();
-		}
 
 	}
 

@@ -12,10 +12,15 @@
 	 */
 	class SiteConfig{
 	
+		// Database constants
 		const DATABASE_PASSWORD = "root";//"hug0War";
 		const DATABASE_SERVER = "localhost";
 		const DATABASE_USER = "root";//"jdk3414";
 		const DATABASE_DATABASE = "jdk3414";
+
+
+		// Amount of time since last heartbeat to mark someone as offline (integer seconds)
+		const HEARTBEAT_DELAY_UNTIL_OFFLINE = 8;
 
 		public static $POSSIBLE_METHODS = array(
 			"chat" => array(
@@ -31,7 +36,8 @@
 			"challenge" => array(
 						"getChallenges", 
 						"challenge",
-						"updateChallengeStatus"
+						"updateChallengeStatus",
+						"getOnlinePlayers"
 						)
 						
 						

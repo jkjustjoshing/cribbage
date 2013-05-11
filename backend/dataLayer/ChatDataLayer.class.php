@@ -11,18 +11,27 @@
 		public function getChats($userID, $opponentID, $lastSeenID = null){
 			if($opponentID == 0){
 				$sql = "SELECT 
-					id, poster, content, timestamp 
-					FROM chats WHERE player1ID IS NULL AND player2ID IS NULL ";
+					chats.id, 
+					chats.poster, 
+					chats.content,
+					chats.timestamp,
+					players.username
+					FROM chats LEFT JOIN players ON players.id=chats.poster 
+					WHERE chats.player1ID IS NULL AND chats.player2ID IS NULL ";
 			}else{
 				$sql = "SELECT 
-					id, poster, content, timestamp 
-					FROM chats 
-					WHERE player1ID=? AND player2ID=? ";
+					chats.id, 
+					chats.poster, 
+					chats.content, 
+					chats.timestamp,
+					players.username
+					FROM chats LEFT JOIN players ON players.id=chats.poster
+					WHERE chats.player1ID=? AND chats.player2ID=? ";
 			}
 			if($lastSeenID !== null){
-				$sql .= " AND id > ? ";
+				$sql .= " AND chats.id > ? ";
 			}
-			$sql .= "ORDER BY timestamp DESC ";
+			$sql .= "ORDER BY chats.timestamp DESC ";
 			if($lastSeenID === null) $sql .= " LIMIT 50 ";
 									
 			if($stmt = $this->mysqli->prepare($sql)){
@@ -52,14 +61,13 @@
 				
 				$stmt->execute();
 				
-				$stmt->bind_result($id, $poster, $content, $timestamp);
+				$stmt->bind_result($id, $poster, $content, $timestamp, $username);
 				
 				$chatArr = array();
 				while($stmt->fetch()){
 				
 					$timestamp = strtotime( $timestamp );
-				
-					$chatItem = array("id"=>$id, "poster"=>$poster, "content"=>$content, "timestamp"=>$timestamp);
+					$chatItem = array("id"=>$id, "posterID"=>$poster, "posterUsername"=>$username, "content"=>$content, "timestamp"=>$timestamp);
 					$chatArr[] = $chatItem;
 				}
 				

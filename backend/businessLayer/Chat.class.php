@@ -12,13 +12,18 @@
 		public $id;
 		public $chatContent;
 		public $posterID;
+		public $posterUsername;
 		public $timestamp;
 		
-		public function __construct($id, $posterID, $chatContent, $timestamp){
+		public function __construct($id, $posterID, $posterUsername, $chatContent, $timestamp){
 			$this->id = $id;
 			$this->chatContent = $chatContent;
 			$this->posterID = $posterID;
+			$this->posterUsername = $posterUsername;
 			$this->timestamp = $timestamp;
+			if(!isset($timestamp)){
+				throw Exception ("Forgot to change call to ChatItem to include username");
+			}
 		}
 		
 		public function equals($other){
@@ -32,6 +37,7 @@
 			return 
 				$this->chatContent == $other->chatContent &&
 				$this->posterID == $other->posterID &&
+				$this->posterUsername = $other->posterUsername &&
 				$this->timestamp == $other->timestamp &&
 				$this->id == $other->id;
 		}
@@ -40,6 +46,7 @@
 			return array(
 				"id" => $this->id,
 				"posterID" => $this->posterID,
+				"posterUsername" => $this->posterUsername,
 				"timestamp" => $this->timestamp,
 				"content" => $this->chatContent
 			);
@@ -121,8 +128,7 @@
 			$chatArr = $database->getChats($userID, $opponentID, $lastSeenID);
 
 			foreach($chatArr as $chat){
-				$chatItem = new ChatItem($chat["id"], $chat["poster"], $chat["content"], $chat["timestamp"]);
-				
+				$chatItem = new ChatItem($chat["id"], $chat["posterID"], $chat["posterUsername"], $chat["content"], $chat["timestamp"]);
 				$room->addItem($chatItem);
 			}
 

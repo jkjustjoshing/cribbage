@@ -1,6 +1,7 @@
 <?php
 
 	require_once(BACKEND_DIRECTORY . "/businessLayer/Challenge.class.php");
+	require_once(BACKEND_DIRECTORY . "/businessLayer/Heartbeat.class.php");
 	
 	function getChallenges($data){ //$playerID, $challenger = null){
 		$playerID = intval($data["playerID"]);
@@ -57,19 +58,20 @@
 		$challengerID = intval($data["challengerID"]);
 		$challengeeID = intval($data["challengeeID"]);
 		$newStatus = $data["newStatus"];
-		
+		$playerID = SecurityToken::extract();
+
 		$database = DataLayer::getChallengeInstance();
 		
 		if(!in_array($newStatus, ChallengeDataLayer::$STATUS)){
 			return "The status '".$newStatus."' is not a valid status.";
 		}
 		
-		if(SecurityToken::checkId($challengerID)){
+		if($playerID === $challengerID){
 			if($newStatus !== "PENDING" && $newStatus !== "CANCELLED"){
 				// Trying to change status to one that should only be set by the challengee
 				return "Only the person you are challenging can set the status to '".$newStatus."'.";
 			}
-		}else if(SecurityToken::checkId($challengeeID)){
+		}else if($playerID === $challengeeID){
 			if($newStatus === "PENDING"){
 				// Trying to change status to one that should only be set by the challengee
 				return "Only the person challenging you can set the status to 'PENDING'.";
@@ -78,6 +80,12 @@
 			// Trying to change status of a challenge they are not a part of.
 			return "You don't have permission to change the status of a challenge between players "
 			  .$challengerID." and " . $challengeeID . ".";
+		}
+
+		$otherPlayerID = $challengerID+$challengeeID-$playerID;
+		if(!$database->isUserHere($otherPlayerID, 0)){// Is other user even in the lobby?
+			$database->updateChallengeStatus($challengerID, $challengeeID, "CANCELLED");
+			return "Player " . $otherPlayerID . " is no longer online.";
 		}
 		
 		$success = $database->updateChallengeStatus($challengerID, $challengeeID, $newStatus);
@@ -90,15 +98,9 @@
 	}
 		
 
-/*
+	function getOnlinePlayers($data){
+		$room = $data["room"];
 
-
- challenge
-        GET: getChallenges($playerID, $challenger = null)
-                 getLobbyPlayers()
-        POST: challenge($challengerID, $challengeeID)
-                    updateChallengeStatus($challengerID, $challengeeID, $newStatus)
-
-
-*/
+		return Heartbeat::getOnlinePlayers($room);
+	}
 ?>

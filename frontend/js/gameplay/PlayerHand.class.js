@@ -10,7 +10,7 @@ function PlayerHand(isCrib, cardArray){
 			this.cards[this.cards.length] = new PlayerCard(0,""); //TODO anonymous card for now
 		}
 	}
-}
+} 
 
 PlayerHand.prototype.remove = function(card){
 	for(var i = 0; i < this.cards.length; ++i){

@@ -1,4 +1,10 @@
 function ajaxCall(getOrPost,data,callback){
+	if(window.gameID !== undefined){
+		data.heartbeatRoom = window.gameID
+	}else{
+		data.heartbeatRoom = 0; // For the lobby
+	}
+
 	$.ajax({
  		type: getOrPost,
  		async: true, 

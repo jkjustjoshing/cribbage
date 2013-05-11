@@ -1,5 +1,7 @@
 <?php
 
+	require_once(dirname(__FILE__) . "/../SiteConfig.class.php");
+
 	class ChallengeDataLayer extends DataLayer{
 		
 		private $mysql;
@@ -167,8 +169,102 @@
 			
 		}
 		
-		public function getLobbyPlayers(){
-			//TODO once heartbeat is figured out
+		public function setHeartbeat($playerID, $room){
+			$playerID = intval($playerID);
+			$room = intval($room);
+
+			$sql = "INSERT INTO heartbeats (playerID, room, lastSeen) VALUES (?,?, NOW()) 
+				ON DUPLICATE KEY 
+				UPDATE lastSeen=VALUES(lastSeen)";
+
+			if($stmt = $this->mysqli->prepare($sql)){
+				
+				$stmt->bind_param("ii", $playerID, $room);
+				
+				$stmt->execute();
+
+				if($this->mysqli->affected_rows === 0){
+					return false;
+				}
+				
+				return true;
+			}
+			return false;
+
+		}
+
+
+		public function getOnlinePlayers($room){
+			//Make sure the input is a valid number
+			$room = intval($room);
+
+			if($room < 0){
+				return false;
+			}
+			
+			$sql = "SELECT
+					players.id, 
+					players.username, 
+					players.email, 
+					players.receiveNotifications,
+					heartbeats.lastSeen
+					FROM heartbeats LEFT JOIN players ON players.id=heartbeats.playerID
+					WHERE heartbeats.room=? AND heartbeats.lastSeen > DATE_SUB(NOW(), INTERVAL ".SiteConfig::HEARTBEAT_DELAY_UNTIL_OFFLINE." SECOND)";			
+			
+			
+			
+			if($stmt = $this->mysqli->prepare($sql)){
+				
+				$stmt->bind_param("i", $room);
+				$stmt->execute();
+				
+				$stmt->bind_result($id, $username, $email, $receiveNotifications, $lastSeen);
+				
+				$playerArr = array();
+				while($stmt->fetch()){
+					$player = array(
+						"id"=>$id, 
+						"username"=>$username, 
+						"email"=>$email,
+						"receiveNotifications"=>$receiveNotifications
+					);
+					$playerArr[] = $player;
+				}
+
+				return $playerArr;
+			}
+			
+			return false;
+
+		}
+
+		public function isUserHere($playerID, $room){
+			//Make sure the input is a valid number
+			$room = intval($room);
+			$playerID = intval($playerID);
+
+			if($room < 0){
+				return false;
+			}
+			
+			$sql = "SELECT
+					players.id
+					FROM heartbeats LEFT JOIN players ON players.id=heartbeats.playerID
+					WHERE heartbeats.room=? AND heartbeats.playerID=? AND heartbeats.lastSeen > DATE_SUB(NOW(), INTERVAL ".SiteConfig::HEARTBEAT_DELAY_UNTIL_OFFLINE." SECOND)";			
+			
+			
+			
+			if($stmt = $this->mysqli->prepare($sql)){
+				
+				$stmt->bind_param("ii", $room, $playerID);
+				$stmt->execute();
+				
+				$stmt->store_result();
+				
+				return $stmt->num_rows() === 1;
+			}
+			
+			return false;
 		}
 	}
 ?>

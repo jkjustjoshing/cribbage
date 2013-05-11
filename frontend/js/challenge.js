@@ -12,6 +12,12 @@ function Challenge(challenger, opponentID, status){
 
 Challenge.prototype.setStatus = function(status){
 	this.status = status;
+
+	if(status == "ACCEPTED"){
+		// Set a timer, remove the challenge, and open the new gameplay window
+		window.open("game.php?gameID="/*+gameID*/, '_blank');
+	}
+
 }
 
 Challenge.prototype.getMessage = function(){
@@ -59,6 +65,55 @@ Challenge.prototype.getMessage = function(){
 				
 }
 
+Challenge.prototype.displayOnlinePlayers = function(){
+	ajaxCall("get",
+		{
+			application: "challenge",
+			method: "getOnlinePlayers",
+			data: { room: 0 }
+		}, function(data){
+			data = data["challenge"];
+
+			var $onlinePlayersContainer = $("#onlinePlayers ul");
+			$onlinePlayersContainer.html("");
+			for(var i = 0; i < data.length; i++){
+				if(window.player.id != data[i].id){
+					var $li = $('<li id="onlinePlayer'+data[i].id+'">');
+					var $a = $("<a>");
+					$a.attr("href", "javascript://");
+					$a.click(function(){
+						var otherID = $(this).parent().attr("id").substring("onlinePlayer".length);
+						otherID = parseInt(otherID);
+						if(window.chats[otherID] !== undefined){
+							// There is already a chat going with this user
+							if(window.chats[otherID].challenge === undefined){
+								window.chats[otherID].challenge = new Challenge(window.player.id, otherID, "PENDING");
+							}else{
+								window.chats[otherID].challenge.selectNewStatus("PENDING");
+							}
+						}else{
+							// There isn't a chat going with this user - set one up, minimized
+							var chatDiv = Chat.prototype.createChatWindow($(this).text());
+							window.chats[otherID] = new Chat(chatDiv, otherID);
+						
+							window.chats[otherID].challenge = new Challenge(window.player.id, otherID, "PENDING");
+							window.chats[otherID].challenge.selectNewStatus("PENDING");
+
+						}
+
+
+						//var challenge = new Challenge(window.player.id, otherID, "PENDING");
+					});
+					$a.text(data[i].username);
+					$li.append($a);
+					$onlinePlayersContainer.append($li);
+				}
+			}
+
+		}
+	);
+}
+
 Challenge.prototype.selectNewStatus = function(newStatus){
 	var which = this;
 	
@@ -75,6 +130,9 @@ Challenge.prototype.selectNewStatus = function(newStatus){
 			if(data["challenge"].success === undefined || data["challenge"].success !== true){
 				// Failure
 				alert(data["challenge"].error);
+			}else{
+				which.setStatus(newStatus);
+				window.chats[which.opponentID].updateChallengeMessage();
 			}
 		}
 	);
@@ -83,6 +141,8 @@ Challenge.prototype.selectNewStatus = function(newStatus){
 
 
 $(document).ready(function(){
+	setInterval(function(){Challenge.prototype.displayOnlinePlayers();}, 3000);
+
 	setInterval(function(){
 
 		ajaxCall("get", 
@@ -119,8 +179,10 @@ $(document).ready(function(){
 						window.chats[otherID].updateChallengeMessage();
 					}else{
 						// There isn't a chat going with this user - set one up, minimized
-						console.log("Open a chat first.");
-						console.log(data[i]);
+						var chatDiv = Chat.prototype.createChatWindow(otherID);
+						window.chats[otherID] = new Chat(chatDiv, otherID);
+
+						window.chats[otherID].challenge = new Challenge((data[i].challengerID == window.player.id), otherID, "PENDING");
 
 					}
 					

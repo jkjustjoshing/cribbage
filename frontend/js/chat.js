@@ -24,14 +24,31 @@ function Chat(container, opponentID){
 		
 }
 
-Chat.prototype.createChatItem = function(name, time, message){
+Chat.prototype.createChatWindow = function(name, shouldINotDisplayTheEle){
+	var div = document.createElement("div");
+	div.setAttribute("class", "chat");
+	div.style.left = (window.chats.size()*200 + 5) + "px";
+	div.innerHTML = '<div class="name">'+name+'</div>' +
+					'<div class="challenge"></div>' +
+					'<div class="conversation">'+
+					'</div>' +
+					'<form class="send" action="" method="post">' +
+						'<input type="text" name="text" autocomplete="off" />' +
+					'</form>';
+	if(shouldINotDisplayTheEle !== true){
+		document.getElementById("lobbyContainer").appendChild(div);
+	}
+	return div;
+}
+
+Chat.prototype.createChatItem = function(id, username, time, message){
 	var container = document.createElement("div");
-	container.setAttribute("class", "chatItem");
+	$(container).attr("class", "chatItem chat"+id);
 	
 	var nameEle = document.createElement("div");
 	nameEle.setAttribute("class", "name");
-	$(nameEle).text(name)
-	
+	$(nameEle).text(username);
+
 	var timeEle = document.createElement("div");
 	timeEle.setAttribute("class", "time");
 	$(timeEle).text(getTimeString(time))
@@ -81,7 +98,7 @@ Chat.prototype.receiveChats = function(data){
 	
 	for(var i = data.length-1; i >= 0; --i){
 		var chatItem = data[i];
-		$chat.append(this.createChatItem(window.playerInfo[chatItem["posterID"]], chatItem["timestamp"], chatItem["content"]));
+		$chat.append(this.createChatItem(chatItem["posterID"], chatItem["posterUsername"], chatItem["timestamp"], chatItem["content"]));
 		this.lastSeenID = chatItem["id"];
 	}
 	
@@ -125,26 +142,30 @@ function getTimeString(postTime){
 	
 	//print hours ago
 	var hoursSince = Math.round(minutesSince/60);
-	if(hoursSince == 1)
+	if(hoursSince === 1){
 		return '1 hour ogo';
-	if(hoursSince < 12)
+	}
+	if(hoursSince < 12){
 		return hoursSince + ' hours ago';
-	
+	}
+
 	//print more than that
 	var jsDate = new Date(postTime*1000);
 	var daysSince = Math.round(hoursSince/24);
-	if(daysSince == 1)
-		var str = 'Yesterday at ';
-	else if(daysSince == 2)
-		var str = '2 days ago at ';
+	var str;
+	if(daysSince === 1)
+		str = 'Yesterday at ';
+	else if(daysSince === 2)
+		str = '2 days ago at ';
 	else{
 		var month = ['Jan','Feb','March','April','May','June','July','Aug','Sept','Oct','Nov','Dec'];
-		var str = month[jsDate.getMonth()] + ' ' + jsDate.getDate();
+		str = month[jsDate.getMonth()] + ' ' + jsDate.getDate();
 		str += ', ' + jsDate.getFullYear() + ' at ';
 	}
 	var hours = jsDate.getHours()%12;
-	if(hours == 0)
+	if(hours === 0){
 		hours = 12;
+	}
 	str += hours + ':'+ ((jsDate.getMinutes() < 10) ? ('0'+jsDate.getMinutes()) : jsDate.getMinutes()) + ' ';
 	str += (jsDate.getHours() < 12)? 'am' : 'pm' ;
 	
