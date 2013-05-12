@@ -1,10 +1,7 @@
-<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.0//EN"
-	"http://www.w3.org/TR/2001/REC-SVG-20010904/DTD/svg10.dtd">
-	
-<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="100" height="522" x="0" y="0">
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="100" height="522" x="0" y="0" id="scoreboard">
 	
 	<!-- Border Rectangle -->	
-	<rect width="100" height="522" stroke="black" fill="none" />
+	<rect width="100" height="522" stroke="black" fill="#aaa" />
 
 	<!-- One instance of the three long straight columns -->
 	<g id="70_dots" transform="translate(10,70)">
@@ -17,14 +14,14 @@
 				
 				<!-- A red and a blue background, without the dots -->
 				<g id="1_background">
-					<rect id="red_box" width="10" height="10" x="-5" y="-5" fill="#ff6666" />
-					<rect id="blue_box" width="10" height="10" x="5" y="-5" fill="#6666ff" />
+					<rect id="red_box" width="10" height="10" x="-5" y="-5" fill="#ff3636" />
+					<rect id="blue_box" width="10" height="10" x="5" y="-5" fill="#3636ff" />
 				</g>
 
 				<!-- 2 opposing dots, without the background color (for the turns) -->
 				<g id="2_dots_no_background">
-					<circle r="3" cx="0" cy="0" fill="#555555" id="dot" />
-					<use xlink:href="#dot" transform="translate(10,0)" />
+					<circle r="3" cx="0" cy="0" fill="#dd5555" id="dot" />
+					<circle r="3" cx="10" cy="0" fill="#5555dd" id="dot" />
 				</g>
 			</g>
 
@@ -58,9 +55,9 @@
 		<use xlink:href="#1_background" transform="translate(40,7) rotate(180,0,0) scale(1,1.6)" />
 
 		<!-- Smooth background to the turn -->
-		<path d="M -45,0 a 45,45 0 1,1 90,0" fill="#ff6666"/>
-		<path d="M -35,0 a 35,35 0 1,1 70,0" fill="#6666ff"/>
-		<path d="M -25,0 a 25,25 0 1,1 50,0" fill="white"/>
+		<path d="M -45,0 a 45,45 0 1,1 90,0" fill="#ff3636"/>
+		<path d="M -35,0 a 35,35 0 1,1 70,0" fill="#3636ff"/>
+		<path d="M -25,0 a 25,25 0 1,1 50,0" fill="#aaa"/>
 
 		<!-- Position a pair of background-less dots to prepare for repeated rotation -->
 		<use xlink:href="#2_dots_no_background" transform="translate(-40,0)" id="rotating" />
@@ -82,9 +79,9 @@
 	<g transform="translate(67.5,490)"><!-- small turn -->
 
 		<!-- Smooth background to the turn -->
-		<path d="M -27.5,0 a 27.5,27.5 0 1,0 55,0" fill="#ff6666"/>
-        <path d="M -17.5,0 a 17.5,17.5 0 1,0 35,0" fill="#6666ff"/>
-        <path d="m -7.5,0 a 7.5,7.5 0 1,0 15,0" fill="white"/>
+		<path d="M -27.5,0 a 27.5,27.5 0 1,0 55,0" fill="#ff3636"/>
+        <path d="M -17.5,0 a 17.5,17.5 0 1,0 35,0" fill="#3636ff"/>
+        <path d="m -7.5,0 a 7.5,7.5 0 1,0 15,0" fill="#aaa"/>
 
 		<!-- Filler background at the start of the curve -->
 		<use xlink:href="#1_background" transform="translate(22.5,-7) rotate(180,0,0) scale(1,1.6)" />
@@ -98,8 +95,7 @@
 		<use xlink:href="#small_rotating" transform="rotate(90,0,0)" />
 		<use xlink:href="#small_rotating" transform="rotate(135,0,0)" />
 		<use xlink:href="#small_rotating" transform="rotate(180,0,0)" />
-
+		
 	</g>
-	
 
 </svg>
