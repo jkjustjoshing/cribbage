@@ -14,7 +14,7 @@
 */
 
 
-.chat#lobbyChat {
+.chat#lobbyChat, .chat#gameChat {
 	position: fixed;
 	right:0px;
 	top:0px;
@@ -34,6 +34,7 @@
 	border: 2px solid red;
 	margin:0;
 	padding:0;
+	background:white;
 }
 
 .chat .challenge {
@@ -48,7 +49,7 @@
 	height: calc(100% - 65px);
 }
 
-#lobbyChat .conversation {
+#lobbyChat .conversation, #gameChat .conversation{
 	overflow: auto;
 	height: -moz-calc(100% - 25px);
 	height: -webkit-calc(100% - 25px);

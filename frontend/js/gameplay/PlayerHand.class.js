@@ -1,3 +1,10 @@
+/**
+ * PlayerHand object
+ * Represents a Player's hand, both in memory and on the screen in the DOM
+ * 
+ * @param {Boolean} isCrib
+ * @param {Array}  cardArray
+ */
 function PlayerHand(isCrib, cardArray){
 	this.isCrib = isCrib;
 	this.cards = [];

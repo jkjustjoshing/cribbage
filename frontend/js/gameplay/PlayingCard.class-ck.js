@@ -6,7 +6,7 @@
  * @param {string} suit The suit of the card - either "diamond", "club", "heart", or "spade"
  * @param {int} number The number of the card: 1-13
  */
-function PlayingCard(number, suit){
+function PlayingCard(suit, number){
 	
 	this.suit = suit;
 	this.number = number;
@@ -51,39 +51,38 @@ function PlayingCard(number, suit){
 		var path = document.createElementNS(svgns, "path");
 		path.setAttributeNS(null, "id", "symbol"+"|"+this.number+"|"+this.suit);
 		if(this.suit == "club"){
-			path.setAttributeNS(null, "d", "M 20,70 " +
-	                   " Q 28,60 27,50 "+
-	                   " C -8,70 -8,17 20,27 " +
+			path.setAttributeNS(null, "d", "M 20,70 
+	                    Q 28,60 27,50 
+	                    C -8,70 -8,17 20,27
 	
-	                   " C -8,-8 68,-8  40,27 " +
+	                    C -8,-8 68,-8  40,27 
 
-	                   " C 68,17 68,70 33,50 " +
-	                   " Q 32,60 40,70 ");
+	                    C 68,17 68,70 33,50
+	                    Q 32,60 40,70");
 		}else if(this.suit == "heart"){
-			path.setAttributeNS(null, "d", "M 33,70 " +
-	                     "L 3,25 " + 
-						 "C -10,0 28,-10 33,13 " + 
-						 "C 38,-10 76,0 63,25 " +
-						 "L 33,70");
+			path.setAttributeNS(null, "d", "M 33,70 
+	                     L 3,25 
+						 C -10,0 28,-10 33,13 
+						 C 38,-10 76,0 63,25 
+						 L 33,70");
 		}else if(this.suit == "spade"){
-			path.setAttributeNS(null, "d", "M 20,70 "+ 
-							 "Q 28,60 27,50 "+
+			path.setAttributeNS(null, "d", "M 20,70 
+							 Q 28,60 27,50 
 							 
-							 "C -13,70 -7,23 30,0 "+
+							 C -13,70 -7,23 30,0
 							 
-							 "C 67,23 73,70 33,50 "+
-							 "Q 32,60 40,70");
+							 C 67,23 73,70 33,50
+							 Q 32,60 40,70");
 		}else if(this.suit == "diamond"){
-			path.setAttributeNS(null, "d", "M 30,0 " +
-						   "Q 16.95,18.25 0,35 "+
-						   "Q 16.95,51.75 30,70 "+
-						   "Q 43.05,51.75 60,35 "+
-						   "Q 43.05,18.25 30,0");
+			path.setAttributeNS(null, "d", "M 30,0 
+						   Q 16.95,18.25 0,35 
+						   Q 16.95,51.75 30,70 
+						   Q 43.05,51.75 60,35 
+						   Q 43.05,18.25 30,0");
 		}
 		path.setAttributeNS(null, "transform", "translate(42.5,61.25) scale(0.25)");
 		path.setAttributeNS(null, "fill", this.color);
 
-		this.ele.appendChild(path)
 
 
 	}

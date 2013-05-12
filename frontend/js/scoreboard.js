@@ -1,11 +1,4 @@
 /**
- * SVG Namespace global variable
- * @type {String}
- */
-var svgns = "http://www.w3.org/2000/svg";
-
-
-/**
  * Scoreboard object
  * @author  Josh Kramer
  * 
