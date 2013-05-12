@@ -26,7 +26,7 @@
 	<key>MasterSheets</key>
 	<array/>
 	<key>ModificationDate</key>
-	<string>2013-05-09 02:01:13 +0000</string>
+	<string>2013-05-12 03:10:34 +0000</string>
 	<key>Modifier</key>
 	<string>Josh Kramer</string>
 	<key>NotesVisible</key>
@@ -1091,7 +1091,7 @@ CANCEL}</string>
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{155.5992, 225.93648}, {17, 14}}</string>
+					<string>{{155.59923, 225.93646}, {17, 14}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>FitText</key>
@@ -1150,7 +1150,7 @@ CANCEL}</string>
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{227.43443, 203.6512}, {16, 14}}</string>
+					<string>{{227.4344, 203.65121}, {16, 14}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>FitText</key>
@@ -1217,8 +1217,8 @@ CANCEL}</string>
 					<integer>16</integer>
 					<key>Points</key>
 					<array>
-						<string>{154.886, 241.83398}</string>
-						<string>{264.72784, 203.16602}</string>
+						<string>{154.88603, 241.83397}</string>
+						<string>{264.72781, 203.16603}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -2055,7 +2055,7 @@ number: int}</string>
 					<key>Points</key>
 					<array>
 						<string>{304.25476, 165.77943}</string>
-						<string>{601.86365, 103.18999}</string>
+						<string>{601.86359, 103.19002}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -2276,7 +2276,7 @@ lastSeen: TIMESTAMP}</string>
 					<key>Points</key>
 					<array>
 						<string>{541.56464, 330.0463}</string>
-						<string>{493.71555, 439.41351}</string>
+						<string>{493.71558, 439.41351}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -2487,7 +2487,7 @@ value: VARCHAR(15) --"PENDING", "VIEWED", "ACCEPTED", "DENIED"}</string>
 					<key>Points</key>
 					<array>
 						<string>{560.85309, 259.22177}</string>
-						<string>{698.04254, 111.42525}</string>
+						<string>{698.04266, 111.42525}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -3468,8 +3468,8 @@ timestamp: TIMESTAMP}</string>
 					<integer>116</integer>
 					<key>Points</key>
 					<array>
-						<string>{1272.677, 327.1264}</string>
-						<string>{1178.7584, 317.8595}</string>
+						<string>{1272.677, 327.12009}</string>
+						<string>{1178.7584, 317.84952}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -4727,7 +4727,7 @@ playingCardID: INTEGER FOREIGN KEY(playingcards.id)}</string>
 					<key>Points</key>
 					<array>
 						<string>{243.67995, 282.33148}</string>
-						<string>{505.83054, 188.4895}</string>
+						<string>{505.8306, 188.4895}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -5483,7 +5483,7 @@ static getChallengeInstance()}</string>
 			<key>BackgroundGraphic</key>
 			<dict>
 				<key>Bounds</key>
-				<string>{{0, 0}, {1152, 733}}</string>
+				<string>{{0, 0}, {1728, 733}}</string>
 				<key>Class</key>
 				<string>SolidGraphic</string>
 				<key>ID</key>
@@ -5519,7 +5519,7 @@ static getChallengeInstance()}</string>
 					<array>
 						<dict>
 							<key>Bounds</key>
-							<string>{{409.41174, 79.82354}, {309.5, 14}}</string>
+							<string>{{664.70587, 103.5294}, {309.5, 14}}</string>
 							<key>Class</key>
 							<string>ShapedGraphic</string>
 							<key>FitText</key>
@@ -5555,7 +5555,7 @@ static getChallengeInstance()}</string>
 						</dict>
 						<dict>
 							<key>Bounds</key>
-							<string>{{409.41174, 93.82354}, {309.5, 42}}</string>
+							<string>{{664.70587, 117.5294}, {309.5, 42.000008}}</string>
 							<key>Class</key>
 							<string>ShapedGraphic</string>
 							<key>FitText</key>
@@ -5595,7 +5595,7 @@ opponent}</string>
 						</dict>
 						<dict>
 							<key>Bounds</key>
-							<string>{{409.41174, 135.82355}, {309.5, 84}}</string>
+							<string>{{664.70587, 159.5294}, {309.5, 84}}</string>
 							<key>Class</key>
 							<string>ShapedGraphic</string>
 							<key>FitText</key>
@@ -5654,7 +5654,7 @@ getTimeString()\
 					<array>
 						<dict>
 							<key>Bounds</key>
-							<string>{{450.58826, 282.52939}, {309.5, 14}}</string>
+							<string>{{705.88239, 306.23526}, {309.5, 14}}</string>
 							<key>Class</key>
 							<string>ShapedGraphic</string>
 							<key>FitText</key>
@@ -5690,7 +5690,7 @@ getTimeString()\
 						</dict>
 						<dict>
 							<key>Bounds</key>
-							<string>{{450.58826, 296.52939}, {309.5, 14}}</string>
+							<string>{{705.88239, 320.23526}, {309.5, 14}}</string>
 							<key>Class</key>
 							<string>ShapedGraphic</string>
 							<key>FitText</key>
@@ -5728,7 +5728,7 @@ getTimeString()\
 						</dict>
 						<dict>
 							<key>Bounds</key>
-							<string>{{450.58826, 310.52939}, {309.5, 84}}</string>
+							<string>{{705.88239, 334.23526}, {309.5, 84}}</string>
 							<key>Class</key>
 							<string>ShapedGraphic</string>
 							<key>FitText</key>
@@ -5787,7 +5787,7 @@ getTimeString()\
 					<array>
 						<dict>
 							<key>Bounds</key>
-							<string>{{789.76495, 275.2941}, {309.5, 14}}</string>
+							<string>{{1045.0591, 298.99997}, {309.49994, 14}}</string>
 							<key>Class</key>
 							<string>ShapedGraphic</string>
 							<key>FitText</key>
@@ -5823,7 +5823,7 @@ getTimeString()\
 						</dict>
 						<dict>
 							<key>Bounds</key>
-							<string>{{789.76495, 289.2941}, {309.5, 56}}</string>
+							<string>{{1045.0591, 312.99997}, {309.49994, 56}}</string>
 							<key>Class</key>
 							<string>ShapedGraphic</string>
 							<key>FitText</key>
@@ -5864,7 +5864,7 @@ poster}</string>
 						</dict>
 						<dict>
 							<key>Bounds</key>
-							<string>{{789.76495, 345.2941}, {309.5, 84}}</string>
+							<string>{{1045.0591, 368.99997}, {309.49994, 84}}</string>
 							<key>Class</key>
 							<string>ShapedGraphic</string>
 							<key>FitText</key>
@@ -5920,7 +5920,7 @@ getTimeString()\
 			<key>GridInfo</key>
 			<dict/>
 			<key>HPages</key>
-			<integer>2</integer>
+			<integer>3</integer>
 			<key>KeepToScale</key>
 			<false/>
 			<key>Layers</key>
@@ -5966,6 +5966,234 @@ getTimeString()\
 			<key>VPages</key>
 			<integer>1</integer>
 		</dict>
+		<dict>
+			<key>ActiveLayerIndex</key>
+			<integer>0</integer>
+			<key>AutoAdjust</key>
+			<true/>
+			<key>BackgroundGraphic</key>
+			<dict>
+				<key>Bounds</key>
+				<string>{{0, 0}, {576, 733}}</string>
+				<key>Class</key>
+				<string>SolidGraphic</string>
+				<key>ID</key>
+				<integer>2</integer>
+				<key>Style</key>
+				<dict>
+					<key>shadow</key>
+					<dict>
+						<key>Draws</key>
+						<string>NO</string>
+					</dict>
+					<key>stroke</key>
+					<dict>
+						<key>Draws</key>
+						<string>NO</string>
+					</dict>
+				</dict>
+			</dict>
+			<key>CanvasOrigin</key>
+			<string>{0, 0}</string>
+			<key>ColumnAlign</key>
+			<integer>1</integer>
+			<key>ColumnSpacing</key>
+			<real>36</real>
+			<key>DisplayScale</key>
+			<string>1 0/72 in = 1.0000 in</string>
+			<key>GraphicsList</key>
+			<array>
+				<dict>
+					<key>Class</key>
+					<string>TableGroup</string>
+					<key>Graphics</key>
+					<array>
+						<dict>
+							<key>Bounds</key>
+							<string>{{28.823532, 158.94113}, {388, 14}}</string>
+							<key>Class</key>
+							<string>ShapedGraphic</string>
+							<key>FitText</key>
+							<string>Vertical</string>
+							<key>Flow</key>
+							<string>Resize</string>
+							<key>ID</key>
+							<integer>97</integer>
+							<key>Shape</key>
+							<string>Rectangle</string>
+							<key>Style</key>
+							<dict>
+								<key>fill</key>
+								<dict>
+									<key>GradientCenter</key>
+									<string>{-0.29411799, -0.26470599}</string>
+								</dict>
+							</dict>
+							<key>Text</key>
+							<dict>
+								<key>Text</key>
+								<string>{\rtf1\ansi\ansicpg1252\cocoartf1187\cocoasubrtf370
+\cocoascreenfonts1{\fonttbl\f0\fswiss\fcharset0 Helvetica;}
+{\colortbl;\red255\green255\blue255;}
+\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\qc
+
+\f0\b\fs24 \cf0 Scoreboard}</string>
+								<key>VerticalPad</key>
+								<integer>0</integer>
+							</dict>
+							<key>TextPlacement</key>
+							<integer>0</integer>
+						</dict>
+						<dict>
+							<key>Bounds</key>
+							<string>{{28.823532, 172.94113}, {388, 42}}</string>
+							<key>Class</key>
+							<string>ShapedGraphic</string>
+							<key>FitText</key>
+							<string>Vertical</string>
+							<key>Flow</key>
+							<string>Resize</string>
+							<key>ID</key>
+							<integer>98</integer>
+							<key>Shape</key>
+							<string>Rectangle</string>
+							<key>Style</key>
+							<dict>
+								<key>fill</key>
+								<dict>
+									<key>GradientCenter</key>
+									<string>{-0.29411799, -0.26470599}</string>
+								</dict>
+							</dict>
+							<key>Text</key>
+							<dict>
+								<key>Align</key>
+								<integer>0</integer>
+								<key>Text</key>
+								<string>{\rtf1\ansi\ansicpg1252\cocoartf1187\cocoasubrtf370
+\cocoascreenfonts1{\fonttbl\f0\fswiss\fcharset0 Helvetica;}
+{\colortbl;\red255\green255\blue255;}
+\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720
+
+\f0\fs24 \cf0 pins[player1] = [\{ele, int\}, \{ele, int\}]\
+pins[player1] = [\{ele, int\}, \{ele, int\}]\
+}</string>
+								<key>VerticalPad</key>
+								<integer>0</integer>
+							</dict>
+							<key>TextPlacement</key>
+							<integer>0</integer>
+						</dict>
+						<dict>
+							<key>Bounds</key>
+							<string>{{28.823532, 214.94113}, {388, 168}}</string>
+							<key>Class</key>
+							<string>ShapedGraphic</string>
+							<key>FitText</key>
+							<string>Vertical</string>
+							<key>Flow</key>
+							<string>Resize</string>
+							<key>ID</key>
+							<integer>99</integer>
+							<key>Shape</key>
+							<string>Rectangle</string>
+							<key>Style</key>
+							<dict>
+								<key>fill</key>
+								<dict>
+									<key>GradientCenter</key>
+									<string>{-0.29411799, -0.26470599}</string>
+								</dict>
+							</dict>
+							<key>Text</key>
+							<dict>
+								<key>Align</key>
+								<integer>0</integer>
+								<key>Text</key>
+								<string>{\rtf1\ansi\ansicpg1252\cocoartf1187\cocoasubrtf370
+\cocoascreenfonts1{\fonttbl\f0\fswiss\fcharset0 Helvetica;}
+{\colortbl;\red255\green255\blue255;}
+\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720
+
+\f0\fs24 \cf0 constructor(player1Info, player2Info);\
+\
+      playerInfo = \{\
+              "id" : playerID,\
+              "score": score,\
+              "backPinPosition": position\
+      \}\
+\
+changeScore(player, newScore)\
+addPoints(player, points) - call ChangeScore()\
+private movePiece\
+private pieceCoordinates}</string>
+								<key>VerticalPad</key>
+								<integer>0</integer>
+							</dict>
+							<key>TextPlacement</key>
+							<integer>0</integer>
+						</dict>
+					</array>
+					<key>GridH</key>
+					<array>
+						<integer>97</integer>
+						<integer>98</integer>
+						<integer>99</integer>
+						<array/>
+					</array>
+					<key>ID</key>
+					<integer>96</integer>
+				</dict>
+			</array>
+			<key>GridInfo</key>
+			<dict/>
+			<key>HPages</key>
+			<integer>1</integer>
+			<key>KeepToScale</key>
+			<false/>
+			<key>Layers</key>
+			<array>
+				<dict>
+					<key>Lock</key>
+					<string>NO</string>
+					<key>Name</key>
+					<string>Layer 1</string>
+					<key>Print</key>
+					<string>YES</string>
+					<key>View</key>
+					<string>YES</string>
+				</dict>
+			</array>
+			<key>LayoutInfo</key>
+			<dict>
+				<key>Animate</key>
+				<string>NO</string>
+				<key>circoMinDist</key>
+				<real>18</real>
+				<key>circoSeparation</key>
+				<real>0.0</real>
+				<key>layoutEngine</key>
+				<string>dot</string>
+				<key>neatoSeparation</key>
+				<real>0.0</real>
+				<key>twopiSeparation</key>
+				<real>0.0</real>
+			</dict>
+			<key>Orientation</key>
+			<integer>2</integer>
+			<key>PrintOnePage</key>
+			<false/>
+			<key>RowAlign</key>
+			<integer>1</integer>
+			<key>RowSpacing</key>
+			<real>36</real>
+			<key>SheetTitle</key>
+			<string>scoreboard</string>
+			<key>UniqueID</key>
+			<integer>6</integer>
+			<key>VPages</key>
+			<integer>1</integer>
+		</dict>
 	</array>
 	<key>SmartAlignmentGuidesActive</key>
 	<string>YES</string>
@@ -5976,11 +6204,11 @@ getTimeString()\
 	<key>WindowInfo</key>
 	<dict>
 		<key>CurrentSheet</key>
-		<integer>3</integer>
+		<integer>5</integer>
 		<key>ExpandedCanvases</key>
 		<array/>
 		<key>Frame</key>
-		<string>{{343, 59}, {1060, 819}}</string>
+		<string>{{720, 59}, {720, 819}}</string>
 		<key>ListView</key>
 		<true/>
 		<key>OutlineWidth</key>
@@ -5994,9 +6222,9 @@ getTimeString()\
 		<key>SidebarWidth</key>
 		<integer>120</integer>
 		<key>VisibleRegion</key>
-		<string>{{-5.886879e-07, -33.999973}, {1141.9753, 801.23462}}</string>
+		<string>{{-56.000008, -24.000034}, {688.23523, 780}}</string>
 		<key>Zoom</key>
-		<real>0.81000000238418579</real>
+		<real>0.85000002384185791</real>
 		<key>ZoomValues</key>
 		<array>
 			<array>
@@ -6022,6 +6250,11 @@ getTimeString()\
 			<array>
 				<string>controller</string>
 				<real>1</real>
+				<real>1</real>
+			</array>
+			<array>
+				<string>scoreboard</string>
+				<real>0.85000002384185791</real>
 				<real>1</real>
 			</array>
 		</array>
