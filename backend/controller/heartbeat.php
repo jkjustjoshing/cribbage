@@ -1,6 +1,6 @@
 <?php
 
-	require_once(BACKEND_DIRECTORY . "/businessLayer/Heartbeat.class.php");
+	require_once(dirname(__FILE__) . "/../businessLayer/Heartbeat.class.php");
 
 	function heartbeat($room){
 		$room = intval($room);

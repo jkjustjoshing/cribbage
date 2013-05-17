@@ -10,7 +10,6 @@
 		private static $playerInstance;
 		private static $challengeInstance;
 		private static $gameplayInstance;
-		private static $instanceCount = 0;
 
 		
 
@@ -24,7 +23,6 @@
 		}
 		
 		public static function getInstance(){
-			self::$instanceCount++;
 			if(self::$instance === null){
 				self::$instance = new DataLayer(
 							SiteConfig::DATABASE_SERVER,
@@ -68,14 +66,6 @@
 			return self::$gameplayInstance;
 		}
 	
-	
-		public function __destruct(){
-			self::$instanceCount--;
-			if(self::$instanceCount == 0){
-				$this->mysqli->close();
-			}
-		}
-
 	}
 
 

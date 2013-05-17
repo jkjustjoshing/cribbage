@@ -57,6 +57,11 @@
 				<ul></ul>
 			</div>
 		</div>
+
+		<div id="logout" style="position:absolute;left:300px;">
+			<a href="logout.php">Logout</a>
+		</div>
+
 		<div class="chat" id="lobbyChat">
 			<div class="conversation">
 			

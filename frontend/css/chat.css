@@ -58,12 +58,11 @@
   left: 0px;
   padding: 0;
   margin: 0; }
-
-.chat .send input {
-  height: 100%;
-  width: 100%;
-  margin: 0;
-  padding: 0; }
+  .chat .send input {
+    height: 100%;
+    width: 100%;
+    margin: 0;
+    padding: 0; }
 
 .chatItem {
   margin: 5px 0px; }
@@ -71,18 +70,16 @@
     background: white; }
   .chatItem:nth-child(even) {
     background: #ccc; }
-
-.chatItem .name {
-  font-style: italic;
-  padding: 2px 2px 4px 2px;
-  float: left; }
-
-.chatItem .time {
-  float: left;
-  padding: 2px; }
-
-.chatItem .message {
-  clear: left; }
+  .chatItem .name {
+    font-style: italic;
+    padding: 2px 2px 4px 2px;
+    float: left; }
+  .chatItem .time {
+    float: left;
+    padding: 2px;
+    font-size: 10pt; }
+  .chatItem .message {
+    clear: left; }
 
 #lobbyContainer {
   position: fixed;

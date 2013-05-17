@@ -1,4 +1,13 @@
 /**
+ * SVG Namespace global variable
+ * @type {String}
+ */
+var svgns = "http://www.w3.org/2000/svg";
+
+var xlinkns = "http://www.w3.org/1999/xlink";
+//var xhtmlns = "http://www.w3.org/1999/xhtml";
+
+/**
  * PlayingCard object
  * Represents a playing card, both in memory and on the screen in the DOM.
  * Initialize with no arguments if it's an unknown card value.
@@ -7,13 +16,15 @@
  * @param {int} number The number of the card: 1-13
  */
 function PlayingCard(number, suit){
-	
+
 	this.suit = suit;
 	this.number = number;
-	if(this.suit == "diamond" || this.suit == "heart"){
+	if(this.suit === "diamond" || this.suit === "heart"){
 		this.color = "red";
-	}else if(this.suit == "club" || this.suit == "spade"){
+	}else if(this.suit === "club" || this.suit === "spade"){
 		this.color = "black";
+	}else{
+		this.suit = undefined;
 	}
 
 	this.ele = document.createElementNS(svgns, "g");
@@ -30,6 +41,32 @@ function PlayingCard(number, suit){
 
 	if(this.suit === undefined || this.number === undefined){
 		// Unknown card, set ele as unknown card ele
+		var gradientDef = document.createElementNS(svgns, "defs");
+		var gradient = document.createElementNS(svgns, "radialGradient");
+		gradient.setAttributeNS(null, "id", "unknownGradient");
+		gradient.setAttributeNS(null, "gradientUnits", "objectBoundingBox");
+		gradient.setAttributeNS(null, "cx", "0.5");
+		gradient.setAttributeNS(null, "cy", "0.5");
+		gradientDef.appendChild(gradient);
+
+		var stop1 = document.createElementNS(svgns, "stop");
+		stop1.setAttributeNS(null, "offset", "0%");
+		stop1.setAttributeNS(null, "stop-color", "#66ff66");
+		
+		var stop2 = document.createElementNS(svgns, "stop");
+		stop2.setAttributeNS(null, "offset", "30%");
+		stop2.setAttributeNS(null, "stop-color", "#66ff66");
+		
+		var stop3 = document.createElementNS(svgns, "stop");
+		stop3.setAttributeNS(null, "offset", "90%");
+		stop3.setAttributeNS(null, "stop-color", "#66cc88");
+		
+		gradient.appendChild(stop1);
+		gradient.appendChild(stop2);
+		gradient.appendChild(stop3);
+
+		this.ele.insertBefore(gradientDef, rect);
+		rect.setAttributeNS(null, "fill", "url(#unknownGradient)");
 
 	}else{
 		// Card known, set ele as known card ele
@@ -40,7 +77,14 @@ function PlayingCard(number, suit){
 		text.setAttributeNS(null, "font-family", "Arial");
 		text.setAttributeNS(null, "font-size", "20");
 		text.setAttributeNS(null, "fill", this.color);
-		text.appendChild(document.createTextNode(this.number));
+
+		var cardNumber = this.number;
+		if(cardNumber === 1) cardNumber = "A";
+		else if(cardNumber === 11) cardNumber = "J";
+		else if(cardNumber === 12) cardNumber = "Q";
+		else if(cardNumber === 13) cardNumber = "K";
+
+		text.appendChild(document.createTextNode(cardNumber));
 		this.ele.appendChild(text);
 
 		var use = document.createElementNS(svgns, "use");
@@ -78,18 +122,26 @@ function PlayingCard(number, suit){
 						   "Q 16.95,18.25 0,35 "+
 						   "Q 16.95,51.75 30,70 "+
 						   "Q 43.05,51.75 60,35 "+
-						   "Q 43.05,18.25 30,0");
+			               "Q 43.05,18.25 30,0");
 		}
-		path.setAttributeNS(null, "transform", "translate(42.5,61.25) scale(0.25)");
+		path.setAttributeNS(null, "transform", "translate(35,50) scale(0.5)");
 		path.setAttributeNS(null, "fill", this.color);
+		this.ele.appendChild(path);
 
-		this.ele.appendChild(path)
+		var usePath = document.createElementNS(svgns, "use");
+		usePath.setAttributeNS(xlinkns, "xlink:href", "#symbol|"+this.number+"|"+this.suit);
+		usePath.setAttributeNS(null, "transform", "translate(-15, 0) scale(0.5)");
+		usePath.setAttributeNS(null, "id", "duplicateSymbol|"+this.number+"|"+this.suit);
+		this.ele.appendChild(usePath);
 
+		var usePath = document.createElementNS(svgns, "use");
+		usePath.setAttributeNS(xlinkns, "xlink:href", "#duplicateSymbol|"+this.number+"|"+this.suit);
+		usePath.setAttributeNS(null, "transform", "rotate(180,50,70)");
+		this.ele.appendChild(usePath);
 
 	}
+} 
 
-	
-}
 
 PlayingCard.prototype.equals = function(other){
 	if(!(other instanceof PlayingCard)){
@@ -99,18 +151,19 @@ PlayingCard.prototype.equals = function(other){
 	return (this.number == other.number && this.suit == other.suit);
 }
 
+
 PlayingCard.prototype.getCount = function(){
 	if(this.number < 11){
 		return this.number;
 	}else{
 		return 10;
 	}
-}
-
-PlayingCard.prototype.getSVG = function(){
-	return 1;
-}
+};
 
 PlayingCard.prototype.isVisible = function(){
 	return (this.number === undefined || this.suit === undefined);
+};
+
+PlayingCard.prototype.drag = function(destinationBox){
+	window.dragging = this;
 }

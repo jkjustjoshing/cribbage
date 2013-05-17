@@ -36,6 +36,12 @@
 		 * is how flushes are calculated
 		 */
 		private $_isCrib;
+
+		/**
+		 * Is this object different from what the database is holding?
+		 * @var boolean Whether or not this object is different from what the database is holding.
+		 */
+		private $isDirty = false;
 		
 		/**
 		 * Constructor for the hand. Can optionally pass an array of cards that will
@@ -48,24 +54,76 @@
 				foreach($cardArray as $card){
 					if(!is_object($card)){
 						throw new InvalidArgumentException("Initializing with a non-object card");
-					}else if(get_class($playingCard) != get_class(new PlayingCard(1, "club"))){
+					}else if(get_class($card) != get_class(new PlayingCard(1, "club"))){
 						// Not a card object
 						throw new InvalidArgumentException("Initializing with a non-card object");
 					}
 
-					$this->_cards[] = $tard;
+					$this->_cards[] = array("card" => $card, "inHand" => true);
+					$this->isDirty = true;
 				}
 			}catch(InvalidArgumentException $e){
+				// Do this to remove any cards that could have been added before the non-card was caught
 				$this->_cards = array();
 				throw $e;
 			}
+		}
+
+		
+		public function writeback($gameID, $playerID){
+			if($this->isDirty){
+				$cards = array();
+
+				foreach($this->_cards as $card){
+					$cards[] = array(
+							"suit" => $card["card"]->getSuit(),
+							"number" => $card["card"]->getNumber(),
+							"inHand" => $card["inHand"]
+						);
+				}
+
+				$database = DataLayer::getGameplayInstance();
+				return $database->writePlayerHand($gameID, $playerID, $cards);
+			}
+		}
+		
+		/**
+		 * Choose a card to mark as played for pegging. Doesn't 
+		 * remove the card from the hand for scoring, just for
+		 * availability for using to peg again.
+		 * @param  PlayingCard $playingCard The playing card to mark as played (must already be in hand)
+		 */
+		public function peg($playingCard){
+			$tempDirty = $this->isDirty;
+			$this->isDirty = true;
+
+			if(!is_object($playingCard)){
+                throw new InvalidArgumentException("Tried playing a card from a PlayerHand that is not an object.");
+            }
+
+            if(get_class($playingCard) != get_class(new PlayingCard(1, "club"))){
+                throw new InvalidArgumentException("Tried playing a card from a PlayerHand that was not a card.");
+            }
+
+			foreach($this->_cards as $index=>$card){
+				if($playingCard->equals($card["card"])){
+					//play
+					$this->_cards[$index]["inHand"] = false;
+					return $card["card"];
+				}
+			}
+			
+			// If the object wasn't changed restore the original dirty value
+			$this->isDirty = $tempDirty;
+
+			throw new UnexpectedValueException("Card " . $playingCard->__toString() . " not in hand");
 		}
 
 		/**
 		 * Adds a playing card to the hand.
 		 * Throws an exception if a non-card is passed
 		 * @param A PlayingCard instance
-		 * @throws InvalidArgumentException if not a PlayingCard instance
+		 * @ throws InvalidArgumentException if not a PlayingCard instance
 		 */
 		public function add($playingCard){
 			
@@ -81,7 +139,9 @@
 			}
 
 			// Confirmed that $playingCard is a card
-			$this->_cards[] = $playingCard;
+			$this->_cards[] = array("card" => $playingCard, "inHand" => true);
+
+			$this->isDirty = true;
 		}
 
 		/**
@@ -92,27 +152,55 @@
 		 * @throws UnexpectedValueException if passed a card not in the hand
 		 */
 		public function remove($playingCard){
+			$tempDirty = $this->isDirty;
+			$this->isDirty = true;
 
 			// Set the score as dirty
 			$this->_scoreDirtyLastCut = null;
 
 			if(!is_object($playingCard)){
-                throw new InvalidArgumentException("Tried adding a card to a PlayerHand that is not an object.");
+                throw new InvalidArgumentException("Tried removing a card from a PlayerHand that is not an object.");
             }
 
             if(get_class($playingCard) != get_class(new PlayingCard(1, "club"))){
-                throw new InvalidArgumentException("Tried adding a card to a PlayerHand that was not a card.");
+                throw new InvalidArgumentException("Tried removing a card from a PlayerHand that was not a card.");
             }
 
 			foreach($this->_cards as $index=>$card){
-				if($playingCard->equals($card)){
+				if($playingCard->equals($card["card"])){
 					//remove
 					unset($this->_cards[$index]);
 					return $card;
 				}
 			}
 			
+			// If the object wasn't changed restore the original dirty value
+			$this->isDirty = $tempDirty;
+
 			throw new UnexpectedValueException("Card " . $playingCard->__toString() . " not in hand");
+		}
+
+		/**
+		 * Test if the playing card given is in the hand currently
+		 * @param  PlayingCard $playingCard The playing card in question
+		 * @return boolean     Whether or not the card is in the hand.
+		 */
+		public function inHand($playingCard){
+			if(!is_object($playingCard)){
+                return false;
+            }
+
+			if(get_class($playingCard) != get_class(new PlayingCard(1, "club"))){
+				return false;
+			}
+
+			foreach($this->_cards as $index=>$card){
+				if($playingCard->equals($card["card"])){
+					return true;
+				}
+			}
+			
+			return false;
 		}
 
 		/**
@@ -141,10 +229,11 @@
 				 */
 
 				// Look for flush
-				$suit = reset($this->_cards)->getSuit(); // Get suit of first item (even if first index isn't predictable)
+				$firstCard = reset($this->_cards);
+				$suit = $firstCard["card"]->getSuit(); // Get suit of first item (even if first index isn't predictable)
 				$flush = true;
 				foreach($this->_cards as $card){
-					if($card->getSuit() != $suit){
+					if($card["card"]->getSuit() != $suit){
 						$flush = false;
 						break;
 					}
@@ -159,7 +248,7 @@
 
 				// Look for knobbs
 				foreach($this->_cards as $card){
-					if($card->getSuit() == $cutCard->getSuit() && $card->getNumber() == 11){
+					if($card["card"]->getSuit() == $cutCard->getSuit() && $card["card"]->getNumber() == 11){
 						$this->_score += 1;
 						break;
 					}
@@ -168,7 +257,10 @@
 
 
 if($debug)echo "<pre>entering points search\n";	
-				$cardsPlusCut = $this->_cards;
+				$cardsPlusCut = array();
+				foreach($this->_cards as $card){
+					$cardsPlusCut[] = $card["card"];
+				}
 				$cardsPlusCut[] = $cutCard;
 
 				usort($cardsPlusCut, function($a, $b){
@@ -273,19 +365,41 @@ if($debug)				echo "</pre>";
 		 * @return The number of cards in the hand
 		 */
 		public function numberOfCardsInHand(){
-			return count($this->_cards);
+			$count = 0;
+			foreach($this->_cards as $card){
+				if($card["inHand"]){
+					++$count;
+				}
+			}
+			return $count;
 		}
 
 		/**
 		 * Return an array of all the cards in the hand
-		 * @return All the cards in the hand
+		 * @return Array Array of cards and inHand values
 		 */
 		public function getCards(){
-			// Make sure we are passing out by value, not by reference
-			$tempArr = $this->_cards;
-			return $tempArr;
+			return $this->_cards;
 		}
 		
+		/**
+		 * Returns an array of cards in the hand in array form to be sent to the client
+		 * @return array A plain array of data representing cards
+		 */
+		public function cardArray(){
+			$arr = array();
+
+			foreach($this->_cards as $card){
+				$cardArr = array(
+						"suit" => $card["card"]->getSuit(),
+						"number" => $card["card"]->getNumber(),
+						"inHand" => $card["inHand"]
+					);
+				$arr[] = $cardArr;
+			}
+
+			return $arr;
+		}
 		
 
 	}

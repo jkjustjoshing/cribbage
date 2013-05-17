@@ -1,10 +1,12 @@
-function Challenge(challenger, opponentID, status){
+function Challenge(challenger, opponent, status){
 	
 	// Boolean - am I the challenger
 	this.challenger = challenger;
 	
-	this.opponentID = opponentID;
+	this.opponentID = opponent.id;
+	this.opponentUsername = opponent.username;
 	this.status = status;
+	this.gameID = -1;
 	
 }
 
@@ -12,18 +14,11 @@ function Challenge(challenger, opponentID, status){
 
 Challenge.prototype.setStatus = function(status){
 	this.status = status;
-
-	if(status == "ACCEPTED"){
-		// Set a timer, remove the challenge, and open the new gameplay window
-		window.open("game.php?gameID="/*+gameID*/, '_blank');
-	}
-
 }
 
 Challenge.prototype.getMessage = function(){
 	
-	//TODO change this to the actual username
-	var opponentUsername = this.opponentID;
+	var opponentUsername = this.opponentUsername;
 
 	switch(this.status){
 		case "PENDING":
@@ -43,9 +38,9 @@ Challenge.prototype.getMessage = function(){
 			}
 		case "ACCEPTED":
 			if(this.challenger){
-				return opponentUsername + " has accepted your challenge. The game window will open momentarily...";
+				return opponentUsername + ' has accepted your challenge. Click <a href="javascript:window.open(\'game.php?gameID='+this.gameID+'\')">here</a> to open the new game.';
 			}else{
-				return "You have accepted " + opponentUsername + "'s challenge. The game window will open momentarily...";
+				return 'You have accepted ' + opponentUsername + '\'s challenge. Click <a href="javascript:window.open(\'game.php?gameID='+this.gameID+'\')">here</a> to open the new game.';
 			}
 		case "DENIED":
 			if(this.challenger){
@@ -83,20 +78,21 @@ Challenge.prototype.displayOnlinePlayers = function(){
 					$a.attr("href", "javascript://");
 					$a.click(function(){
 						var otherID = $(this).parent().attr("id").substring("onlinePlayer".length);
+						var otherUsername = $(this).text();
 						otherID = parseInt(otherID);
 						if(window.chats[otherID] !== undefined){
 							// There is already a chat going with this user
 							if(window.chats[otherID].challenge === undefined){
-								window.chats[otherID].challenge = new Challenge(window.player.id, otherID, "PENDING");
+								window.chats[otherID].challenge = new Challenge(true, {id:otherID, username:otherUsername}, "PENDING");
 							}else{
 								window.chats[otherID].challenge.selectNewStatus("PENDING");
 							}
 						}else{
 							// There isn't a chat going with this user - set one up, minimized
-							var chatDiv = Chat.prototype.createChatWindow($(this).text());
-							window.chats[otherID] = new Chat(chatDiv, otherID);
+							var chatDiv = Chat.prototype.createChatWindow(otherUsername);
+							window.chats[otherID] = new Chat(chatDiv, {id:otherID, username:otherUsername});
 						
-							window.chats[otherID].challenge = new Challenge(window.player.id, otherID, "PENDING");
+							window.chats[otherID].challenge = new Challenge(true, {id:otherID, username:otherUsername}, "PENDING");
 							window.chats[otherID].challenge.selectNewStatus("PENDING");
 
 						}
@@ -132,6 +128,7 @@ Challenge.prototype.selectNewStatus = function(newStatus){
 				alert(data["challenge"].error);
 			}else{
 				which.setStatus(newStatus);
+				which.gameID = data["challenge"].gameID;
 				window.chats[which.opponentID].updateChallengeMessage();
 			}
 		}
@@ -160,31 +157,42 @@ $(document).ready(function(){
 					if(data[i].challengerID == window.player.id){
 						challenger = true;
 						otherID = data[i].challengeeID;
+						otherUsername = data[i].challengeeUsername;
 					}else if(data[i].challengeeID == window.player.id){
 						challenger = false;
 						otherID = data[i].challengerID;
+						otherUsername = data[i].challengerUsername;
 					}else{
 						console.log("user - " + window.player.id);
 						console.log("The challenge ajax call returned a challenge that doesn't belong to this user.");
 						console.log(data[i]);
 					}
 					
-					if(window.chats[otherID] !== undefined){
-						// There is already a chat going with this user
-						if(window.chats[otherID].challenge === undefined){
-							window.chats[otherID].challenge = new Challenge((data[i].challengerID == window.player.id), otherID, data[i].status);
+
+					if(data[i].status !== "CANCELLED" && data[i].status !== "DENIED"){
+						if(window.chats[otherID] !== undefined){
+							// There is already a chat going with this user
+							if(window.chats[otherID].challenge === undefined){
+								window.chats[otherID].challenge = new Challenge((data[i].challengerID == window.player.id), {id:otherID, username:otherUsername}, data[i].status);
+							}else{
+								window.chats[otherID].challenge.setStatus(data[i].status);
+							}
+							window.chats[otherID].updateChallengeMessage();
 						}else{
-							window.chats[otherID].challenge.setStatus(data[i].status);
+							// There isn't a chat going with this user - set one up, minimized
+							var chatDiv = Chat.prototype.createChatWindow(otherUsername);
+							window.chats[otherID] = new Chat(chatDiv, {id:otherID, username:otherUsername});
+
+							window.chats[otherID].challenge = new Challenge((data[i].challengerID == window.player.id), {id:otherID, username:otherUsername}, data[i].status);
 						}
-						window.chats[otherID].updateChallengeMessage();
-					}else{
-						// There isn't a chat going with this user - set one up, minimized
-						var chatDiv = Chat.prototype.createChatWindow(otherID);
-						window.chats[otherID] = new Chat(chatDiv, otherID);
-
-						window.chats[otherID].challenge = new Challenge((data[i].challengerID == window.player.id), otherID, "PENDING");
-
 					}
+
+					// When a challenge gets accepted get the new gameID
+					if(data[i].status === "ACCEPTED"){
+						//alert(data[i].gameID);
+						window.chats[otherID].challenge.gameID = data[i].gameID;
+					}
+
 					
 				}
 			}

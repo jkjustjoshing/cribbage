@@ -32,11 +32,14 @@
 		public function __construct($number, $suit){
 			if(in_array($suit, self::$suits)){
 				$this->_suit = $suit;
+			}else if($suit === null){
+				// Anonymous card being created
+				$this->_suit = $suit;
 			}else{
 				throw new Exception("Card can't be created with suit " . $suit . ".");
 			}
 
-			if(is_int($number) && $number > 0 && $number < 14){
+			if(is_int($number) && $number >= 0 && $number < 14){
 				$this->_number = $number;
 			}else if(is_string($number)){
 					if(("".intval($number)) == $number && intval($number) > 0 && intval($number < 14)){
@@ -104,7 +107,7 @@
 				return false;
 			}
 
-			if($this->_number == $other->_number && $this->_suit == $other->_suit){
+			if($this->_number === $other->_number && $this->_suit === $other->_suit){
 				return true;
 			}else{
 				return false;
@@ -125,21 +128,16 @@
 		 * @return A string to identify the card
 		 */
 		public function __toString(){
+			if($this->_suit === null){
+				return "Hidden card";
+			}
+
 			$number = $this->_number;
 			if($number == 11) $number = "J";
 			else if($number == 12) $number = "Q";
 			else if($number == 13) $number = "K";
 
 			return $number . " of " . $this->_suit . "s";
-		}
-		
-		/**
-		 * Returns a string for the SVG element of the card
-		 * @returns A string for the SVG element of the card
-		 */
-		public static function toSVG(){
-			//TODO
-			return "";
 		}
 
 	}

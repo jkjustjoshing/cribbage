@@ -1,4 +1,4 @@
-/**
+ /**
  * PlayingCard object
  * Represents a playing card, both in memory and on the screen in the DOM.
  * Initialize with no arguments if it's an unknown card value.

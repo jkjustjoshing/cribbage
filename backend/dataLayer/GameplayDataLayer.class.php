@@ -7,124 +7,316 @@
 		public function __construct($mysqli){
 			$this->mysqli = $mysqli;
 		}
-		
-		
-		
-		
-		/*
-		public function getChats($userID, $opponentID, $lastSeenID = null){
-			if($opponentID == 0){
-				$sql = "SELECT 
-					id, poster, content, timestamp 
-					FROM chats WHERE player1ID IS NULL AND player2ID IS NULL ";
-			}else{
-				$sql = "SELECT 
-					id, poster, content, timestamp 
-					FROM chats 
-					WHERE player1ID=? AND player2ID=? ";
-			}
-			if($lastSeenID !== null){
-				$sql .= " AND id > ? ";
-			}
-			$sql .= "ORDER BY timestamp DESC ";
-			if($lastSeenID === null) $sql .= " LIMIT 50 ";
-									
+
+		/**
+		 * Change the game's state
+		 * @param  int $gameID The game of whom to change the state of
+		 * @param  string $newState The new state to change to. Must be existing state or exception thrown
+		 * @return boolean If the operation successfully completed
+		 */
+		public function changeGameState($gameID, $newState){
+			$sql = "UPDATE gamespaces
+			        SET gamestateID=(
+			        	SELECT id FROM gamestates WHERE value=?
+			        )
+			        WHERE id=?";
+
 			if($stmt = $this->mysqli->prepare($sql)){
-				
-				//Bind paramaters
-				//smaller ID is first
-				
-				if($userID < $opponentID){
-					$player1 = $userID;
-					$player2 = $opponentID;
-				}else{
-					$player1 = $opponentID;
-					$player2 = $userID;
-				}
-				
-				if($opponentID == 0){
-					if($lastSeenID !== null){
-						$stmt->bind_param("i", $lastSeenID);
-					}
-				}else{
-					if($lastSeenID !== null){
-						$stmt->bind_param("iii", $player1, $player2, $lastSeenID);
-					}else{
-						$stmt->bind_param("ii", $player1, $player2);
-					}
-				}
-				
-				$stmt->execute();
-				
-				$stmt->bind_result($id, $poster, $content, $timestamp);
-				
-				$chatArr = array();
-				while($stmt->fetch()){
-				
-					$timestamp = strtotime( $timestamp );
-				
-					$chatItem = array("id"=>$id, "poster"=>$poster, "content"=>$content, "timestamp"=>$timestamp);
-					$chatArr[] = $chatItem;
-				}
-				
-				return $chatArr;
+				//Bind parameter, execute, and bind result
+				$stmt->bind_param("si", $newState, $gameID);
+				return $stmt->execute();
 			}
-			
+
 			return false;
 		}
 
-		public function postChat($userID, $opponentID, $message){			
-			
-			// If this is being called statically
-			if(!isset($this)){
-				throw Exception("Calling DataLayer->postChat statically");
-			}
-			if($opponentID == 0){
-				$sql = "INSERT INTO chats (poster, content, timestamp) VALUES (?, ?, ?)";
+		/**
+		 * Put an array of cards in the crib for the given game
+		 * @param  int $gameID The game in question
+		 * @param  array $cards  The array of cards to add
+		 * @return boolean If the add was successful
+		 */
+		public function putInCrib($gameID, $cards){
+			// Then add the new hand
+			$sql = "INSERT INTO playerhands (gameID, playerID, playingcardID)
+					VALUES
+					(?, NULL, (
+							SELECT id FROM playingcards WHERE suit=? AND number=?
+						))
+			";
+			if($stmt = $this->mysqli->prepare($sql)){	
+				//Bind parameter, execute, and bind result
+				for($i = 0; $i < count($cards); ++$i){
+					$stmt->bind_param("isi", $gameID, $cards[$i]["suit"], $cards[$i]["number"]);
+					if(!$stmt->execute()){
+						// Statement failed
+						return false;
+					}
+					return true;
+				}
 			}else{
-				$sql = "INSERT INTO chats (player1ID, player2ID, poster, content, timestamp) VALUES (?, ?, ?, ?, ?)";
-				if($userID < $opponentID){
-					$player1 = $userID;
-					$player2 = $opponentID;
-				}else{
-					$player1 = $opponentID;
-					$player2 = $userID;
-				}
+				return false;
 			}
-			
-			if($stmt = $this->mysqli->prepare($sql)){
-												
-				//////////////////////////////////////////////
-				/// MUST VALIDATE INPUT!!!!
-				////////////////////////////////////////////
-				
-				$timestamp = date("Y-m-d H:i:s", time());
-				
-				//Bind paramater of username			
-				if($opponentID == 0){
-					$stmt->bind_param("iss",
-						$userID,
-						$message,
-						$timestamp);
-				}else{
-					$stmt->bind_param("iiiss", 
-						$player1, 
-						$player2, 
-						$userID,
-						$message,
-						$timestamp);
-				}
-								
-				$stmt->execute();
+		}
 
-				if($this->mysqli->insert_id === 0){
-					//fail, throw exception
-					throw new DatabaseException("New chat was not successfully posted to database. " .
-					                            "User - $userID, Opponent - $opponentID, " .
-					                            "Message - '$message'");
+		/**
+		 * Replace the hand in the database with the one passed in.
+		 * @param  int $gameID   The game for which the hand belongs
+		 * @param  int $playerID The player for which the hand is being written
+		 * @param  array $cards    The cards to have in the hand
+		 * @return boolean If the operation successfully completed
+		 */
+		public function writePlayerHand($gameID, $playerID, $cards){
+			// First remove the hand if it exists
+			$sql = "DELETE FROM playerhands
+			        WHERE gameID=? AND playerID=?";
+			if($stmt = $this->mysqli->prepare($sql)){
+				//Bind parameter, execute, and bind result
+				$stmt->bind_param("ii", $gameID, $playerID);
+				if($stmt->execute() === false){
+					//failure
+					return false;
 				}
-				
+			}else{
+				return false;
 			}
-		}*/
+              
+			// Then add the new hand
+			$sql = "INSERT INTO playerhands (gameID, playerID, playingcardID, inHand)
+					VALUES
+					(?, ?, (
+							SELECT id FROM playingcards WHERE suit=? AND number=?
+						), ?)
+			";
+			if($stmt = $this->mysqli->prepare($sql)){	
+				//Bind parameter, execute, and bind result
+				for($i = 0; $i < count($cards); ++$i){
+					$stmt->bind_param("iisii", $gameID, $playerID, $cards[$i]["suit"], $cards[$i]["number"], $cards[$i]["inHand"]);
+					if(!$stmt->execute()){
+						// Statement failed
+						return false;
+					}
+				}
+				return true;
+			}else{
+				return false;
+			}
+		
+		}
+
+		/**
+		 * Gets the gameID for a game between these two players.
+		 * If one doesn't exist create it.
+		 * @param  int $player1ID One of the players
+		 * @param  int $player2ID The other player
+		 * @return int The gameID for a game between these two players, or false on error
+		 */
+		public function getGameID($player1ID, $player2ID){
+			$sql = "SELECT id FROM gamespaces
+			        WHERE ((player1ID=? AND player2ID=?) 
+			        OR (player2ID=? AND player1ID=?)) 
+					AND gamestatusID=(SELECT id FROM gamestatuses WHERE value='IN_PROGRESS')";
+
+			if($stmt = $this->mysqli->prepare($sql)){	
+				//Bind parameter, execute, and bind result
+				$stmt->bind_param("iiii", $player1ID, $player2ID, $player1ID, $player2ID);
+				$stmt->execute();
+				$stmt->bind_result($gameID);
+				
+				$stmt->fetch();
+
+				if(is_numeric($gameID) && $gameID !== 0){
+					return $gameID;
+				}else{
+					$sql = "INSERT INTO gamespaces
+					        (player1ID, player2ID, turnID, dealerID, gamestatusID, gamestateID)
+					        VALUES
+					        (?,?,?,?,(
+					        	SELECT id FROM gamestatuses WHERE value='IN_PROGRESS'
+					        ),(
+					        	SELECT id FROM gamestates WHERE value='DEALING'
+					        ))";
+					if($stmt = $this->mysqli->prepare($sql)){	
+						//Bind parameter, execute, and bind result
+						$stmt->bind_param("iiii", $player1ID, $player2ID, $player2ID, $player1ID);
+						$stmt->execute();
+						return $this->mysqli->insert_id;
+					}
+					return false;
+				}
+			}
+			return false;
+		}
+
+		/**
+		 * Get the basic game info from the database
+		 * @param  int $gameID The game for whom to get the information from
+		 * @return array An array of all the game's information
+		 */
+		public function getGameInfo($gameID){
+			$sql = "SELECT game.player1ID, game.player2ID, 
+				       game.player1Score, game.player2Score,
+				       game.player1backPinPosition, game.player2backPinPosition,
+				       game.turnID, game.dealerID,
+				       status.value,
+				       state.value
+				    FROM gamespaces AS game LEFT JOIN gamestatuses AS status
+				    ON game.gamestatusID=status.id
+				    LEFT JOIN gamestates AS state
+				    ON game.gamestateID=state.id
+				    WHERE game.id=?";
+
+			if($stmt = $this->mysqli->prepare($sql)){	
+				//Bind parameter, execute, and bind result
+				$stmt->bind_param("i", $gameID);
+				$stmt->execute();
+				$stmt->bind_result(
+						$player1ID, $player2ID,
+						$player1Score, $player2Score,
+						$player1backPinPosition, $player2backPinPosition,
+						$turnID, $dealerID,
+						$gamestatus, $gamestate
+					);
+				
+				$stmt->fetch();
+
+				return array(
+					"gameID"=>$gameID,
+					"player1ID"=>$player1ID,
+					"player2ID"=>$player2ID,
+					"player1Score"=>$player1Score,
+					"player2Score"=>$player2Score,
+					"player1backPinPosition"=>$player1backPinPosition,
+					"player2backPinPosition"=>$player2backPinPosition,
+					"turnID"=>$turnID,
+					"dealerID"=>$dealerID,
+					"gamestatus"=>$gamestatus, // NOT the ID
+					"gamestate"=>$gamestate  // NOT the ID
+
+				);
+
+			}
+			return false;
+		}
+
+		/**
+		 * Gets each players' hand for the game,
+		 * plus the crib. The business logic layer
+		 * will restrict access as appropriate to this information 
+		 * @param  int $gameID The game ID of the game from 
+		 *                     which to get the hand data
+		 * @return array An array of hands. The indeces will be the 
+		 *               player's ID, and "crib" for the crib
+		 */
+		public function getHands($gameID){
+			$sql = "SELECT 
+					hand.playerID, hand.inHand,
+					card.suit, card.number
+					FROM playerhands AS hand
+					LEFT JOIN playingcards AS card ON hand.playingcardID=card.id
+					WHERE hand.gameID=?
+					ORDER BY hand.playerID
+			";
+									
+			if($stmt = $this->mysqli->prepare($sql)){	
+				//Bind parameter, execute, and bind result
+				$stmt->bind_param("i", $gameID);
+				$stmt->execute();
+				$stmt->bind_result($playerID, $inHand, $suit, $number);
+				
+				$handArr = array();
+				while($stmt->fetch()){
+					// If the playerID is null make it "crib"
+					if($playerID === null){
+						$playerID = "crib";
+					}
+					
+					// If the hand array isn't made yet make it
+					if(!isset($handArr[$playerID])){
+						$handArr[$playerID] = array();
+					}
+
+					// Put in hand array
+					$handArr[$playerID][] = array(
+						"inHand" => $inHand,
+						"suit" => $suit,
+						"number" => $number
+						);
+				}
+				return $handArr;
+			}
+			return false;
+		}
+
+		/**
+		 * Gets the card deck of the deckID given.
+		 * Does not protect access to the deck since it's 
+		 * only accessed server-side and through a
+		 * Gamespace object.
+		 * @param  int $deckID The ID of the deck to fetch
+		 * @return array         An array consisting of array elements each with a suit and a number
+		 */
+		public function getCardDeck($gameID){
+
+			$sql = "SELECT 
+					card.number AS num, card.suit AS suit
+					FROM carddecks AS deck
+					LEFT JOIN playingcards AS card ON deck.playingCardID=card.id
+					WHERE deck.gameID=?
+					ORDER BY deck.cardIndex ASC
+			";
+									
+			if($stmt = $this->mysqli->prepare($sql)){	
+				//Bind parameter, execute, and bind result
+				$stmt->bind_param("i", $gameID);
+				$stmt->execute();
+				$stmt->bind_result($number, $suit);
+				
+				$cardArr = array();
+				while($stmt->fetch()){
+					$card = array(
+						"number" => $number,
+						"suit" => $suit
+						);
+					$cardArr[] = $card;
+				}
+				return $cardArr;
+			}
+			return false;
+		}
+
+		public function deleteCardDeck($gameID){
+			$sql = "DELETE FROM carddecks WHERE gameID=?";
+									
+			if($stmt = $this->mysqli->prepare($sql)){
+				//Bind parameter and execute
+				$stmt->bind_param("i", $gameID);
+				return $stmt->execute();
+			}
+			return false;
+		}
+
+
+		public function insertCardDeck($gameID, $cardArray){
+
+			$sql = "INSERT INTO carddecks (cardIndex, gameID, playingCardID)
+					VALUES (?, ?, (
+						SELECT id FROM playingcards WHERE suit=? AND number=?
+						))";
+									
+			if($stmt = $this->mysqli->prepare($sql)){
+				//Bind parameter and execute for each card
+				for($i = 0; $i < count($cardArray); ++$i){
+					$stmt->bind_param("iisi", $i, $gameID, $cardArray[$i]["suit"], $cardArray[$i]["number"]);
+					if(!$stmt->execute()){
+						// Statement failed
+						return false;
+					}
+				}
+				return true;
+			}
+			return false;
+		}
+		
 	}
 ?>

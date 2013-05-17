@@ -1,6 +1,7 @@
-function Chat(container, opponentID){
+function Chat(container, opponent){
 	this.$container = $(container);
-	this.opponentID = opponentID;
+	this.opponentID = (opponent.id === undefined ? opponent : opponent.id);
+	this.opponentUsername = (opponent.id === undefined ? opponent : opponent.username);
 	
 	var which = this;
 
@@ -90,7 +91,8 @@ Chat.prototype.receiveChats = function(data){
 	data = data["chat"];
 	
 	if(data["error"] != undefined){
-		alert(data["error"]);
+		// For chat errors just redirect to the login page
+		window.location = "login.php";
 		returnVal = false;
 	}
 	
@@ -126,7 +128,7 @@ Chat.prototype.updateChallengeMessage = function(){
 function getTimeString(postTime){
 
 	var secondsSince = window.currentTime - postTime;
-
+/*
 	//print seconds ago
 	if(secondsSince < 5)
 		return 'moments ago';
@@ -134,22 +136,22 @@ function getTimeString(postTime){
 		return secondsSince + ' seconds ago';
 	
 	//print minutes ago
-	var minutesSince = Math.round(secondsSince/60);
-	if(minutesSince == 1)
+*/	var minutesSince = Math.round(secondsSince/60);
+/*	if(minutesSince == 1)
 		return '1 minute ago';
 	if(minutesSince < 60)
 		return minutesSince + ' minutes ago';
 	
 	//print hours ago
-	var hoursSince = Math.round(minutesSince/60);
-	if(hoursSince === 1){
+*/	var hoursSince = Math.round(minutesSince/60);
+/*	if(hoursSince === 1){
 		return '1 hour ogo';
 	}
 	if(hoursSince < 12){
 		return hoursSince + ' hours ago';
 	}
 
-	//print more than that
+*/	//print more than that
 	var jsDate = new Date(postTime*1000);
 	var daysSince = Math.round(hoursSince/24);
 	var str;

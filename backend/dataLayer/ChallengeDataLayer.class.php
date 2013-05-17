@@ -18,6 +18,9 @@
 		public function __construct($mysqli){
 			$this->mysqli = $mysqli;
 		}
+
+	
+
 		
 		
 		/**
@@ -42,12 +45,18 @@
 			}
 			
 			$sql = "SELECT 
-				challenges.challengerID AS challengerID, 
-				challenges.challengeeID AS challengeeID, 
+				challenges.challengerID AS challengerID,
+				challengerusername.username as challengerUsername,
+				challenges.challengeeID AS challengeeID,
+				challengeeusername.username as challengeeUsername,
 				challengestatuses.value AS status
 				FROM 
 				challenges LEFT JOIN challengestatuses
 				ON challenges.challengestatusID=challengestatuses.id 
+				LEFT JOIN players as challengerusername
+				ON challenges.challengerID=challengerusername.id
+				LEFT JOIN players as challengeeusername
+				ON challenges.challengeeID=challengeeusername.id
 				WHERE ";
 				
 				
@@ -70,16 +79,19 @@
 				}
 				$stmt->execute();
 				
-				$stmt->bind_result($challengerID, $challengeeID, $status);
+				$stmt->bind_result($challengerID, $challengerUsername, $challengeeID, $challengeeUsername, $status);
 				
 				$challengeArr = array();
 				while($stmt->fetch()){
 								
 					$challengeItem = array(
 						"challengerID"=>$challengerID, 
+						"challengerUsername" => $challengerUsername,
 						"challengeeID"=>$challengeeID, 
+						"challengeeUsername" => $challengeeUsername,
 						"status"=>$status
 					);
+
 					$challengeArr[] = $challengeItem;
 				}
 				
@@ -90,45 +102,16 @@
 		}
 		
 		/**
-		 * challenge($playerID, $challengeeID)
-		 *
-		 * Creates a challenge initiated by the current user.
-		 *
+		 * Challenge a player to a game. Alias for updateChallengeStatus
+		 * with a status of "PENDING"
 		 * @param $challengerID The player initiating the challenge
 		 * @param $challengeeID The player being challenged
-		 * @return Whether or not the challenge was successfully added
-		 *         to the database
+		 * @return Whether or not the challenge was successfully made
 		 */
 		public function challenge($challengerID, $challengeeID){
-			
-			//Make sure the inputs are valid numbers
-			$challengerID = intval($challengerID);
-			$challengeeID = intval($challengeeID);
-			
-			$sql = "INSERT INTO challenges 
-				(challengerID, challengeeID, challengestatusID)
-				VALUES
-				(?,?,(SELECT id FROM challengestatuses WHERE value='PENDING'))
-				
-				ON DUPLICATE KEY
-				UPDATE challengestatusID=(SELECT id FROM challengestatuses WHERE value='PENDING')";
-			
-			if($stmt = $this->mysqli->prepare($sql)){
-				
-				$stmt->bind_param("ii", $challengerID, $challengeeID);
-				
-				$stmt->execute();
-
-				if($this->mysqli->affected_rows === 0){
-					return false;
-				}
-				
-				return true;
-			}
-			
-			return false;
+			return $this->updateChallengeStatus($challengerID, $challengeeID, "PENDING");
 		}
-		
+
 		/**
 		 * updateChallengeStatus($challengerID, $challengeeID, $newStatus)
 		 *
@@ -148,13 +131,17 @@
 				return false;
 			}
 			
-			$sql = "UPDATE challenges SET challengestatusID=(
-				SELECT id FROM challengestatuses WHERE value=?
-			) WHERE challengerID=? AND challengeeID=?";
+			$sql = "INSERT INTO challenges 
+				(challengerID, challengeeID, challengestatusID)
+				VALUES
+				(?,?,(SELECT id FROM challengestatuses WHERE value=?))
+				
+				ON DUPLICATE KEY
+				UPDATE challengestatusID=(SELECT id FROM challengestatuses WHERE value=?)";
 			
 			if($stmt = $this->mysqli->prepare($sql)){
 				
-				$stmt->bind_param("sii", $newStatus, $challengerID, $challengeeID);
+				$stmt->bind_param("iiss", $challengerID, $challengeeID, $newStatus, $newStatus);
 				
 				$stmt->execute();
 

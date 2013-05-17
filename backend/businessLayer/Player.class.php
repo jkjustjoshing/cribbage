@@ -11,6 +11,7 @@
 	class Player{
 		
 		public $id = null;
+		public $username = null;
 		public $email = null;
 		public $receiveNotifications = null;
 		

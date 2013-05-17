@@ -66,16 +66,18 @@
 	padding:0;
 	margin:0;
 	
+	input {
+		height:100%;
+		width:100%;
+		margin:0;
+		padding:0;
+	}
 }
 
-.chat .send input {
-	height:100%;
-	width:100%;
-	margin:0;
-	padding:0;
-}
 
-.chatItem {
+.chatItem{
+	margin:5px 0px;
+
 	&:nth-child(odd){
 		background:white;
 	}
@@ -84,22 +86,21 @@
 		background:#ccc;
 	}
 	
-	margin:5px 0px;
-}
+	.name {
+		font-style: italic;
+		padding:2px 2px 4px 2px;
+		float:left;
+	}
 
-.chatItem .name {
-	font-style: italic;
-	padding:2px 2px 4px 2px;
-	float:left;
-}
+	.time {
+		float:left;
+		padding: 2px;
+		font-size: 10pt;
+	}
 
-.chatItem .time {
-	float:left;
-	padding: 2px;
-}
-
-.chatItem .message {
-	clear:left;
+	.message {
+		clear:left;
+	}
 }
 
 #lobbyContainer {

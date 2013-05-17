@@ -1,6 +1,7 @@
 <?
 
 	require_once(BACKEND_DIRECTORY . "/dataLayer/DataLayer.class.php");
+	require_once(BACKEND_DIRECTORY . "/businessLayer/gameplay/Gamespace.class.php");
 
 	/**
 	 * Challenge class
@@ -37,8 +38,20 @@
 		 * @return Array of Challenge objects, or false on failure
 		 */
 		public static function getChallenges($playerID, $challenger = null){
+
 			$database = DataLayer::getChallengeInstance();
-			return $database->getChallenges($playerID, $challenger);
+			$challenges = $database->getChallenges($playerID, $challenger);
+
+			// If any of the challenges are "ACCEPTED"
+			// also say the gameID so the game can be
+			// opened
+			for($i = 0; $i < count($challenges); ++$i){
+				if($challenges[$i]["status"] == "ACCEPTED"){
+					$challenges[$i]["gameID"] = Gamespace::getGameID($challenges[$i]["challengeeID"], $challenges[$i]["challengerID"]);
+				}
+			}
+
+			return $challenges;
 		}
 		
 		/**
