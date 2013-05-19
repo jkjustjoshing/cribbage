@@ -21,5 +21,10 @@ Challenge System
 	Choose an opponent. Can't be yourself. If game already exists (and isn't open elsewhere) open game. If game exists and is open elsewhere, disable the other instance. If no game exists, challenge the other player
 
 
+Security/Compatability
+	Test on various browsers
+	Old browsers should gracefully fail
+	Run pen testing
+	
 
 Include README with all cool features to check out, as well as anything that isn't finished

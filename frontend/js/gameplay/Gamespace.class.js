@@ -53,12 +53,12 @@ function Gamespace(data, svgEle){
  */
 Gamespace.prototype.constructState = function(){
 	var which = this;
-	switch(this.gamestate){
+	switch(which.gamestate){
 		case "DEALING":
 			which.deck.setDealer(which.dealer, which.gamestate);
 			which.crib.setDealer(which.dealer, which.gamestate);
 			// If not dealing, poll for information
-			if(this.dealer !== window.player.id){
+			if(which.dealer !== window.player.id){
 				var waitingInterval = setInterval(function(){
 					ajaxCall("get",
 						{
@@ -84,8 +84,9 @@ Gamespace.prototype.constructState = function(){
 			break;
 		case "CHOOSING_CRIB":
 			// Set event listeners on my cards
-			this.statusMessage("Drag 2 cards into the crib from your hand.");
-			this.hands[window.player.id].chooseCrib();
+			which.crib.choosingCribMode(true);
+			which.statusMessage("Drag 2 cards into the crib from your hand.");
+			which.hands[window.player.id].chooseCrib();
 
 			// Poll for other player submitting crib cards to update view
 			// Once crib has 4 cards move to next state
@@ -93,6 +94,7 @@ Gamespace.prototype.constructState = function(){
 		case "CUTTING_CARD":
 			// If not dealing spread cards and set listener on each card
 			// On click of card, send cut information to server
+			which.crib.choosingCribMode(false);
 			break;
 		case "PEGGING":
 			// Setup using another function, very in-depth

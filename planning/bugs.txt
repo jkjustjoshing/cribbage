@@ -1,0 +1,2 @@
+When cards snap back when choosing a crib, sometimes they snap back behind other cards, and even behind the crib boundary
+When the player has put 2 cards in the crib, then picks up one of the crib cards it always snaps back to the hand, even if it's dropped back down inside the crib boundary

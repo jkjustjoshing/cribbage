@@ -40,17 +40,6 @@ function CardDeck(container, cutCard){
 
 } 
 
-PlayerHand.prototype.remove = function(card){
-	for(var i = 0; i < this.cards.length; ++i){
-		if(this.cards[i].equals(card)){
-			this.cards.splice(i);
-			return true;
-		}
-	}
-	
-	return false;
-}
-
 /**
  * Reshuffle the deck multiple times. Will send to database once dealing
  */

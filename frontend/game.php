@@ -47,7 +47,7 @@
 		<title>Cribbage</title>
 		<meta name="viewport" content="width=device-width, initial-scale=1.0">
 		<!-- Bootstrap -->
-		<link href="../bootstrap/css/bootstrap.min.css" rel="stylesheet" media="screen">
+		<link href="bootstrap/css/bootstrap.min.css" rel="stylesheet" media="screen">
 		<script src="js/jquery.min.js"></script>
 		<script type="text/javascript" src="js/chat.js"></script>
 		<script type="text/javascript" src="js/ajax.js"></script>
@@ -55,7 +55,7 @@
 		<link type="text/css" rel="stylesheet" href="css/game.css" />
 		<script type="text/javascript" src="js/jquery.svg.min.js"></script>
 		<script type="text/javascript" src="js/jquery.svganim.js"></script>
-		<script type="text/javascript" src="js/gameplay/scoreboard-ck.js"></script>
+		<script type="text/javascript" src="js/gameplay/Scoreboard.class-ck.js"></script>
 		<script type="text/javascript" src="js/gameplay/PlayingCard.class.js"></script>
 		<script type="text/javascript" src="js/gameplay/PlayerHand.class.js"></script>
 		<script type="text/javascript" src="js/gameplay/CardDeck.class.js"></script>
@@ -64,7 +64,14 @@
 		<script type="text/javascript" src="js/init.js"></script>
 		<script type="text/javascript">
 
-			window.textColor = "red";
+<?php
+	
+	$textColor = "purple";
+	
+?>
+
+
+			window.textColor = "<?php echo $textColor; ?>";
 
 			window.gameID = <?php echo $gameID; ?>;
 				
@@ -114,7 +121,7 @@
 				<!-- Make the background -> 800x600 -->
 				<rect x="0" y="0" width="100%" height="100%" id="background" />
 				
-				<text id="statusMessage" x="100" y="260" font-family="Arial" font-size="20" fill="red"></text>
+				<text id="statusMessage" x="100" y="260" font-family="Arial" font-size="20" fill="<?php echo $textColor; ?>"></text>
 			</svg>
 		</div>
 		<div class="chat" id="gameChat">

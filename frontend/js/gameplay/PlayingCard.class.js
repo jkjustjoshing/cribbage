@@ -28,7 +28,11 @@ function PlayingCard(number, suit){
 	}
 
 	this.ele = document.createElementNS(svgns, "g");
-
+	if(this.suit === undefined || this.number === undefined){
+		this.ele.setAttributeNS(null, "name", "hidden");
+	}else{
+		this.ele.setAttributeNS(null, "name", this.number + "|" + this.suit);
+	}
 	var rect = document.createElementNS(svgns, "rect");
 	rect.setAttributeNS(null, "width", "100");
 	rect.setAttributeNS(null, "height", "140");
@@ -161,9 +165,61 @@ PlayingCard.prototype.getCount = function(){
 };
 
 PlayingCard.prototype.isVisible = function(){
-	return (this.number === undefined || this.suit === undefined);
+	return !(this.number === undefined || this.suit === undefined);
 };
 
-PlayingCard.prototype.drag = function(destinationBox){
-	window.dragging = this;
+PlayingCard.prototype.drag = function(callback){
+	var which = this;
+	var dragging = false;
+	if(this.mousedownCallback === undefined){
+		this.mousedownCallback = function(mousedownTarget){
+			dragging = true;
+			// Potentially change to using which.ele.parentNode.parentNode
+			var target = which.ele;
+			target.parentNode.appendChild(target);
+
+			var transform = target.getAttributeNS(null, "transform");
+			var initXString = transform.substring("translate(".length + transform.indexOf("translate("), transform.indexOf(","));
+			var initYString = " " + transform.substring(transform.indexOf(",")+1, transform.indexOf(")"));
+			var initX = parseInt(initXString) - mousedownTarget.clientX;
+			var initY = parseInt(initYString) - mousedownTarget.clientY;
+			var x, y;
+			var mousemove = function(mousemoveTarget){
+				if(dragging){
+					x = mousemoveTarget.clientX  + initX;
+					y = mousemoveTarget.clientY + initY;
+					target.setAttributeNS(null, "transform", "translate("+x+", "+y+")");
+				}
+			};
+
+			var mouseup = function(){
+				if(dragging){
+					dragging = false;
+					which.ele.removeEventListener("mousemove", mousemove);
+					which.ele.removeEventListener("mouseup", mouseup);
+
+					
+					// Call the callback method. Pass it the x/y coordinates of the center
+					// of the card. If the method returns false spring back to original 
+					// location, otherwise remove the drag listener.
+					if(!callback(which.ele, x, y)){
+						$(target).animate({
+							svgTransform: "translate("+parseInt(initXString)+", "+parseInt(initYString)+")"
+						}, 100);
+					}else{
+						which.ele.removeEventListener("mousedown", this.mousedownCallback);
+					}
+				}
+			};
+
+			which.ele.parentNode.addEventListener('mouseup',mouseup,false);
+			which.ele.parentNode.addEventListener('mousemove',mousemove,false);
+		};
+	}
+
+	if(callback === false){
+		this.ele.removeEventListener("mousedown", this.mousedownCallback);
+	}else{
+		this.ele.addEventListener("mousedown", this.mousedownCallback, false);
+	}
 }
