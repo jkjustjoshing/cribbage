@@ -1,7 +1,7 @@
 <?php
 
-	require_once("SecurityToken.class.php");
-	require_once("../../project/simpletest/autorun.php");
+	require_once("../SecurityToken.class.php");
+	require_once("../../../project/simpletest/autorun.php");
 
 	class TestSecurityToken extends UnitTestCase{
 

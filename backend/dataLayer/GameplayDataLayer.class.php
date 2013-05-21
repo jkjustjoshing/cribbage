@@ -8,101 +8,6 @@
 			$this->mysqli = $mysqli;
 		}
 
-		/**
-		 * Change the game's state
-		 * @param  int $gameID The game of whom to change the state of
-		 * @param  string $newState The new state to change to. Must be existing state or exception thrown
-		 * @return boolean If the operation successfully completed
-		 */
-		public function changeGameState($gameID, $newState){
-			$sql = "UPDATE gamespaces
-			        SET gamestateID=(
-			        	SELECT id FROM gamestates WHERE value=?
-			        )
-			        WHERE id=?";
-
-			if($stmt = $this->mysqli->prepare($sql)){
-				//Bind parameter, execute, and bind result
-				$stmt->bind_param("si", $newState, $gameID);
-				return $stmt->execute();
-			}
-
-			return false;
-		}
-
-		/**
-		 * Put an array of cards in the crib for the given game
-		 * @param  int $gameID The game in question
-		 * @param  array $cards  The array of cards to add
-		 * @return boolean If the add was successful
-		 */
-		public function putInCrib($gameID, $cards){
-			// Then add the new hand
-			$sql = "INSERT INTO playerhands (gameID, playerID, playingcardID)
-					VALUES
-					(?, NULL, (
-							SELECT id FROM playingcards WHERE suit=? AND number=?
-						))
-			";
-			if($stmt = $this->mysqli->prepare($sql)){	
-				//Bind parameter, execute, and bind result
-				for($i = 0; $i < count($cards); ++$i){
-					$stmt->bind_param("isi", $gameID, $cards[$i]["suit"], $cards[$i]["number"]);
-					if(!$stmt->execute()){
-						// Statement failed
-						return false;
-					}
-					return true;
-				}
-			}else{
-				return false;
-			}
-		}
-
-		/**
-		 * Replace the hand in the database with the one passed in.
-		 * @param  int $gameID   The game for which the hand belongs
-		 * @param  int $playerID The player for which the hand is being written
-		 * @param  array $cards    The cards to have in the hand
-		 * @return boolean If the operation successfully completed
-		 */
-		public function writePlayerHand($gameID, $playerID, $cards){
-			// First remove the hand if it exists
-			$sql = "DELETE FROM playerhands
-			        WHERE gameID=? AND playerID=?";
-			if($stmt = $this->mysqli->prepare($sql)){
-				//Bind parameter, execute, and bind result
-				$stmt->bind_param("ii", $gameID, $playerID);
-				if($stmt->execute() === false){
-					//failure
-					return false;
-				}
-			}else{
-				return false;
-			}
-              
-			// Then add the new hand
-			$sql = "INSERT INTO playerhands (gameID, playerID, playingcardID, inHand)
-					VALUES
-					(?, ?, (
-							SELECT id FROM playingcards WHERE suit=? AND number=?
-						), ?)
-			";
-			if($stmt = $this->mysqli->prepare($sql)){	
-				//Bind parameter, execute, and bind result
-				for($i = 0; $i < count($cards); ++$i){
-					$stmt->bind_param("iisii", $gameID, $playerID, $cards[$i]["suit"], $cards[$i]["number"], $cards[$i]["inHand"]);
-					if(!$stmt->execute()){
-						// Statement failed
-						return false;
-					}
-				}
-				return true;
-			}else{
-				return false;
-			}
-		
-		}
 
 		/**
 		 * Gets the gameID for a game between these two players.
@@ -121,13 +26,15 @@
 				//Bind parameter, execute, and bind result
 				$stmt->bind_param("iiii", $player1ID, $player2ID, $player1ID, $player2ID);
 				$stmt->execute();
-				$stmt->bind_result($gameID);
 				
-				$stmt->fetch();
+				$stmt->store_result();
 
-				if(is_numeric($gameID) && $gameID !== 0){
+				if($stmt->num_rows === 1){
+					$stmt->bind_result($gameID);
+					$stmt->fetch();
 					return $gameID;
 				}else{
+
 					$sql = "INSERT INTO gamespaces
 					        (player1ID, player2ID, turnID, dealerID, gamestatusID, gamestateID)
 					        VALUES
@@ -136,10 +43,12 @@
 					        ),(
 					        	SELECT id FROM gamestates WHERE value='DEALING'
 					        ))";
+
 					if($stmt = $this->mysqli->prepare($sql)){	
 						//Bind parameter, execute, and bind result
 						$stmt->bind_param("iiii", $player1ID, $player2ID, $player2ID, $player1ID);
 						$stmt->execute();
+
 						return $this->mysqli->insert_id;
 					}
 					return false;
@@ -197,6 +106,76 @@
 
 			}
 			return false;
+		}	
+
+
+		/**
+		 * Change the game's state
+		 * @param  int $gameID The game of whom to change the state of
+		 * @param  string $newState The new state to change to. Must be existing state or exception thrown
+		 * @return boolean If the operation successfully completed
+		 */
+		public function changeGameState($gameID, $newState){
+			$sql = "UPDATE gamespaces
+			        SET gamestateID=(
+			        	SELECT id FROM gamestates WHERE value=?
+			        )
+			        WHERE id=?";
+
+			if($stmt = $this->mysqli->prepare($sql)){
+				//Bind parameter, execute, and bind result
+				$stmt->bind_param("si", $newState, $gameID);
+				return $stmt->execute();
+			}
+
+			return false;
+		}
+
+	
+		/**
+		 * Replace the hand in the database with the one passed in.
+		 * @param  int $gameID   The game for which the hand belongs
+		 * @param  int $playerID The player for which the hand is being written
+		 * @param  array $cards    The cards to have in the hand
+		 * @return boolean If the operation successfully completed
+		 */
+		public function writePlayerHand($gameID, $playerID, $cards){
+			// First remove the hand if it exists
+
+			$sql = "DELETE FROM playerhands
+			        WHERE gameID=? AND playerID=?";
+			if($stmt = $this->mysqli->prepare($sql)){
+				//Bind parameter, execute, and bind result
+				$stmt->bind_param("ii", $gameID, $playerID);
+				if($stmt->execute() === false){
+					//failure
+					return false;
+				}
+			}else{
+				return false;
+			}
+              
+			// Then add the new hand
+			$sql = "INSERT INTO playerhands (gameID, playerID, playingcardID, inHand)
+					VALUES
+					(?, ?, (
+							SELECT id FROM playingcards WHERE suit=? AND number=?
+						), ?)
+			";
+			if($stmt = $this->mysqli->prepare($sql)){	
+				//Bind parameter, execute, and bind result
+				for($i = 0; $i < count($cards); ++$i){
+					$stmt->bind_param("iisii", $gameID, $playerID, $cards[$i]["suit"], $cards[$i]["number"], $cards[$i]["inHand"]);
+					if(!$stmt->execute()){
+						// Statement failed
+						return false;
+					}
+				}
+				return true;
+			}else{
+				return false;
+			}
+		
 		}
 
 		/**
@@ -247,6 +226,36 @@
 			}
 			return false;
 		}
+
+		/**
+		 * Put an array of cards in the crib for the given game
+		 * @param  int $gameID The game in question
+		 * @param  array $cards  The array of cards to add
+		 * @return boolean If the add was successful
+		 */
+		public function putInCrib($gameID, $cards){
+			// Then add the new hand
+			$sql = "INSERT INTO playerhands (gameID, playerID, playingcardID)
+					VALUES
+					(?, NULL, (
+							SELECT id FROM playingcards WHERE suit=? AND number=?
+						))
+			";
+			if($stmt = $this->mysqli->prepare($sql)){	
+				//Bind parameter, execute, and bind result
+				for($i = 0; $i < count($cards); ++$i){
+					$stmt->bind_param("isi", $gameID, $cards[$i]["suit"], $cards[$i]["number"]);
+					if(!$stmt->execute()){
+						// Statement failed
+						return false;
+					}
+				}
+				return true;
+			}else{
+				return false;
+			}
+		}
+
 
 		/**
 		 * Gets the card deck of the deckID given.

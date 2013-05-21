@@ -73,7 +73,6 @@
 		public function writeback($gameID, $playerID){
 			if($this->isDirty){
 				$cards = array();
-
 				foreach($this->_cards as $card){
 					$cards[] = array(
 							"suit" => $card["card"]->getSuit(),
@@ -83,6 +82,7 @@
 				}
 
 				$database = DataLayer::getGameplayInstance();
+
 				return $database->writePlayerHand($gameID, $playerID, $cards);
 			}
 		}
@@ -186,6 +186,7 @@
 		 * @return boolean     Whether or not the card is in the hand.
 		 */
 		public function inHand($playingCard){
+
 			if(!is_object($playingCard)){
                 return false;
             }

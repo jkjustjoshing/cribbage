@@ -118,7 +118,7 @@
 
 		public function __construct($gameID, $playerID){
 			if(!is_numeric($gameID) || !is_numeric($playerID)){
-				throw new Exception("");
+				throw new Exception("Game ID '$gameID' or player ID '$playerID' aren't numbers.");
 			}
 			$this->gameID = intval($gameID);
 			$this->playerID = intval($playerID);
@@ -129,6 +129,7 @@
 
 			$this->player1ID = $gameInfo["player1ID"];
 			$this->player2ID = $gameInfo["player2ID"];
+
 			if($this->player1ID !== $playerID && $this->player2ID !== $playerID){
 				// The playerID isn't part of this game - don't let them see it!
 				throw new Exception("Player " . $playerID . " can't see a game between players " . $this->player1ID . " and " . $this->player2ID . ".");
@@ -198,7 +199,7 @@
 		 * (or null if the dealer hasn't dealt yet)
 		 * @return PlayerHand The current hand for the player.
 		 */
-		public function getMyHand(){
+		public function getOpponentHand(){
 			$database = DataLayer::getGameplayInstance();
 			if($this->player1ID === $this->playerID){
 				$opponentID = $this->player2ID;
@@ -218,7 +219,13 @@
 			foreach($hands[$opponentID] as $cardArr){
 				//If we are at the right part of the game give the actual cards
 				//Otherwise, display anonymous cards
-				$cards[] = new PlayingCard($cardArr["number"], $cardArr["suit"]);
+				if($this->gamestate == "VIEWING_HANDS" ||
+					$this->gamestate == "WAITING_PLAYER_1" ||
+					$this->gamestate == "WAITING_PLAYER_2"){
+					$cards[] = new PlayingCard($cardArr["number"], $cardArr["suit"]);
+				}else{
+					$cards[] = new PlayingCard(0, null);
+				}
 			}
 
 			return new PlayerHand(PlayerHand::NOT_CRIB, $cards);
@@ -232,7 +239,7 @@
 		 * counting of points state of the game.
 		 * @return PlayerHand The current (possibly hidden) hand for the player's opponent
 		 */
-		public function getOpponentHand(){
+		public function getMyHand(){
 			$database = DataLayer::getGameplayInstance();
 
 			$hands = $database->getHands($this->gameID);
@@ -246,13 +253,7 @@
 			foreach($hands[$this->playerID] as $cardArr){
 				// If the gamestate is either VIEWING_HANDS or WAITING_PLAYER_# show opponent cards
 				// Otherwise, show anonymous cards
-				if($this->gamestate == "VIEWING_HANDS" ||
-					$this->gamestate == "WAITING_PLAYER_1" ||
-					$this->gamestate == "WAITING_PLAYER_2"){
-					$cards[] = new PlayingCard($cardArr["number"], $cardArr["suit"]);
-				}else{
-					$cards[] = new PlayingCard(0, null);
-				}
+				$cards[] = new PlayingCard($cardArr["number"], $cardArr["suit"]);
 			}
 			return new PlayerHand(PlayerHand::NOT_CRIB, $cards);
 		}
@@ -369,19 +370,22 @@
 
 			$myHand = $this->getMyHand();
 
+			if(count($myHand->getCards()) === 4){
+				return "You already put 2 cards in the crib.";
+			}
+
 			// Are these two cards in the player's hand
-			if(!$myHand->inHand($card1) || !$myHand->inHand($card1)){
+			if(!$myHand->inHand($card1) || !$myHand->inHand($card2)){
 				return "You can only put cards in the crib that are in your hand.";
 			}
 
 			// Put the cards in the crib, remove from players hand
 			$myHand->remove($card1);
 			$myHand->remove($card2);
-			echo "NUMBER - " . $myHand->numberOfCardsInHand() . " - NUMBER";
 			
 			// Write the crib, write the removing them from the hand
 			$myHand->writeback($this->gameID, $this->playerID);
-			echo "NUMBER - " . $myHand->numberOfCardsInHand() . " - NUMBER";
+
 			$database = DataLayer::getGameplayInstance();
 			$cards = array(
 					array("number" => $card1->getNumber(), "suit" => $card1->getSuit()),
@@ -390,6 +394,7 @@
 				);
 			if(!$database->putInCrib($this->gameID, $cards)){
 				// Failed, put cards back in hand
+				echo "pal bar";
 				$myHand->add($card1);
 				$myHand->add($card2);
 				$myHand->writeback($this->gameID, $this->playerID);
@@ -397,6 +402,10 @@
 			}
 		
 			// If the other player's hand has 4 cards change the state to CUTTING_CARD
+			$crib = $this->getCrib();
+			if(count($crib) === 4){
+
+			}
 		}
 
 		/**

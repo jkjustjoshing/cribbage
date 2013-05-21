@@ -1,6 +1,6 @@
 <?php
 	require_once(dirname(__FILE__) . "/../SiteConfig.class.php");
-	require_once(dirname(__FILE__) . "/DataLayer.class.php");
+	require_once(dirname(__FILE__) . "/../dataLayer/DataLayer.class.php");
 
 	$queries = array();
 	$queries["players"] = "CREATE TABLE IF NOT EXISTS players(
@@ -36,9 +36,9 @@
 	);";
 	
 	$queries["carddecks"] = "CREATE TABLE IF NOT EXISTS carddecks(
-		deckID INT NOT NULL,
+		gameID INT NOT NULL,
 		cardIndex TINYINT(1) NOT NULL,
-		PRIMARY KEY(deckID, cardIndex),
+		PRIMARY KEY(gameID, cardIndex),
 		playingCardID INT,
 		FOREIGN KEY(playingCardID) REFERENCES playingcards(id)
 	);";
@@ -47,23 +47,22 @@
 		id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
 		value VARCHAR(15)
 		);";
-	
-	$queries["playerhands"] = "CREATE TABLE IF NOT EXISTS playerhands(
-		id INT NOT NULL AUTO_INCREMENT,
-		playingcardID INT NOT NULL,
-		PRIMARY KEY(id, playingcardID),
-		inHand TINYINT
-	);";
+
+	$queries["gamestates"] = "CREATE TABLE IF NOT EXISTS gamestates(
+		id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+		value VARCHAR(20)
+		);";
 	
 	$queries["gamespaces"] = "CREATE TABLE IF NOT EXISTS gamespaces(
-		id INT NOT NULL PRIMARY KEY,
+		id INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
 		player1ID INT NOT NULL,
 		FOREIGN KEY(player1ID) REFERENCES players(id),
 		player2ID INT NOT NULL,
 		FOREIGN KEY(player2ID) REFERENCES players(id),
 		player1Score TINYINT DEFAULT 0,
+		player1backPinPosition TINYINT DEFAULT 0,
 		player2Score TINYINT DEFAULT 0,
-		deckID INT NOT NULL,
+		player2backPinPosition TINYINT DEFAULT 0,
 		cribID INT NOT NULL,
 		" ./*FOREIGN KEY(cribID) REFERENCES playerhand(id),*/ "
 		turnID INT NOT NULL,
@@ -71,7 +70,19 @@
 		dealerID INT NOT NULL,
 		FOREIGN KEY(dealerID) REFERENCES players(id),
 		gamestatusID INT NOT NULL,
-		FOREIGN KEY(gamestatusID) REFERENCES gamestatuses(id)
+		FOREIGN KEY(gamestatusID) REFERENCES gamestatuses(id),
+		gamestateID INT NOT NULL,
+		FOREIGN KEY(gamestateID) REFERENCES gamestates(id)
+	);";
+
+	$queries["playerhands"] = "CREATE TABLE IF NOT EXISTS playerhands(
+		gameID INT NOT NULL COMMENT 'The gameID this hand exists for',
+		FOREIGN KEY(gameID) REFERENCES gamespaces(id),
+		playerID INT COMMENT 'NULL if the hand is the crib',
+		FOREIGN KEY(playerID) REFERENCES players(id),
+		playingcardID INT NOT NULL,
+		FOREIGN KEY(playingcardID) REFERENCES playingcards(id),
+		inHand TINYINT COMMENT 'Indicates if the card has been pegged yet, 0 or 1'
 	);";
 	
 	$queries["playedcards"] = "CREATE TABLE IF NOT EXISTS playedcards(
@@ -98,7 +109,15 @@
 		challengestatusID INT NOT NULL,
 		FOREIGN KEY(challengestatusID) REFERENCES challengestatuses(id)
 	);";
-	
+
+	$queries["heartbeats"] = "CREATE TABLE IF NOT EXISTS heartbeats(
+		playerID INT NOT NULL,
+		FOREIGN KEY(playerID) REFERENCES players(id),
+		room INT NOT NULL,
+		PRIMARY KEY(playerID, room),
+		lastSeen TIMESTAMP
+	);";
+
 	$queries["populategamestatuses"] = 
 		"INSERT INTO gamestatuses (value) VALUES 
 			('INVITED'), 
@@ -106,6 +125,16 @@
 			('FINISHED'), 
 			('FOREFIT'), 
 			('CANCEL');";
+
+	$queries["populategamestates"] = 
+		"INSERT INTO gamestates (value) VALUES 
+			('DEALING'), 
+			('CHOOSING_CRIB'), 
+			('CUTTING_CARD'), 
+			('PEGGING'),  
+			('VIEWING_HANDS'),  
+			('WAITING_PLAYER_1'),  
+			('WAITING_PLAYER_2');";
 
 	$queries["populatechallengestatuses"] =
 		"INSERT INTO challengestatuses (value) values ";
@@ -139,7 +168,7 @@
 	}
 
 	function addTables($print = false){
-	$mysqli = new mysqli(
+		$mysqli = new mysqli(
 								SiteConfig::DATABASE_SERVER, 
 								SiteConfig::DATABASE_USER, 
 								SiteConfig::DATABASE_PASSWORD, 
@@ -160,7 +189,7 @@
 	}
 	
 	function dropAllTables($print = false){
-	$mysqli = new mysqli(
+		$mysqli = new mysqli(
 								SiteConfig::DATABASE_SERVER, 
 								SiteConfig::DATABASE_USER, 
 								SiteConfig::DATABASE_PASSWORD, 

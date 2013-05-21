@@ -111,6 +111,31 @@
  		return array("gamestate" => $gamespace->gamestate);
 	}
 
+
+	function putInCrib($data){
+		$gameID = intval($data["gameID"]);
+
+		// Get security token to see who we are,
+		$playerID = SecurityToken::extract();
+
+		// Make sure user is allowed to see this game
+		try{
+			$gamespace = new Gamespace($gameID, $playerID);
+		}catch(Exception $e){
+			return "Player " . $playerID . " doesn't have access to gameID " . $gameID . ".";
+ 		}
+
+ 		$card1 = new PlayingCard($data["cards"][0]["number"], $data["cards"][0]["suit"]);
+ 		$card2 = new PlayingCard($data["cards"][1]["number"], $data["cards"][1]["suit"]);
+
+ 		$result = $gamespace->putCardsInCrib($card1, $card2);
+ 		if($result == ""){
+ 			return array("succes" => true);
+ 		}else{
+ 			return $result;
+ 		}
+
+	}
 /*
 "getTurn", // Are we waiting for the other user to do something (either put a card down, put cards in crib, accept points they are viewing)
 "getDealer", // Returns if I am the dealer

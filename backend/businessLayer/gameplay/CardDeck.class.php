@@ -59,6 +59,7 @@
 				return $deck;
 			}
 
+
 			$objectDeck = array();
 			foreach($deck as $card){
 				$objectDeck[] = new PlayingCard($card["number"], $card["suit"]);

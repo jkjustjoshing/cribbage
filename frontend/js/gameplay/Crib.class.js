@@ -216,10 +216,10 @@ Crib.prototype.successfulDrag = function(x, y){
 }
 
 Crib.prototype.confirmSelection = function(){
-	var visibleCardCount = 0;
+	var visibleCards = [];
 	for(var i = 0; i < this.cards.length; ++i){
 		if(this.cards[i].isVisible()){
-			visibleCardCount++;
+			visibleCards[visibleCards.length] = this.cards[i];
 		}
 	}
 
@@ -242,13 +242,45 @@ Crib.prototype.confirmSelection = function(){
 			// Disable dragging myself, change back text of crib
 			which.choosingCribMode(false);
 			
+			var visibleCards = [];
+			for(var i = 0; i < which.cards.length; ++i){
+				if(which.cards[i].isVisible()){
+					visibleCards[visibleCards.length] = which.cards[i];
+				}
+			}
+
 			// Send the crib info to the server
+			ajaxCall(
+				"post",
+				{
+					application: "game",
+					method: "putInCrib",
+					data: {
+						gameID: window.gameID,
+						cards: [
+							{
+								suit: visibleCards[0].suit,
+								number: visibleCards[0].number
+							},
+							{
+								suit: visibleCards[1].suit,
+								number: visibleCards[1].number
+							}
+						]
+					}
+				},
+				function(data){
+					console.log("crib sent");
+					console.log(data);
+				}
+			);
+
 			// 		Callback - set up interval to check for gamestate change
 			// 		When gamestate changes tell the gamestate object to setup the next state
 		};
 	}
 
-	if(visibleCardCount !== 2){
+	if(visibleCards.length !== 2){
 		this.cribBox.childNodes[0].setAttributeNS(null, "stroke", "red");
 		cribText.removeChild(cribText.firstChild);
 		cribText.appendChild(document.createTextNode(cribTextString));
