@@ -129,8 +129,11 @@
  		$card2 = new PlayingCard($data["cards"][1]["number"], $data["cards"][1]["suit"]);
 
  		$result = $gamespace->putCardsInCrib($card1, $card2);
+ 		$crib = $gamespace->getCrib();
+
  		if($result == ""){
- 			return array("succes" => true);
+ 			return array("success" => true,
+ 						 "cribSize" => count($crib->getCards()));
  		}else{
  			return $result;
  		}

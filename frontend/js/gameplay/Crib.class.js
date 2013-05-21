@@ -11,12 +11,21 @@ var svgns = "http://www.w3.org/2000/svg";
  * 
  * @param Array  cardArray An array of PlayingCard objects
  */
-function Crib(cardArray, container, coordinates){	
+function Crib(cardArray, container, coordinates, dealer){	
 	this.cards = [];
 	this.ele = container;
 	this.isChoosingCribMode = false;
 
 	this.coordinates = coordinates;
+
+	this.padding = {x:10, y:5};
+	this.coordinates.x += this.padding.x;
+	this.coordinates.y += this.padding.y;
+	this.textBoxCoordinates = {};
+	this.textBoxCoordinates[window.player.id] = {x: 700, y:670};
+	this.textBoxCoordinates[window.opponent.id] = {x: 660, y:45};
+
+	this.setDealer(dealer);
 
 	for(var i = 0; i < cardArray.length; ++i){
 		if(!(cardArray[i] instanceof PlayingCard)){
@@ -28,14 +37,6 @@ function Crib(cardArray, container, coordinates){
 			this.add(cardArray[i], true);
 		}
 	}
-
-	this.padding = {x:10, y:5};
-	this.coordinates.x += this.padding.x;
-	this.coordinates.y += this.padding.y;
-	this.textBoxCoordinates = {};
-	this.textBoxCoordinates[window.player.id] = {x: 700, y:670};
-	this.textBoxCoordinates[window.opponent.id] = {x: 660, y:45};
-
 
 } 
 
@@ -50,11 +51,14 @@ Crib.prototype.add = function(card){
 	if(this.cards.length < 4){
 		this.cards[this.cards.length] = card;
 
+		if(!card.isOnScreen()){
+			this.ele.appendChild(card.ele);
+		}
 		// Animate card to the crib
 		$(card.ele).animate({
 			svgTransform: "translate("+(this.coordinates.x + (this.cards.length-1)*35)+","+this.coordinates.y+")"
 		}, 100);
-
+	
 		// Make card draggable outside the crib
 		if(card.isVisible()){
 			/*card.drag(function(ele, x, y){
@@ -207,7 +211,7 @@ Crib.prototype.choosingCribMode = function(isChoosingCribMode){
  * @return {boolean}   Whether or not the card was inside the crib box
  */
 Crib.prototype.successfulDrag = function(x, y){
-	if(this.cards.length >= 2) return false;
+	if(window.gamespace.hands[window.player.id].length <= 4) return false;
 	var bbox = this.cribBox.childNodes[0].getBBox();
 	var insideHorizontally = x > bbox.x && x < (bbox.x + bbox.width);
 	var insideVertically = y > bbox.y && y < (bbox.y + bbox.height);
@@ -270,8 +274,16 @@ Crib.prototype.confirmSelection = function(){
 					}
 				},
 				function(data){
-					console.log("crib sent");
-					console.log(data);
+					data = data["game"];
+
+					if(data.success === true){
+						
+						// Check for the number of cards in the crib
+						alert(data["cribSize"]);
+
+					}else{
+						alert(data["error"]);
+					}
 				}
 			);
 

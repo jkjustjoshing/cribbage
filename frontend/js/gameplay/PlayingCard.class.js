@@ -223,3 +223,7 @@ PlayingCard.prototype.drag = function(callback){
 		this.ele.addEventListener("mousedown", this.mousedownCallback, false);
 	}
 }
+
+PlayingCard.prototype.isOnScreen = function(){
+	return this.ele.parentNode !== null;
+}

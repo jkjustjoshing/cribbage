@@ -28,8 +28,9 @@ function Gamespace(data, svgEle){
 	this.hands[window.player.id] = new PlayerHand(data.hands[window.player.id], svgEle, window.coordinates.playerHand);
 	this.hands[window.player.id].sort();
 	this.hands[window.opponent.id] = new PlayerHand(data.hands[window.opponent.id], svgEle, window.coordinates.opponentHand); 
-	this.crib = new Crib(data.hands["crib"], svgEle, (this.dealer === window.player.id ? window.coordinates.myCrib : window.coordinates.opponentCrib));
-	this.crib.setDealer(this.dealer, this.gamestate);
+	console.log("crib");
+	console.log(data.hands["crib"]);
+	this.crib = new Crib(data.hands["crib"], svgEle, (this.dealer === window.player.id ? window.coordinates.myCrib : window.coordinates.opponentCrib), this.dealer);
 
 
 	this.deck = new CardDeck(svgEle, this.cutCard);
