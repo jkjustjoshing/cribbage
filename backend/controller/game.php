@@ -2,7 +2,6 @@
 
 	require_once(BACKEND_DIRECTORY . "/businessLayer/gameplay/Gamespace.class.php");
 
-
 	/**
 	 * getTurn($data)
 	 * Method that returns an array saying whether or not it's the
@@ -159,7 +158,7 @@
  		}
 
  		$result = $gamespace->cutCard($index);
- 		
+
  		if(!is_object($result)){
  			return $result;
  		}
@@ -185,6 +184,30 @@
  		$card = $gamespace->cutCard();
 
  		return array("cutCard"=>array("number"=>$card->getNumber(), "suit"=>$card->getSuit()));
+	}
+
+	function playCard($data){
+		$gameID = intval($data["gameID"]);
+
+		// Get security token to see who we are,
+		$playerID = SecurityToken::extract();
+
+		// Make sure user is allowed to see this game
+		try{
+			$gamespace = new Gamespace($gameID, $playerID);
+		}catch(Exception $e){
+			return "Player " . $playerID . " doesn't have access to gameID " . $gameID . ".";
+ 		}
+
+ 		$card = new PlayingCard($data["card"]["number"], $data["card"]["suit"]);
+
+ 		$return = $gamespace->playCard($card);
+
+ 		if($return !== ""){
+ 			return $return;
+ 		}else{
+ 			//no error, do more stuff to return
+ 		}
 	}
 /*
 "getTurn", // Are we waiting for the other user to do something (either put a card down, put cards in crib, accept points they are viewing)

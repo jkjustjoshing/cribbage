@@ -459,10 +459,17 @@
 			}
 		}
 
-		public function pegCard($card){
+		public function playCard($card){
 			// Is it this player's turn and is the game state correct?
-			// Get the cards played
-			$this->cardsPlayed = array();
+			if($this->playerID !== $this->turnID){
+				return "It's not your turn.";
+			}
+
+			if($this->gamestate !== "PEGGING"){
+				return "You can only play cards when it's time to do so in the game.";
+			}
+
+			$playedCards = new PlayedCards(/* ???? */);
 
 			// Is this an ok card to play, play it 
 			// 		(database for user's hand and for 

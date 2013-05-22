@@ -22,14 +22,13 @@ function Gamespace(data, svgEle){
 
 	this.dealer = data.dealer;
 
-	this.playedCards = data.playedCards // TODO create the PlayedCards object
+	this.playedCards = new PlayedCards([], document.getElementsByTagName("svg")[1], window.coordinates.playedCards);//data.playedCards // TODO create the PlayedCards object
 
 	this.hands = [];
 	this.hands[window.player.id] = new PlayerHand(data.hands[window.player.id], svgEle, window.coordinates.playerHand);
 	this.hands[window.player.id].sort();
 	this.hands[window.opponent.id] = new PlayerHand(data.hands[window.opponent.id], svgEle, window.coordinates.opponentHand); 
-	console.log("crib");
-	console.log(data.hands["crib"]);
+
 	this.crib = new Crib(data.hands["crib"], svgEle, (this.dealer === window.player.id ? window.coordinates.myCrib : window.coordinates.opponentCrib), this.dealer);
 
 	if(this.cutCard.number !== null && this.cutCard.suit !== null){
@@ -235,5 +234,5 @@ window.coordinates = {
 	deck: {x: 720, y: 280},
 	myCrib: {x: 580, y: 500},
 	opponentCrib: {x:580, y:20},
-	playedCards:0
+	playedCards: {x: 50, y: 350}
 }

@@ -61,6 +61,7 @@
 		<script type="text/javascript" src="js/gameplay/CardDeck.class.js"></script>
 		<script type="text/javascript" src="js/gameplay/Gamespace.class.js"></script>
 		<script type="text/javascript" src="js/gameplay/Crib.class.js"></script>
+		<script type="text/javascript" src="js/gameplay/PlayedCards.class.js"></script>
 		<script type="text/javascript" src="js/init.js"></script>
 		<script type="text/javascript">
 
