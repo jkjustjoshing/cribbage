@@ -88,8 +88,8 @@
 	);";
 	
 	$queries["playedcards"] = "CREATE TABLE IF NOT EXISTS playedcards(
-		gamespaceID INT NOT NULL,
-		FOREIGN KEY(gamespaceID) REFERENCES gamespaces(id),
+		gameID INT NOT NULL,
+		FOREIGN KEY(gameID) REFERENCES gamespaces(id),
 		cardOrder INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
 		playingcardID INT NOT NULL,
 		FOREIGN KEY(playingcardID) REFERENCES playingcards(id), 

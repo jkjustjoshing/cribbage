@@ -202,8 +202,48 @@
 			$player2 = $playerDatabase->getPlayer("josh2");
 
 			$gameID = $database->getGameID($player1["id"], $player2["id"]);
+		}
+
+		function testPlayCards(){
+			echo "testPlayCards()<br />\n";
+
+			$this->start();
+
+			$playerDatabase = DataLayer::getPlayerInstance();
+			$database = DataLayer::getGameplayInstance();
+
+			$player1 = $playerDatabase->getPlayer("josh1");
+			$player2 = $playerDatabase->getPlayer("josh2");
+
+			$gameID = $database->getGameID($player1["id"], $player2["id"]);
+
+			$card = array();
+			$card[] = array("suit" => "diamond", "number" => 8);
+			$card[] = array("suit" => "spade", "number" => 6);
+			$card[] = array("suit" => "heart", "number" => 9);
+			$card[] = array("suit" => "diamond", "number" => 12);
+			$card[] = array("suit" => "diamond", "number" => 2);
+			$card[] = array("suit" => "club", "number" => 3);
+
+			$played = $database->getPlayedCards($gameID);
+			$this->assertEqual(count($played), 0);
+
+			$database->playCard($gameID, $player1["id"], $card[0]);
+			$database->playCard($gameID, $player2["id"], $card[1]);
+			$database->playCard($gameID, $player1["id"], $card[2]);
+			$database->playCard($gameID, $player2["id"], $card[3]);
+
+			$played = $database->getPlayedCards($gameID);
+			$this->assertEqual(count($played), 4);
+
+			$database->clearPlayedCards($gameID);
+			$played = $database->getPlayedCards($gameID);
+			$this->assertEqual(count($played), 0);
+
 
 			
+
+
 		}
 
 	}

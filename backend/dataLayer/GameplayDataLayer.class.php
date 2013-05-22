@@ -331,7 +331,7 @@
 		 * only accessed server-side and through a
 		 * Gamespace object.
 		 * @param  int $deckID The ID of the deck to fetch
-		 * @return array         An array consisting of array elements each with a suit and a number
+		 * @return array         An array consisting of array elements each with a suit and a number, or false on error
 		 */
 		public function getCardDeck($gameID){
 
@@ -362,6 +362,11 @@
 			return false;
 		}
 
+		/**
+		 * Delete a full deck from the database
+		 * @param  int $gameID The game that the deck belongs to.
+		 * @return boolean         Whether or not the delete was successful
+		 */
 		public function deleteCardDeck($gameID){
 			$sql = "DELETE FROM carddecks WHERE gameID=?";
 									
@@ -373,7 +378,12 @@
 			return false;
 		}
 
-
+		/**
+		 * Insert a card deck into the database
+		 * @param  int $gameID    The game that the deck belongs to.
+		 * @param  array $cardArray An array of cards to insert (each card is an array with a "suit" and a "number" index)
+		 * @return boolean            Whether or not the insert was successful
+		 */
 		public function insertCardDeck($gameID, $cardArray){
 
 			$sql = "INSERT INTO carddecks (cardIndex, gameID, playingCardID)
@@ -394,6 +404,79 @@
 			}
 			return false;
 		}
-		
+
+		/**
+		 * Gets the played cards for this game/hand
+		 * @param  int $gameID The game to get the played cards for
+		 * @return array The played cards, or false on error
+		 */
+		public function getPlayedCards($gameID){
+			$sql = "SELECT 
+					card.number AS number, card.suit AS suit,
+					played.playedByID
+					FROM playedcards AS played
+					LEFT JOIN playingcards AS card ON played.playingcardID=card.id
+					WHERE played.gameID=?
+					ORDER BY played.cardOrder ASC
+			";
+									
+			if($stmt = $this->mysqli->prepare($sql)){	
+				//Bind parameter, execute, and bind result
+				$stmt->bind_param("i", $gameID);
+				$stmt->execute();
+				$stmt->bind_result($number, $suit, $playedByID);
+				
+				$cardArr = array();
+				while($stmt->fetch()){
+					$card = array(
+						"number" => $number,
+						"suit" => $suit,
+						"playedByID" => $playedByID
+						);
+					$cardArr[] = $card;
+				}
+				return $cardArr;
+			}
+			return false;
+		}
+
+		/**
+		 * Mark a card in the database as being played.
+		 * @param  int $gameID The game for which the card is being played
+		 * @param  int $playedByID   The ID of the player who played the card.
+		 * @param  array $card   "suit" and "number" index denoting the card in question
+		 * @return boolean         Whether or not the play worked
+		 */
+		public function playCard($gameID, $playedByID, $card){
+			$sql = "INSERT INTO playedcards (gameID, playingcardID, playedByID)
+					VALUES (?, (
+						SELECT id FROM playingcards WHERE suit=? AND number=?
+						), ?)";
+									
+			if($stmt = $this->mysqli->prepare($sql)){
+				//Bind parameter and execute
+				$stmt->bind_param("isii", $gameID, $card["suit"], $card["number"], $playedByID);
+				
+				return $stmt->execute();
+			}
+			return false;
+		}
+
+		/**
+		 * Deletes from the database all played cards from this game
+		 * @param  int $gameID The game for which to delete the cards from
+		 * @return boolean         Whether or not the delete was successful
+		 */
+		public function clearPlayedCards($gameID){
+			$sql = "DELETE FROM playedcards WHERE gameID=?";
+									
+			if($stmt = $this->mysqli->prepare($sql)){
+				//Bind parameter and execute
+				$stmt->bind_param("i", $gameID);
+				return $stmt->execute();
+			}
+			return false;
+		}
+
 	}
 ?>
