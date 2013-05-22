@@ -139,6 +139,53 @@
  		}
 
 	}
+
+	function pickCutIndex($data){
+		$gameID = intval($data["gameID"]);
+
+		// Get security token to see who we are,
+		$playerID = SecurityToken::extract();
+
+		// Make sure user is allowed to see this game
+		try{
+			$gamespace = new Gamespace($gameID, $playerID);
+		}catch(Exception $e){
+			return "Player " . $playerID . " doesn't have access to gameID " . $gameID . ".";
+ 		}
+
+ 		$index = intval($data["index"]);
+ 		if($index < 0 || $index >= (52-6-6)){ // Number of cards in deck after dealing
+ 			return "Index " . $index . " is out of bounds.";
+ 		}
+
+ 		$result = $gamespace->cutCard($index);
+ 		
+ 		if(!is_object($result)){
+ 			return $result;
+ 		}
+
+ 		$card = $gamespace->cutCard();
+
+ 		return array("cutCard"=>array("number"=>$card->getNumber(), "suit"=>$card->getSuit()));
+	}
+
+	function getCutCard($data){
+		$gameID = intval($data["gameID"]);
+
+		// Get security token to see who we are,
+		$playerID = SecurityToken::extract();
+
+		// Make sure user is allowed to see this game
+		try{
+			$gamespace = new Gamespace($gameID, $playerID);
+		}catch(Exception $e){
+			return "Player " . $playerID . " doesn't have access to gameID " . $gameID . ".";
+ 		}
+
+ 		$card = $gamespace->cutCard();
+
+ 		return array("cutCard"=>array("number"=>$card->getNumber(), "suit"=>$card->getSuit()));
+	}
 /*
 "getTurn", // Are we waiting for the other user to do something (either put a card down, put cards in crib, accept points they are viewing)
 "getDealer", // Returns if I am the dealer

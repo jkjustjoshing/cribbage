@@ -60,7 +60,7 @@
 						}
 					}
 			}else{
-				throw new Exception("Card can't be created with a non-numeric value");
+				throw new Exception("Card can't be created with a non-numeric value " . $number . ".");
 			}
 		} // end __construct
 

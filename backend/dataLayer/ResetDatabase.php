@@ -69,6 +69,8 @@
 		FOREIGN KEY(turnID) REFERENCES players(id),
 		dealerID INT NOT NULL,
 		FOREIGN KEY(dealerID) REFERENCES players(id),
+		cutCard INT,
+		FOREIGN KEY(cutCard) REFERENCES playingcards(id),
 		gamestatusID INT NOT NULL,
 		FOREIGN KEY(gamestatusID) REFERENCES gamestatuses(id),
 		gamestateID INT NOT NULL,

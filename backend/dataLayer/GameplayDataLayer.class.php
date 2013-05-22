@@ -66,13 +66,15 @@
 			$sql = "SELECT game.player1ID, game.player2ID, 
 				       game.player1Score, game.player2Score,
 				       game.player1backPinPosition, game.player2backPinPosition,
-				       game.turnID, game.dealerID,
+				       game.turnID, game.dealerID, cards.suit, cards.number,
 				       status.value,
 				       state.value
 				    FROM gamespaces AS game LEFT JOIN gamestatuses AS status
 				    ON game.gamestatusID=status.id
 				    LEFT JOIN gamestates AS state
 				    ON game.gamestateID=state.id
+				    LEFT JOIN playingcards AS cards
+				    ON game.cutCard=cards.id
 				    WHERE game.id=?";
 
 			if($stmt = $this->mysqli->prepare($sql)){	
@@ -83,7 +85,7 @@
 						$player1ID, $player2ID,
 						$player1Score, $player2Score,
 						$player1backPinPosition, $player2backPinPosition,
-						$turnID, $dealerID,
+						$turnID, $dealerID, $cutCardSuit, $cutCardNumber,
 						$gamestatus, $gamestate
 					);
 				
@@ -99,6 +101,7 @@
 					"player2backPinPosition"=>$player2backPinPosition,
 					"turnID"=>$turnID,
 					"dealerID"=>$dealerID,
+					"cutCard"=>array("suit"=>$cutCardSuit, "number"=>$cutCardNumber),
 					"gamestatus"=>$gamestatus, // NOT the ID
 					"gamestate"=>$gamestate  // NOT the ID
 
@@ -256,6 +259,71 @@
 			}
 		}
 
+		/**
+		 * Set the cut card for the given game.
+		 * @param int $gameID The game ID for the game in question
+		 * @param array $card Array representing the card being set as the cut card
+		 * @return  boolean Whether or not the query was successful
+		 */
+		public function setCutCard($gameID, $card){
+			// Then add the new hand
+			$sql = "UPDATE gamespaces
+					SET cutCard=(
+						SELECT id FROM playingcards WHERE suit=? AND number=?
+					)
+					WHERE id=?
+			";
+
+			if($stmt = $this->mysqli->prepare($sql)){	
+				$stmt->bind_param("sii", $card["suit"], $card["number"], $gameID);
+				if(!$stmt->execute()){
+					// Statement failed
+					return false;
+				}
+				return true;
+			}else{
+				return false;
+			}
+		}
+
+		/**
+		 * Gets the cut card for the current game,
+		 * or an empty array if no card has been cut
+		 * @param  int $gameID The game ID for the game in question
+		 * @return array  Array with the cut card, empty array for no cut card, and false for failure
+		 */
+		public function getCutCard($gameID){
+			$sql = "SELECT 
+					card.number, card.suit
+					FROM gamespaces AS game
+					LEFT JOIN playingcards AS card ON game.cutCard=card.id
+					WHERE game.id=?
+			";
+									
+			if($stmt = $this->mysqli->prepare($sql)){	
+				//Bind parameter, execute, and bind result
+				$stmt->bind_param("i", $gameID);
+				$stmt->execute(); 
+				$stmt->bind_result($number, $suit);
+				$stmt->fetch();
+				// echo ($card["number"] === null ? "null number " : "not null number");
+				// echo ($card["suit"] === null ? "null suit" : "not null suit");
+				// echo $gameID;
+				// die();
+				if($number !== null && $suit !== null){
+					$card = array(
+						"number" => $number,
+						"suit" => $suit
+						);
+					return $card;
+				}else{
+				//	echo "other one";
+				//	die();
+					return array();
+				}
+			}
+			return false;
+		}
 
 		/**
 		 * Gets the card deck of the deckID given.

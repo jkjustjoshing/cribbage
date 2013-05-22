@@ -153,6 +153,7 @@
 		 * @return PlayingCard        The card that used to be at the given index of the deck
 		 */
 		public function pickCutCard($index){
+			//print_r($this->cards);die();
 			$card = $this->cards[$index];
 			unset($this->cards[$index]);
 			$this->cards = array_values($this->cards);

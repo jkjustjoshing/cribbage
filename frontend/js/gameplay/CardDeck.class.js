@@ -21,7 +21,7 @@ function CardDeck(container, cutCard){
 	// Add the cards to the screen, with a delay between displaying each one
 	var alt_i = 0;
 	var cards = [];
-	for(var i = 0; i < 7; ++i){
+	for(var i = 0; i < this.deckHeight; ++i){
 		if(i == 6 && which.cutCard !== undefined && which.cutCard !== null){
 			// Display the cut card
 			cards[i] = document.createElementNS(svgns, "g");
@@ -39,6 +39,8 @@ function CardDeck(container, cutCard){
 	this.numberOfTimesToShuffle = 1;
 
 } 
+
+CardDeck.prototype.deckHeight = 7;
 
 /**
  * Reshuffle the deck multiple times. Will send to database once dealing
@@ -119,4 +121,13 @@ CardDeck.prototype.deal = function(){
 			}
 		}
 	);
+}
+
+CardDeck.prototype.updateCutCard = function(card){
+	this.cutCard = card;
+	this.ele.removeChild(this.ele.lastChild);
+	cutCard = document.createElementNS(svgns, "g");
+	cutCard.setAttributeNS(null, "transform", "translate("+((this.deckHeight-1)*2)+",0)");
+	cutCard.appendChild(card.ele);
+	this.ele.appendChild(cutCard);
 }

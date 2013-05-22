@@ -1,2 +1,6 @@
 When cards snap back when choosing a crib, sometimes they snap back behind other cards, and even behind the crib boundary
 When the player has put 2 cards in the crib, then picks up one of the crib cards it always snaps back to the hand, even if it's dropped back down inside the crib boundary
+The crib doesn't poll for the other player putting their cards in, and for the player who first puts the cards in the state never changes.
+
+
+

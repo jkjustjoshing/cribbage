@@ -32,6 +32,11 @@ function Gamespace(data, svgEle){
 	console.log(data.hands["crib"]);
 	this.crib = new Crib(data.hands["crib"], svgEle, (this.dealer === window.player.id ? window.coordinates.myCrib : window.coordinates.opponentCrib), this.dealer);
 
+	if(this.cutCard.number !== null && this.cutCard.suit !== null){
+		this.cutCard = new PlayingCard(this.cutCard["number"], this.cutCard["suit"]);
+	}else{
+		this.cutCard = null;
+	}
 
 	this.deck = new CardDeck(svgEle, this.cutCard);
 	this.deck.setDealer(this.dealer, this.gamestate);
@@ -96,6 +101,59 @@ Gamespace.prototype.constructState = function(){
 			// If not dealing spread cards and set listener on each card
 			// On click of card, send cut information to server
 			which.crib.choosingCribMode(false);
+
+			var cutCardCallback = function(data){
+				data = data["game"];
+				if(data["error"] !== undefined){
+					alert(data["error"]);
+				}else{
+					if(data["cutCard"]["suit"] !== "" && data["cutCard"]["number"] !== 0){
+						// The card has been cut
+						if(interval !== undefined){
+							clearInterval(interval);
+						}
+
+						window.gamespace.deck.updateCutCard(new PlayingCard(data["cutCard"]["number"], data["cutCard"]["suit"]));
+
+						which.gamestate = "PEGGING";
+						which.constructState();
+					}
+				}
+			}
+
+			if(which.dealer == window.opponent.id){
+				which.statusMessage("Pick a cut card.");
+				setTimeout(function(){
+					var cutCardIndex = prompt("Pick a cut card");
+					ajaxCall(
+						"post",
+						{
+							application: "game",
+							method: "pickCutIndex",
+							data: {
+								gameID: window.gameID,
+								index: cutCardIndex
+							}
+						},
+						cutCardCallback
+					);
+				}, 2000);
+			}else{
+				which.statusMessage("Waiting for " + window.opponent.username + " to pick the cut card.");
+				var interval = setInterval(function(){
+					ajaxCall(
+						"get",
+						{
+							application: "game",
+							method: "getCutCard",
+							data: {
+								gameID: window.gameID
+							}
+						},
+						cutCardCallback
+					);
+				}, 2000);
+			}
 			break;
 		case "PEGGING":
 			// Setup using another function, very in-depth

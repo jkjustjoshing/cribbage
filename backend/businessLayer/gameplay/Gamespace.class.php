@@ -143,6 +143,7 @@
 			$this->dealerID = $gameInfo["dealerID"];
 			$this->gamestatus = $gameInfo["gamestatus"];
 			$this->gamestate = $gameInfo["gamestate"];
+			$this->cutCard = $gameInfo["cutCard"];
 
 		}
 
@@ -403,19 +404,59 @@
 		
 			// If the other player's hand has 4 cards change the state to CUTTING_CARD
 			$crib = $this->getCrib();
-			if(count($crib) === 4){
-
+			if(count($crib->getCards()) === 4){
+				$database->changeGameState($this->gameID, "CUTTING_CARD");
 			}
 		}
 
 		/**
-		 * Choose the cut card.
+		 * Choose the cut card, or get the cut card if $index is omitted.
 		 * @param  int $index The index from where to get the cut card
-		 * @return string Error message, or empty string on success
+		 * @return string Error message, or a PlayingCard object
 		 */
-		public function cutCard($index){
-			// Check user is not dealer and the state is correct
-			// Update the database
+		public function cutCard($index = null){
+			$database = DataLayer::getGameplayInstance();
+			if($index !== null){
+				// Check user is not dealer and the state is correct
+				if($this->playerID == $this->dealer){
+					return "You can't cut the card if you are dealer.";
+				}
+
+				if($this->gamestate !== "CUTTING_CARD"){
+					return "You can only cut the card when it's time to do so in the game.";
+				}
+				
+				//Get the card at that index
+				$deck = CardDeck::getDeck($this->gameID);
+				$cutCard = $deck->pickCutCard($index);
+
+				// Update the database
+				$result = $database->setCutCard($this->gameID, array("suit"=>$cutCard->getSuit(), "number"=>$cutCard->getNumber()));
+				if($result === false){
+					return "There was a database error setting the cut card.";
+				}else{
+					
+					// Change the state to PEGGING
+					if($database->changeGameState($this->gameID, "PEGGING")){
+						$this->gamestate = "PEGGING";
+					}
+
+					return $cutCard;
+				}
+
+			}else{
+				//Get the cut card and return it
+				$card = $database->getCutCard($this->gameID);
+				if($card === false){
+					return "There was a database problem getting the cut card.";
+				}else{
+					if(array_key_exists("suit", $card) && array_key_exists("number", $card)){
+						return new PlayingCard($card["number"], $card["suit"]);
+					}else{
+						return new PlayingCard(0, null);
+					}
+				}
+			}
 		}
 
 		public function pegCard($card){
