@@ -1,4 +1,4 @@
-<?
+<?php
 
 	require_once(dirname(__FILE__) . "/PlayingCard.class.php");
 	require_once(dirname(__FILE__) . "/../../dataLayer/DataLayer.class.php");
@@ -33,8 +33,8 @@
 
 
 		
-		private $cards;
-		private $screenCards;
+		private $screenCards = array();
+		private $count = 0;
 		
 		/**
 		 * The cards that have been player. Each card is an array with
@@ -44,8 +44,27 @@
 		 */
 		private $cards = array();
 
-		public function __construct(){
+		/**
+		 * Initialize with cards
+		 * @param array $cards Array of cards to initialize with
+		 */
+		public function __construct($cards = null){
+			if($cards === null || count($cards) == 0){
+				return;
+			}
 			// Put cards into cards and screenCards
+			$runningCount = 0;
+			for($i = 0; $i < count($cards); ++$i){
+				$this->cards[] = array("card"=>$cards[$i]["card"], "playedByID"=>$cards[$i]["playedByID"]);
+				if($this->count + $cards[$i]["card"]->getCountValue() <= 31){
+					$this->screenCards[] = array("card"=>$cards[$i]["card"], "playedByID"=>$cards[$i]["playedByID"]);
+					$this->count += $cards[$i]["card"]->getCountValue();
+				}else{
+					$this->screenCards = array();
+					$this->screenCards[] = array("card"=>$cards[$i]["card"], "playedByID"=>$cards[$i]["playedByID"]);
+					$this->count = $cards[$i]["card"]->getCountValue();
+				}
+			}
 		}
 
 		/**
@@ -53,13 +72,21 @@
 		 * @param  PlayingCard $card The card to play
 		 * @return int  The number of points from playing, or false if te card can't be played
 		 */
-		public function play($card){
+		public function play($card, $playerID){
 			if($this->getCount() + $card->getCountValue() > 31){
 				return false;
 			}
 
 			$points = $this->scoreIfAddingCard($card);
 			
+			$this->screenCards[] = array("card"=>$card, "playedByID"=>$playerID);
+			$this->cards[] = array("card"=>$card, "playedByID"=>$playerID);
+
+			return $points;
+		}
+
+		public function clear(){
+			$this->screenCards = array();
 		}
 
 		/**
@@ -119,7 +146,7 @@
 			// Test for pair/3/4 of a kind
 			$countOfSameCards = 1;
 			for($i = count($this->screenCards)-1; $i > 0; --$i){
-				if($this->screenCards[$i]->getNumber() === $card->getNumber()){
+				if($this->screenCards[$i]["card"]->getNumber() === $card->getNumber()){
 					$countOfSameCards++;
 				}else{
 					break;
@@ -135,15 +162,16 @@
 
 			// Test for straight
 			// Take the last 3 cards, sort, and check if in order. If so check 4, and on
+
 			if(count($this->screenCards) > 1){
 				$maxStraight = 0;
 				// For each length of straight possible
-				for($numToLookBack = 2; $numToLookBack < count($this->screenCards); ++$numToLookBack){
+				for($numToLookBack = 2; $numToLookBack <= count($this->screenCards); ++$numToLookBack){
 					
 					//Accumulate the last X cards into an array to check
 					$cardArr = array($card);
 					for($add = 0; $add < $numToLookBack; ++$add){
-						$cardArr[] = $this->screenCards[count($this->screenCards)-1-$add];
+						$cardArr[] = $this->screenCards[count($this->screenCards)-1-$add]["card"];
 					}
 
 					// Sort the array of last cards
@@ -158,13 +186,15 @@
 	                $cardArr = array_values($cardArr);
 
 	                // Check for straight
+	                $continue = false;
 	                for($i = 1; $i < count($cardArr); ++$i){
 	                	if($cardArr[$i-1]->getNumber() + 1 !== $cardArr[$i]->getNumber()){
-	                		break 2;
+	                		$continue = true;
+	                		break;
 	                	}
 	                }
 
-	                if($maxStraight < $numToLookBack + 1){
+	                if(!$continue && ($maxStraight < $numToLookBack + 1)){
 	                	$maxStraight = $numToLookBack + 1;
 	                }
 				}
@@ -178,7 +208,7 @@
 		public function getCount(){
 			$runningCount = 0;
 			for($i = 0; $i < count($this->screenCards); ++$i){
-				$runningCount += $this->screenCards[$i];
+				$runningCount += $this->screenCards[$i]["card"]->getCountValue();
 			}
 
 			return $runningCount;
