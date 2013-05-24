@@ -30,7 +30,7 @@
 						"getTurn", // Are we waiting for the other user to do something (either put a card down, put cards in crib, accept points they are viewing)
 		/* good */				"getDealer", // Returns if I am the dealer
 						"getCutCard", // Gets the cut card, or null if there isn't one
-						"getPeggingCards", // Get the cards for pegging
+						"getPlayedCards", // Get the cards for pegging
 		/* good */				"getScore", // Get the scores of the two players
 		/* good */				"getDealer", // Who is the dealer now?
 						"getGameData", // A large array of everything you could want to know about the board state

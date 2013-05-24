@@ -10,32 +10,10 @@
 	 *
 	 */
 	class PlayedCards{
-
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	/*
-	Process for playing a card
-		Check to see if the card can be played without clearing the count
-		if it can not be
-			if the last card played was the same player as currently is trying to play
-				the other player already "go"ed - get a point, clear the crib and get a point
-				pass the turn
-			else
-				"go-ing"
-				pass the turn
-		else
-			play the card
-			update the count
-			get points
-			pass the turn
-
-	 */
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-
 		
 		private $screenCards = array();
 		private $count = 0;
-		
+		private $gameID;
 		/**
 		 * The cards that have been player. Each card is an array with
 		 * a PlayingCard and the ID of the player who played it
@@ -48,9 +26,20 @@
 		 * Initialize with cards
 		 * @param array $cards Array of cards to initialize with
 		 */
-		public function __construct($cards = null){
+		public function __construct($gameID, $cards = null){
+			$this->database = DataLayer::getGameplayInstance();
+			$this->gameID = $gameID;
+
 			if($cards === null || count($cards) == 0){
-				return;
+				$cardArr = $this->database->getPlayedCards($gameID);
+				if($cardArr === false){
+					throw new Exception("There was a database error fetching the played cards.");
+				}
+				$cards = array();
+				for($i = 0; $i < count($cardArr); ++$i){
+					$card = new PlayingCard($cardArr[$i]["number"], $cardArr[$i]["suit"]);
+					$cards[] = array("card"=>$card, "playedByID"=>$cardArr[$i]["playedByID"]);
+				}
 			}
 			// Put cards into cards and screenCards
 			$runningCount = 0;
@@ -67,6 +56,18 @@
 			}
 		}
 
+		public static function clearDatabase($gameID){
+			$database = DataLayer::getGameplayInstance();
+
+			$result = $database->clearPlayedCards($gameID);
+
+			if($result === false){
+				return "There was a database problem.";
+			}else{
+				return "";
+			}
+		}
+
 		/**
 		 * Play a card.
 		 * @param  PlayingCard $card The card to play
@@ -76,6 +77,8 @@
 			if($this->getCount() + $card->getCountValue() > 31){
 				return false;
 			}
+
+			$result = $this->database->playCard($this->gameID, $playerID, array("number"=>$card->getNumber(), "suit"=>$card->getSuit()));
 
 			$points = $this->scoreIfAddingCard($card);
 			

@@ -478,5 +478,90 @@
 			return false;
 		}
 
+		/**
+		 * Update the score of a player in a game. Called whenever a player scores any points.
+		 * @param  int $gameID   The game for which to change the score
+		 * @param  int $playerID The player for which to change the score
+		 * @param  int $newScore The new score to put into the database, overwriting the old score
+		 * @return boolean           Whether or not the operation was successful.
+		 */
+		public function updateScore($gameID, $playerID, $newScore){
+			// Then add the new hand
+			$sql = "UPDATE gamespaces
+			    SET player1backPinPosition= CASE
+			        WHEN player1ID=? THEN player1Score
+			        ELSE player1backPinPosition
+			    END,
+			    player1Score = CASE
+			        WHEN player1ID=? THEN ?
+			        ELSE player1Score 
+			    END,
+			    player2backPinPosition = CASE
+			        WHEN player2ID=? THEN player2Score
+			        ELSE player2backPinPosition
+			    END,
+			    player2Score = CASE
+			        WHEN player2ID=? THEN ?
+			        ELSE player2Score
+			    END
+			    WHERE id=?
+			";
+
+			if($stmt = $this->mysqli->prepare($sql)){	
+				$stmt->bind_param("iiiiiii", $playerID, $playerID, $newScore, $playerID, $playerID, $newScore, $gameID);
+				return $stmt->execute();
+			}else{
+				return false;
+			}
+		}
+
+		/**
+		 * Switches whose turn it is in the database
+		 * @param  int $gameID The game for which to change whose turn it is
+		 * @return boolean         Whether or not it was successful
+		 */
+		public function switchTurn($gameID){
+			// Then add the new hand
+			$sql = "UPDATE gamespaces
+			    SET turnID = CASE
+			        WHEN turnID=player1ID THEN player2ID
+			        WHEN turnID=player2ID THEN player1ID
+			        ELSE turnID
+			    END
+			    WHERE id=?
+			";
+
+			if($stmt = $this->mysqli->prepare($sql)){	
+				$stmt->bind_param("i", $gameID);
+				return $stmt->execute();
+			}else{
+				return false;
+			}
+		}
+
+		/**
+		 * Switches whose turn it is in the database
+		 * @param  int $gameID The game for which to change whose turn it is
+		 * @return boolean         Whether or not it was successful
+		 */
+		public function switchDealer($gameID){
+			// Then add the new hand
+			$sql = "UPDATE gamespaces
+			    SET dealerID = CASE
+			        WHEN dealerID=player1ID THEN player2ID
+			        WHEN dealerID=player2ID THEN player1ID
+			        ELSE dealerID
+			    END
+			    WHERE id=?
+			";
+
+			if($stmt = $this->mysqli->prepare($sql)){	
+				$stmt->bind_param("i", $gameID);
+				return $stmt->execute();
+			}else{
+				return false;
+			}
+		}
+
 	}
 ?>

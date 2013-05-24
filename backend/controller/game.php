@@ -27,7 +27,7 @@
 			return "Player " + $userID + " doesn't have access to gameID " . $gameID . ".";
  		}
 
-
+ 		$gamespace->
 
 	}
 
@@ -206,20 +206,84 @@
  		if($return !== ""){
  			return $return;
  		}else{
- 			//no error, do more stuff to return
+ 			//no error
+ 			return array("success"=>true, "gamestate" => $gamespace->gamestate);
  		}
 	}
-/*
-"getTurn", // Are we waiting for the other user to do something (either put a card down, put cards in crib, accept points they are viewing)
-"getDealer", // Returns if I am the dealer
-"getCutCard", // Gets the cut card, or null if there isn't one
-"getPeggingCards", // Get the cards for pegging
-"getScore", // Get the scores of the two players
-"getDealer", // Who is the dealer now?
-"getGameData", // A large array of everything you could want to know about the board state
-"pickCutIndex",  // Send an index of 
-"shuffle", // Shuffle the deck. Pass the number of times to shuffle to reduce requests
-"playCard", // Put a card on the table for pegging. Only remove from hand if it returns success (could return a required "go", a "not your turn", "you don't have that card")
-"putInCrib", // Send 2 cards to put into the crib
-"deal" */
+
+	function getTurn($data){
+		$gameID = intval($data["gameID"]);
+
+		// Get security token to see who we are,
+		$playerID = SecurityToken::extract();
+
+		// Make sure user is allowed to see this game
+		try{
+			$gamespace = new Gamespace($gameID, $playerID);
+		}catch(Exception $e){
+			return "Player " . $playerID . " doesn't have access to gameID " . $gameID . ".";
+ 		}
+
+		return array("turn"=>$gamespace->turnID);
+	}
+
+	function getPlayedCards($data){
+		$gameID = intval($data["gameID"]);
+
+		// Get security token to see who we are,
+		$playerID = SecurityToken::extract();
+
+		// Make sure user is allowed to see this game
+		try{
+			$gamespace = new Gamespace($gameID, $playerID);
+		}catch(Exception $e){
+			return "Player " . $playerID . " doesn't have access to gameID " . $gameID . ".";
+ 		}
+
+ 		$cards = $gamespace->getPlayedCards();
+
+ 		$toReturn = array();
+ 		foreach($cards as $card){
+ 			$toReturn[] = array("number"=>$card["card"]->getNumber(),
+ 				                "suit"=>$card["card"]->getSuit(),
+ 				                "playedByID"=>$card["playedByID"]);
+ 		}
+
+ 		return $toReturn;
+
+	}
+
+	function getDealer($data){
+		$gameID = intval($data["gameID"]);
+
+		// Get security token to see who we are,
+		$playerID = SecurityToken::extract();
+
+		// Make sure user is allowed to see this game
+		try{
+			$gamespace = new Gamespace($gameID, $playerID);
+		}catch(Exception $e){
+			return "Player " . $playerID . " doesn't have access to gameID " . $gameID . ".";
+ 		}
+
+		return array("dealer"=>$gamespace->dealerID);
+	}
+
+	
+	function getScore($data){
+		$gameID = intval($data["gameID"]);
+
+		// Get security token to see who we are,
+		$playerID = SecurityToken::extract();
+
+		// Make sure user is allowed to see this game
+		try{
+			$gamespace = new Gamespace($gameID, $playerID);
+		}catch(Exception $e){
+			return "Player " . $playerID . " doesn't have access to gameID " . $gameID . ".";
+ 		}
+
+		return array("scores"=>$gamespace->getScores(), "backPinPositions"=>$gamespace->getBackPinPositions());
+	}
+
 ?>

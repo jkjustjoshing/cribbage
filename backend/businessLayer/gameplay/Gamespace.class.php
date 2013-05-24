@@ -157,6 +157,34 @@
 		}
 
 		/**
+		 * Add points to a player, both in the object and in the database
+		 * @param  int $playerID The player for whom to add the points
+		 * @param  int $pointsToAdd The points to add to the current score
+		 * @return string     Error message, or empty string on success.
+		 */
+		private function updateScore($playerID, $pointsToAdd){
+			if($playerID === $this->player1ID){
+				$this->player1backPinPosition = $this->player1Score;
+				$this->player1Score += $pointsToAdd
+				$score = $this->player1Score;
+			}else if($playerID === $this->player2ID){
+				$this->player2backPinPosition = $this->player2Score;
+				$this->player2Score += $pointsToAdd;
+				$score = $this->player2Score;
+			}else{
+				return "Can only change score of a player in the current game.";
+			}
+
+			$database = DataLayer::getGameplayInstance();
+
+			if(!$database->updateScore($this->gameID, $playerID, $score)){
+				return "There was a database error updating the score of player " . $playerID . ".";
+			}
+
+			return "";
+		}
+
+		/**
 		 * Gets the back pin positions of both players
 		 * @return array An array of back pin positions, indexed by the player's IDs
 		 */
@@ -289,16 +317,6 @@
 				}
 			}
 			return new PlayerHand(PlayerHand::CRIB, $cards);
-		}
-
-		/**
-		 * Get the cards that have been played. It gets 
-		 * all cards played this hand, even if they have been
-		 * cleared after reaching 31.
-		 * @return PlayedCards A PlayedCards object
-		 */
-		public function getPlayedCards(){
-			// Implement me!!! :) :) :)
 		}
 
 		/**
@@ -459,7 +477,29 @@
 			}
 		}
 
+		/**
+		 * Get the cards that have been played. It gets 
+		 * all cards played this hand, even if they have been
+		 * cleared after reaching 31.
+		 * @return PlayedCards A PlayedCards object
+		 */
+		public function getPlayedCards(){
+			$playedCards = new PlayedCards($this->gameID);
+
+			$cards = $playedCards->getAllCards();
+			return $cards;
+		}
+
+
+		/**
+		 * Play a card.
+		 * @param  PlayingCard $card The playing card to play, or null for a go
+		 * @return string   Error message on error, or empty string on success.
+		 */
 		public function playCard($card){
+
+			$database = DataLayer::getGameplayInstance();
+
 			// Is it this player's turn and is the game state correct?
 			if($this->playerID !== $this->turnID){
 				return "It's not your turn.";
@@ -469,14 +509,51 @@
 				return "You can only play cards when it's time to do so in the game.";
 			}
 
-			$playedCards = new PlayedCards(/* ???? */);
+			$playedCards = new PlayedCards($this->gameID);
+			
+			// If this is a null card, make sure that no other card can be played
+			if($card === null){
 
-			// Is this an ok card to play, play it 
-			// 		(database for user's hand and for 
-			// 		playedcards table), get the score
-			// Report the score?
-			// 
-			// If all users have played all cards change the state to VIEWING_CARDS
+				$hand = $this->getMyHand();
+				$cardArr = array();
+				foreach($hand as $card){
+					$cardArr[] = $card["card"];
+				}
+
+				$possible = $playedCards->test($cardArr);
+
+				if($possible){
+					return "One of the cards in your hand can be played. You must use that card before going.";
+				}else{
+					// Switch turns
+					$database->switchTurn($this->gameID);
+
+					// If the last card that was played was mine, give me a point
+					$this->updateScore($this->playerID, 1);
+				}
+			}else{
+				// Make sure the card is in our hand
+				if(!$this->getMyHand()->inHand($card)){
+					return "You can only play a card that is in your hand.";
+				}
+
+				// Play the card
+				$points = $playedCards->play($card);
+				if($points === false){
+					return "You can't play that card because it makes the count go above 31";
+				}else{
+					// Add points to the user
+					$this->updateScore($this->playerID, $points);
+
+					// Take card out of player's hand
+					$this->getMyHand()->remove($card);
+
+					// Change whose turn it is
+					$this->switchTurn($this->gameID);
+				}
+
+			}
+
 		}
 
 		public function doneViewing(){
