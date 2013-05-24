@@ -22,7 +22,7 @@ function Gamespace(data, svgEle){
 
 	this.dealer = data.dealer;
 
-	this.playedCards = new PlayedCards([], document.getElementsByTagName("svg")[1], window.coordinates.playedCards);//data.playedCards // TODO create the PlayedCards object
+	this.playedCards = new PlayedCards(data.playedCards, document.getElementsByTagName("svg")[1], window.coordinates.playedCards);
 
 	this.hands = [];
 	this.hands[window.player.id] = new PlayerHand(data.hands[window.player.id], svgEle, window.coordinates.playerHand);
@@ -93,8 +93,46 @@ Gamespace.prototype.constructState = function(){
 			which.statusMessage("Drag 2 cards into the crib from your hand.");
 			which.hands[window.player.id].chooseCrib();
 
+			if(which.hands[window.player.id].cards.length == 6){
+				which.statusMessage("Choose 2 cards for " + ((window.player.id === this.dealer) ? "my" : (window.opponent.username+"'s")) + " crib.");
+			}else{
+				which.statusMessage("Waiting for " + window.opponent.username + " to put 2 cards in the crib.");
+			}
 			// Poll for other player submitting crib cards to update view
-			// Once crib has 4 cards move to next state
+			var interval = setInterval(function(){
+				ajaxCall(
+					"get",
+					{
+						application: "game",
+						method: "getHands",
+						data: {
+							gameID: window.gameID
+						}
+					},
+					function(data){
+						if(data["game"]["crib"].length > which.crib.cards.length){
+							// Animate cards to crib from opponent hand
+							var card = which.hands[window.opponent.id].remove(new PlayingCard());
+							which.crib.add(card);
+
+							var card = which.hands[window.opponent.id].remove(new PlayingCard());
+							which.crib.add(card);
+
+							which.crib.sort();
+						}
+
+						if(data["game"]["crib"].length == 4){
+							// If the crib has 4 cards stop the polling
+							clearInterval(interval);
+
+							// Move to cutting card state
+							which.gamestate = "CUTTING_CARD";
+							which.constructState();
+						}
+					}
+				);
+				// Once crib has 4 cards clear the interval and update the state
+			}, 5000);
 			break;
 		case "CUTTING_CARD":
 			// If not dealing spread cards and set listener on each card

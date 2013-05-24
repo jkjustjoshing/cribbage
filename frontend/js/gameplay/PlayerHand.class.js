@@ -31,7 +31,7 @@ function PlayerHand(cardArray, container, coordinates){
 
 PlayerHand.prototype.remove = function(card){
 	var oldLength = this.cards.length;
-	for(var i = 0; i < this.cards.length; ++i){
+	for(var i = this.cards.length-1; i >= 0; --i){
 		if(this.cards[i].equals(card)){
 			var card = this.cards[i];
 			this.cards.splice(i, 1);

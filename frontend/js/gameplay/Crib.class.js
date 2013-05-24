@@ -23,7 +23,7 @@ function Crib(cardArray, container, coordinates, dealer){
 	this.coordinates.y += this.padding.y;
 	this.textBoxCoordinates = {};
 	this.textBoxCoordinates[window.player.id] = {x: 700, y:670};
-	this.textBoxCoordinates[window.opponent.id] = {x: 660, y:45};
+	this.textBoxCoordinates[window.opponent.id] = {x: 660, y:190};
 
 	this.setDealer(dealer);
 
@@ -181,7 +181,7 @@ Crib.prototype.setDealer = function(dealerID){
 		this.cribBox.childNodes[1].setAttributeNS(null, "x", this.textBoxCoordinates[window.opponent.id].x);
 		this.cribBox.childNodes[1].setAttributeNS(null, "y", this.textBoxCoordinates[window.opponent.id].y);
 	}
-}
+};
 
 /**
  * Tells the crib whether or not it should be accepting changes to the crib
@@ -216,8 +216,17 @@ Crib.prototype.successfulDrag = function(x, y){
 	var insideHorizontally = x > bbox.x && x < (bbox.x + bbox.width);
 	var insideVertically = y > bbox.y && y < (bbox.y + bbox.height);
 	return insideHorizontally && insideVertically;
+};
 
-}
+Crib.prototype.hide = function(){
+	for(var i = 0; i < this.cards.length; ++i){
+		if(this.cards[i].isVisible()){
+			var card = this.cards[i];
+			this.cards[i] = new PlayingCard();
+			card.ele.parentNode.replaceChild(this.cards[i].ele, card.ele);
+		}
+	}
+};
 
 Crib.prototype.confirmSelection = function(){
 	var visibleCards = [];
@@ -277,12 +286,11 @@ Crib.prototype.confirmSelection = function(){
 					data = data["game"];
 
 					if(data.success === true){
-						
-						// Check for the number of cards in the crib
-						alert(data["cribSize"]);
-
+						which.hide();
+						which.sort();
+						window.gamespace.statusMessage("Waiting for " + window.opponent.username + " to put 2 cards in the crib.");
 					}else{
-						alert(data["error"]);
+						alert(data.error);
 					}
 				}
 			);
@@ -303,4 +311,4 @@ Crib.prototype.confirmSelection = function(){
 		cribText.appendChild(document.createTextNode("Click to confirm"));
 		cribText.addEventListener("click", this.confirmCrib, false);
 	}
-}
+};

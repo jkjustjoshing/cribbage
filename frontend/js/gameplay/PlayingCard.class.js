@@ -27,6 +27,10 @@ function PlayingCard(number, suit){
 		this.suit = undefined;
 	}
 
+	if(this.number == 0){
+		this.number = undefined;
+	}
+
 	this.ele = document.createElementNS(svgns, "g");
 	if(this.suit === undefined || this.number === undefined){
 		this.ele.setAttributeNS(null, "name", "hidden");

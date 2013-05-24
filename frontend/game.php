@@ -14,10 +14,12 @@
 			// Token was set, but something was wrong. Logged out.
 			// Show login screen
 			header("Location: login.php");
+			die();
 		}
 	}else{
 		// No token, redirect to page
 		header("Location: login.php");
+		die();
 	}
 	
 	// Check gameID exists

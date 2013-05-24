@@ -3,6 +3,7 @@
 	require_once(BACKEND_DIRECTORY . "/businessLayer/gameplay/PlayerHand.class.php");
 	require_once(BACKEND_DIRECTORY . "/dataLayer/DataLayer.class.php");
 	require_once(BACKEND_DIRECTORY . "/businessLayer/gameplay/CardDeck.class.php");
+	require_once(BACKEND_DIRECTORY . "/businessLayer/gameplay/PlayedCards.class.php");
 
 	/**
 	 * Gamespace class
@@ -165,7 +166,7 @@
 		private function updateScore($playerID, $pointsToAdd){
 			if($playerID === $this->player1ID){
 				$this->player1backPinPosition = $this->player1Score;
-				$this->player1Score += $pointsToAdd
+				$this->player1Score += $pointsToAdd;
 				$score = $this->player1Score;
 			}else if($playerID === $this->player2ID){
 				$this->player2backPinPosition = $this->player2Score;
@@ -481,13 +482,22 @@
 		 * Get the cards that have been played. It gets 
 		 * all cards played this hand, even if they have been
 		 * cleared after reaching 31.
-		 * @return PlayedCards A PlayedCards object
+		 * @return array Array of cards.
 		 */
 		public function getPlayedCards(){
 			$playedCards = new PlayedCards($this->gameID);
 
 			$cards = $playedCards->getAllCards();
-			return $cards;
+
+			$toReturn = array();
+
+			foreach($cards as $card){
+				$toReturn[] = array("number"=>$card["card"]->getNumber(),
+					                "suit"=>$card["card"]->getSuit(),
+					                "playedByID"=>$card["playedByID"]);
+			}
+
+			return $toReturn;
 		}
 
 

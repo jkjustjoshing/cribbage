@@ -2,35 +2,6 @@
 
 	require_once(BACKEND_DIRECTORY . "/businessLayer/gameplay/Gamespace.class.php");
 
-	/**
-	 * getTurn($data)
-	 * Method that returns an array saying whether or not it's the
-	 * current user's turn. It is defined as being the user's turn
-	 * if the player can do something and isn't waiting for the other
-	 * user. Hypothetically, while both players are choosing what to 
-	 * put in their crib, both players could have this method return
-	 * true.
-	 * 
-	 * @param  [Array] $data Associative array with one index called gameID
-	 * @return [Array] An array indicating success, or a failure message.
-	 */
-	function getTurn($data){
-		$gameID = intval($data["gameID"]);
-		
-		// Get security token to see who we are,
-		$playerID = SecurityToken::extract();
-
-		//Get if this game it's the user's turn
-		try{
-			$gamespace = new Gamespace($gameID, $userID);
-		}catch(Exception $e){
-			return "Player " + $userID + " doesn't have access to gameID " . $gameID . ".";
- 		}
-
- 		$gamespace->
-
-	}
-
 	function deal($data){
 		$gameID = intval($data["gameID"]);
 		$numberOfTimesToShuffle = intval($data["numberOfTimesToShuffle"]);
@@ -90,7 +61,7 @@
 		$result["gamestatus"] = $gamespace->gamestatus;
 		$result["cutCard"] = $gamespace->cutCard;
 		$result["playedCards"] = $gamespace->getPlayedCards();
-
+		
 		return $result;
 	}
 
@@ -136,7 +107,31 @@
  		}else{
  			return $result;
  		}
+	}
 
+	function getHands($data){
+		$gameID = intval($data["gameID"]);
+
+		// Get security token to see who we are,
+		$playerID = SecurityToken::extract();
+
+		// Make sure user is allowed to see this game
+		try{
+			$gamespace = new Gamespace($gameID, $playerID);
+		}catch(Exception $e){
+			return "Player " . $playerID . " doesn't have access to gameID " . $gameID . ".";
+ 		}
+
+ 		$myHand = $gamespace->getMyHand() === null ? array() : $gamespace->getMyHand()->cardArray();
+ 		$opponentHand = $gamespace->getOpponentHand() === null ? array() : $gamespace->getOpponentHand()->cardArray();
+ 		$crib = $gamespace->getCrib() === null ? array() : $gamespace->getCrib()->cardArray();		
+		$result = array(
+				$playerID => $myHand,
+				$gamespace->getOpponentID() => $opponentHand,
+				"crib" => $crib
+			);
+
+		return $result;
 	}
 
 	function pickCutIndex($data){
@@ -211,6 +206,18 @@
  		}
 	}
 
+	/**
+	 * getTurn($data)
+	 * Method that returns an array saying whether or not it's the
+	 * current user's turn. It is defined as being the user's turn
+	 * if the player can do something and isn't waiting for the other
+	 * user. Hypothetically, while both players are choosing what to 
+	 * put in their crib, both players could have this method return
+	 * true.
+	 * 
+	 * @param  [Array] $data Associative array with one index called gameID
+	 * @return [Array] An array indicating success, or a failure message.
+	 */
 	function getTurn($data){
 		$gameID = intval($data["gameID"]);
 
@@ -242,14 +249,7 @@
 
  		$cards = $gamespace->getPlayedCards();
 
- 		$toReturn = array();
- 		foreach($cards as $card){
- 			$toReturn[] = array("number"=>$card["card"]->getNumber(),
- 				                "suit"=>$card["card"]->getSuit(),
- 				                "playedByID"=>$card["playedByID"]);
- 		}
-
- 		return $toReturn;
+ 		return $cards;
 
 	}
 
