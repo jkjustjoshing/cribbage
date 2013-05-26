@@ -138,14 +138,14 @@ PlayerHand.prototype.chooseCrib = function(disable){
 // Where is the card? If it's in the crib move it.
 PlayerHand.prototype.draggingCallback = function(ele, x, y, which){
 	if(window.gamespace.crib.successfulDrag(x+50, y+70)){ //half the width, half the height of a card
+		
 		// It's in the crib - send it over!
-		console.log(ele);
 		var cardID = ele.getAttributeNS(null, "name").split("|");
 
 		var card = which.remove(new PlayingCard(cardID[0], cardID[1]), false);
 		window.gamespace.crib.add(card);
 
-		// 		If there are 2 cards there show button
+		// If there are 2 cards there show button
 		// If it's not in crib animate back, then sort
 		which.sort(true);
 		return true;

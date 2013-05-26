@@ -91,7 +91,7 @@
 		gameID INT NOT NULL,
 		FOREIGN KEY(gameID) REFERENCES gamespaces(id),
 		cardOrder INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-		playingcardID INT NOT NULL,
+		playingcardID INT,
 		FOREIGN KEY(playingcardID) REFERENCES playingcards(id), 
 		playedByID INT NOT NULL,
 		FOREIGN KEY(playedByID) REFERENCES players(id)

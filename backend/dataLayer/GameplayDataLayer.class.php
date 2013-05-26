@@ -448,15 +448,23 @@
 		 * @return boolean         Whether or not the play worked
 		 */
 		public function playCard($gameID, $playedByID, $card){
-			$sql = "INSERT INTO playedcards (gameID, playingcardID, playedByID)
-					VALUES (?, (
-						SELECT id FROM playingcards WHERE suit=? AND number=?
-						), ?)";
-									
+			if($card === null){
+				$sql = "INSERT INTO playedcards (gameID, playedByID)
+						VALUES (?, ?)";
+			}else{
+				$sql = "INSERT INTO playedcards (gameID, playingcardID, playedByID)
+						VALUES (?, (
+							SELECT id FROM playingcards WHERE suit=? AND number=?
+							), ?)";
+			}
+
 			if($stmt = $this->mysqli->prepare($sql)){
 				//Bind parameter and execute
-				$stmt->bind_param("isii", $gameID, $card["suit"], $card["number"], $playedByID);
-				
+				if($card === null){
+					$stmt->bind_param("ii", $gameID, $playedByID);
+				}else{
+					$stmt->bind_param("isii", $gameID, $card["suit"], $card["number"], $playedByID);
+				}
 				return $stmt->execute();
 			}
 			return false;

@@ -289,6 +289,9 @@ Crib.prototype.confirmSelection = function(){
 						which.hide();
 						which.sort();
 						window.gamespace.statusMessage("Waiting for " + window.opponent.username + " to put 2 cards in the crib.");
+						cribText.removeEventListener("click", which.confirmCrib);
+						cribText.firstChild.nodeValue = (which.dealer === window.player.id ? "My Crib" : (window.opponent.username + "'s Crib"));
+
 					}else{
 						alert(data.error);
 					}
@@ -307,8 +310,7 @@ Crib.prototype.confirmSelection = function(){
 		cribText.removeEventListener("click", this.confirmCrib); console.log("This line doesn't work!!!!");
 	}else{
 		this.cribBox.childNodes[0].setAttributeNS(null, "stroke", "green");
-		cribText.removeChild(cribText.firstChild);
-		cribText.appendChild(document.createTextNode("Click to confirm"));
+		cribText.firstChild.nodeValue = "Click to confirm";
 		cribText.addEventListener("click", this.confirmCrib, false);
 	}
 };

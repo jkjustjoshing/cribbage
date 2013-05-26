@@ -59,6 +59,8 @@
 								throw new Exception("Card can't be created with a number " . $number . ".");
 						}
 					}
+			}else if($number === null){
+				$this->_number = 0;
 			}else{
 				throw new Exception("Card can't be created with a non-numeric value " . $number . ".");
 			}

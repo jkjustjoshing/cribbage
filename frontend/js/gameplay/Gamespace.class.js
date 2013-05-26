@@ -19,7 +19,6 @@ function Gamespace(data, svgEle){
 	this.scoreboard = new Scoreboard(playerInfo, opponentInfo);
 
 	this.cutCard = data.cutCard; // TODO create the card object, or set to undefined, pass to deck object??
-
 	this.dealer = data.dealer;
 
 	this.playedCards = new PlayedCards(data.playedCards, document.getElementsByTagName("svg")[1], window.coordinates.playedCards);
@@ -272,5 +271,5 @@ window.coordinates = {
 	deck: {x: 720, y: 280},
 	myCrib: {x: 580, y: 500},
 	opponentCrib: {x:580, y:20},
-	playedCards: {x: 50, y: 350}
+	playedCards: {x: 50, y: 370}
 }
