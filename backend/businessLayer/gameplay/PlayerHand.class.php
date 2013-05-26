@@ -52,14 +52,14 @@
 			$this->_isCrib = $isCrib;
 			try{
 				foreach($cardArray as $card){
-					if(!is_object($card)){
+					if(!is_object($card["card"])){
 						throw new InvalidArgumentException("Initializing with a non-object card");
-					}else if(get_class($card) != get_class(new PlayingCard(1, "club"))){
+					}else if(get_class($card["card"]) != get_class(new PlayingCard(1, "club"))){
 						// Not a card object
 						throw new InvalidArgumentException("Initializing with a non-card object");
 					}
 
-					$this->_cards[] = array("card" => $card, "inHand" => true);
+					$this->_cards[] = array("card" => $card["card"], "inHand" => $card["inHand"]);
 					$this->isDirty = true;
 				}
 			}catch(InvalidArgumentException $e){
@@ -197,7 +197,7 @@
 
 			foreach($this->_cards as $index=>$card){
 				if($playingCard->equals($card["card"])){
-					return true;
+					return $card["inHand"];
 				}
 			}
 			

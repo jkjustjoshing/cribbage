@@ -123,7 +123,7 @@ PlayerHand.prototype.chooseCrib = function(disable){
 		// Set local mousedown listener
 		for(var i = 0; i < this.cards.length; ++i){
 			this.cards[i].drag(function(ele, x, y){
-				return which.draggingCallback(ele, x, y, which);
+				return which.cribDraggingCallback(ele, x, y, which);
 			});
 		}
 	}else{
@@ -136,7 +136,7 @@ PlayerHand.prototype.chooseCrib = function(disable){
 
 
 // Where is the card? If it's in the crib move it.
-PlayerHand.prototype.draggingCallback = function(ele, x, y, which){
+PlayerHand.prototype.cribDraggingCallback = function(ele, x, y, which){
 	if(window.gamespace.crib.successfulDrag(x+50, y+70)){ //half the width, half the height of a card
 		
 		// It's in the crib - send it over!
@@ -155,36 +155,40 @@ PlayerHand.prototype.draggingCallback = function(ele, x, y, which){
 	}
 }
 
-/**
- * Plays one of the cards to the PlayedCards object.
- * This method returns the card and ele and the caller
- * must not drop the card. This method will tell
- * the server via ajax about the move, but only
- * if the card is NOT anonymous.
- * @param  [PlayingCard or DOMNode] card The card being played
- * @return [PlayingCard and DOMNode]     The card being played
- */
-PlayerHand.prototype.playCard = function(card){
-	// Find the card
-	for(var i = 0; i < this.cards.length; ++i){
-		if(this.cards[i].equals(card)){
-			break;
+PlayerHand.prototype.peggingMode = function(disable){
+	// Set global drag/mousup listeners (this.ele is the SVG element containing the hand)
+	if(disable === undefined || disable === true){
+		var which = this;
+		this.dragging = true;
+		// Set local mousedown listener
+		for(var i = 0; i < this.cards.length; ++i){
+			this.cards[i].drag(function(ele, x, y){
+				return which.peggingDraggingCallback(ele, x, y, which);
+			});
+		}
+	}else{
+		this.dragging = false;
+		for(var i = 0; i < this.cards.length; ++i){
+			this.cards[i].drag(false);
 		}
 	}
-	if(i == this.cards.length){
-		alert("That card can't be played!.");
-		return;
-	}
-
-	// pull the card out
-	var foundCard = this.cards[i];
-	foundCard.ele.parentNode.removeChild(foundCard.ele);
-	this.cards[i] = undefined;
-
-	// Shift the other cards over to the left
-	this.sort()
-
-	// If the card isn't anonymous send the play via ajax
-	console.log("Must tell server about card being played")
-		// Tell the caller about send on success of callback, or immediately if anonymous
 }
+
+// Where is the card? If it's in the crib move it.
+PlayerHand.prototype.peggingDraggingCallback = function(ele, x, y, which){
+	if(window.gamespace.playedCards.successfulDrag(x+50, y+70)){ //half the width, half the height of a card
+		
+		// It's in the crib - send it over!
+		var cardID = ele.getAttributeNS(null, "name").split("|");
+
+		var card = which.remove(new PlayingCard(cardID[0], cardID[1]), false);
+		window.gamespace.playedCards.play(card, window.player.id);
+
+		which.sort(true);
+		return true;
+	}else{
+		which.sort(true);
+		return false;
+	}
+}
+

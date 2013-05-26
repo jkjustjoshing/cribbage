@@ -252,9 +252,9 @@
 				if($this->gamestate == "VIEWING_HANDS" ||
 					$this->gamestate == "WAITING_PLAYER_1" ||
 					$this->gamestate == "WAITING_PLAYER_2"){
-					$cards[] = new PlayingCard($cardArr["number"], $cardArr["suit"]);
+					$cards[] = array("card"=>new PlayingCard($cardArr["number"], $cardArr["suit"]), "inHand"=>$cardArr["inHand"]);
 				}else{
-					$cards[] = new PlayingCard(0, null);
+					$cards[] = array("card"=>new PlayingCard(0, null), "inHand"=>$cardArr["inHand"]);
 				}
 			}
 
@@ -283,8 +283,9 @@
 			foreach($hands[$this->playerID] as $cardArr){
 				// If the gamestate is either VIEWING_HANDS or WAITING_PLAYER_# show opponent cards
 				// Otherwise, show anonymous cards
-				$cards[] = new PlayingCard($cardArr["number"], $cardArr["suit"]);
+				$cards[] = array("card"=>new PlayingCard($cardArr["number"], $cardArr["suit"]), "inHand"=>$cardArr["inHand"]);
 			}
+
 			return new PlayerHand(PlayerHand::NOT_CRIB, $cards);
 		}
 
@@ -312,9 +313,9 @@
 				if($this->gamestate == "VIEWING_HANDS" ||
 					$this->gamestate == "WAITING_PLAYER_1" ||
 					$this->gamestate == "WAITING_PLAYER_2"){
-					$cards[] = new PlayingCard($cardArr["number"], $cardArr["suit"]);
+					$cards[] = array("card"=>new PlayingCard($cardArr["number"], $cardArr["suit"]), "inHand"=>$cardArr["inHand"]);
 				}else{
-					$cards[] = new PlayingCard(0, null);
+					$cards[] = array("card"=>new PlayingCard(0, null), "inHand"=>$cardArr["inHand"]);
 				}
 			}
 			return new PlayerHand(PlayerHand::CRIB, $cards);
@@ -520,7 +521,7 @@
 			}
 
 			$playedCards = new PlayedCards($this->gameID);
-			
+
 			// If this is a null card, make sure that no other card can be played
 			if($card === null){
 
@@ -539,7 +540,10 @@
 					$database->switchTurn($this->gameID);
 
 					// If the last card that was played was mine, give me a point
-					$this->updateScore($this->playerID, 1);
+					$result = $this->updateScore($this->playerID, 1);
+					if($result !== ""){
+						return $result;
+					}
 				}
 			}else{
 				// Make sure the card is in our hand
@@ -548,18 +552,30 @@
 				}
 
 				// Play the card
-				$points = $playedCards->play($card);
+				$points = $playedCards->play($card, $this->playerID);
+
 				if($points === false){
 					return "You can't play that card because it makes the count go above 31";
 				}else{
+
 					// Add points to the user
-					$this->updateScore($this->playerID, $points);
+					if($points !== 0){
+						$result = $this->updateScore($this->playerID, $points);
+						if($result !== ""){
+							return $result;
+						}
+					}
 
 					// Take card out of player's hand
-					$this->getMyHand()->remove($card);
+					$myHand = $this->getMyHand();
+					$myHand->peg($card);
+					$myHand->writeback($this->gameID, $this->playerID);
+
 
 					// Change whose turn it is
-					$this->switchTurn($this->gameID);
+					$database->switchTurn($this->gameID);
+
+					return "";
 				}
 
 			}

@@ -192,7 +192,8 @@ Gamespace.prototype.constructState = function(){
 			}
 			break;
 		case "PEGGING":
-			// Setup using another function, very in-depth
+			which.hands[window.player.id].peggingMode(true);
+
 			break;
 		case "VIEWING_HANDS":
 			// Create button to mark being done

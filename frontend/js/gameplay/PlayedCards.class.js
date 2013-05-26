@@ -21,8 +21,9 @@ function PlayedCards(cards, container, coordinates){
 	this.background.setAttributeNS(null, "height", "200");
 	this.background.setAttributeNS(null, "rx", "10");
 	this.background.setAttributeNS(null, "ry", "10");
+	this.background.setAttributeNS(null, "x", "100");
+	this.background.setAttributeNS(null, "y", (coordinates.y-120));
 	this.background.setAttributeNS(null, "fill", "#444");
-	this.background.setAttributeNS(null, "transform", "translate(100, "+(coordinates.y-120)+")");
 	this.container.appendChild(this.background);
 
 
@@ -30,17 +31,17 @@ function PlayedCards(cards, container, coordinates){
 	var count = 0;
 	var screenCards = [];
 	for(var i = 0; i < cards.length; ++i){
-		count += cards[i].number;
-
-		if(count > 31){
-			count = cards[i].number;
+		if(cards[i].suit !== null){
+			count += cards[i].number;
+			screenCards[screenCards.length] = {card: new PlayingCard(cards[i].number, cards[i].suit), playedByID: cards[i].playedByID};
+		}else{
+			count = 0;
 			screenCards = [];
 		}
-		screenCards[screenCards.length] = {card: new PlayingCard(cards[i].number, cards[i].suit), playedByID: cards[i].playedByID};
 	}
 
 	for(var i = 0; i < screenCards.length; ++i){
-		this.play(screenCards[i].card, screenCards[i].playedByID);
+		this.play(screenCards[i].card, screenCards[i].playedByID, true);
 	}
 
 	this.updateCountText();
@@ -73,7 +74,7 @@ PlayedCards.prototype.updateCountText = function(){
  * @param  {PlayingCard} card   The card to play
  * @param  {int} player The ID of the player who played this
  */
-PlayedCards.prototype.play = function(card, player){
+PlayedCards.prototype.play = function(card, player, initializing){
 	var x = this.coordinates.x + 100;
 	var y = this.coordinates.y - 100;
 	if(window.player.id === player){
@@ -82,13 +83,44 @@ PlayedCards.prototype.play = function(card, player){
 	x += this.screenCards.length * 35;
 
 	this.container.appendChild(card.ele);
-	card.ele.setAttributeNS(null, "transform", "translate("+x+", "+y+")");
-	this.updateCountText();
+	
+	if(card.ele.parentNode === null){
+		// Card not yet on page, just show
+		card.ele.setAttributeNS(null, "transform", "translate("+x+", "+y+")");
+	}else{
+		// Card on page - animate to position
+		$(card.ele).animate({
+			svgTransform: "translate("+x+", "+y+")"
+		}, 100);
+	}
 
 	// Add to object
-		this.screenCards[this.screenCards.length] = {card: card, playedByID: player};
-		this.cards[this.cards.length] = {card: card, playedByID: player};
-		this.count += card.getCount();
+	this.screenCards[this.screenCards.length] = {card: card, playedByID: player};
+	this.cards[this.cards.length] = {card: card, playedByID: player};
+	this.count += card.getCount();
+
+	this.updateCountText();
+
+	if(initializing === undefined || initializing == false){
+		card.loading(true);
+		ajaxCall(
+			"post",
+			{
+				application: "game",
+				method: "playCard",
+				data: {
+					gameID: window.gameID,
+					card: {
+						number: card.number,
+						suit: card.suit
+					}
+				}
+			},
+			function(data){
+				card.loading(false);
+			}
+		);
+	}
 }
 
 PlayedCards.prototype.clearFromScreen = function(){

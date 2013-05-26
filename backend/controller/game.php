@@ -195,7 +195,7 @@
  		}
 
  		$card = new PlayingCard($data["card"]["number"], $data["card"]["suit"]);
-
+ 		
  		$return = $gamespace->playCard($card);
 
  		if($return !== ""){

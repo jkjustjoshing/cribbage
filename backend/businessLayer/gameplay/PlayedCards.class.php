@@ -148,7 +148,7 @@
 			
 			// Test for pair/3/4 of a kind
 			$countOfSameCards = 1;
-			for($i = count($this->screenCards)-1; $i > 0; --$i){
+			for($i = count($this->screenCards)-1; $i >= 0; --$i){
 				if($this->screenCards[$i]["card"]->getNumber() === $card->getNumber()){
 					$countOfSameCards++;
 				}else{

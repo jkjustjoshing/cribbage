@@ -231,3 +231,30 @@ PlayingCard.prototype.drag = function(callback){
 PlayingCard.prototype.isOnScreen = function(){
 	return this.ele.parentNode !== null;
 }
+
+PlayingCard.prototype.loading = function(enable){
+	if(this.isLoading === undefined){
+		this.isLoading = false;
+	}
+
+	if(enable && !this.isLoading){
+		// Show loading bar
+		this.isLoading = true;
+		this.loadingEle = document.createElementNS(svgns, "rect");
+		this.loadingEle.setAttributeNS(null, "width", "100");
+		this.loadingEle.setAttributeNS(null, "height", "140");
+		this.loadingEle.setAttributeNS(null, "rx", "8");
+		this.loadingEle.setAttributeNS(null, "ry", "8");
+		this.loadingEle.setAttributeNS(null, "fill", "black");
+		this.loadingEle.setAttributeNS(null, "opacity", "0.5");
+
+		this.ele.appendChild(this.loadingEle);
+
+	}else if(!enable && this.isLoading){
+		// Hide loading bar
+		this.isLoading = false;
+
+		this.ele.removeChild(this.loadingEle);
+
+	}
+}
