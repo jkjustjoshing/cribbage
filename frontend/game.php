@@ -87,20 +87,6 @@
 				window.chats = {};
 				window.chats[window.opponent.id] = new Chat($("#gameChat"), window.opponent.id);
 
-				window.scoreboard = new Scoreboard(
-					{
-						score: <?php $scores = $gamespace->getScores(); echo $scores[$player->id]; ?>, 
-						id: <?php echo $player->id; ?>, 
-						username: '<?php echo $player->username; ?>', 
-						backPinPosition: <?php $backPins = $gamespace->getBackPinPositions(); echo $backPins[$player->id]; ?>
-					},
-					{
-						score: <?php echo $scores[$opponent->id]; ?>, 
-						id: <?php echo $opponent->id; ?>, 
-						username: '<?php echo $opponent->username; ?>', 
-						backPinPosition: <?php echo $backPins[$opponent->id]; ?>
-					}
-				);
 			});
 		</script>
 		<style type="text/css">

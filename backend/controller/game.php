@@ -45,7 +45,7 @@
  		$result = array();
  		$result["gameID"] = $gameID;
  		$result["scores"] = $gamespace->getScores();
- 		$result["backPinPositions"] = $gamespace->getScores();
+ 		$result["backPinPositions"] = $gamespace->getBackPinPositions();
 
  		$myHand = $gamespace->getMyHand() === null ? array() : $gamespace->getMyHand()->cardArray();
  		$opponentHand = $gamespace->getOpponentHand() === null ? array() : $gamespace->getOpponentHand()->cardArray();
@@ -207,7 +207,7 @@
  				"gamestate"=>$gamespace->gamestate,
  				"turn"=>$gamespace->turnID,
 				"scores"=>$gamespace->getScores(),
-				"backPinPositions"=>$gamespace->getScores()
+				"backPinPositions"=>$gamespace->getBackPinPositions()
  			);
  		}
 	}
@@ -260,7 +260,7 @@
  			"gamestate"=>$gamespace->gamestate,
  			"turn"=>$gamespace->turnID,
  			"scores"=>$gamespace->getScores(),
- 			"backPinPositions"=>$gamespace->getScores()
+ 			"backPinPositions"=>$gamespace->getBackPinPositions()
  		);
 
 	}

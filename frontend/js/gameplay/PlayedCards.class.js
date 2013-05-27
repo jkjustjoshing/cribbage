@@ -128,6 +128,29 @@ PlayedCards.prototype.play = function(card, player, initializing){
 
 					which.screenCards.length--;
 					which.cards.length--;
+				}else{
+					// Success, update
+					window.gamespace.turn = data["game"]["turn"];
+
+					if(window.gamespace.scoreboard.playerInfo[window.player.id].score !== data["game"]["scores"][window.player.id]){
+						// Player has a new score
+						if(window.gamespace.scoreboard.playerInfo[window.player.id].score !== data["game"]["backPinPositions"][window.player.id]){
+							window.gamespace.scoreboard.changeScore(window.player.id, data["game"]["backPinPositions"][window.player.id]);
+						}
+						window.gamespace.scoreboard.changeScore(window.player.id, data["game"]["scores"][window.player.id]);					
+					}
+					if(window.gamespace.scoreboard.playerInfo[window.opponent.id].score !== data["game"]["scores"][window.opponent.id]){
+						// Opponent has a new score
+						if(window.gamespace.scoreboard.playerInfo[window.opponent.id].score !== data["game"]["backPinPositions"][window.opponent.id]){
+							window.gamespace.scoreboard.changeScore(window.opponent.id, data["game"]["backPinPositions"][window.opponent.id]);
+						}
+						window.gamespace.scoreboard.changeScore(window.opponent.id, data["game"]["scores"][window.opponent.id]);					
+					}
+
+					if(window.gamespace.gamestate !== data["game"]["gamestate"]){
+						alert("Gamestate is now " + data["game"]["gamestate"]);
+						window.gamespace.gamestate = data["game"]["gamestate"];
+					}
 				}
 			}
 		);
