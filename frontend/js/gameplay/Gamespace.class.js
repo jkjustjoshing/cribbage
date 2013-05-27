@@ -193,7 +193,7 @@ Gamespace.prototype.constructState = function(){
 			break;
 		case "PEGGING":
 			which.hands[window.player.id].peggingMode(true);
-
+			var interval = setInterval(which.playedCards.poll, 5000);
 			break;
 		case "VIEWING_HANDS":
 			// Create button to mark being done
@@ -272,5 +272,5 @@ window.coordinates = {
 	deck: {x: 720, y: 280},
 	myCrib: {x: 580, y: 500},
 	opponentCrib: {x:580, y:20},
-	playedCards: {x: 50, y: 370}
+	playedCards: {x: 50, y: 390}
 }

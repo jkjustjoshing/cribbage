@@ -315,7 +315,7 @@
 					$this->gamestate == "WAITING_PLAYER_2"){
 					$cards[] = array("card"=>new PlayingCard($cardArr["number"], $cardArr["suit"]), "inHand"=>$cardArr["inHand"]);
 				}else{
-					$cards[] = array("card"=>new PlayingCard(0, null), "inHand"=>$cardArr["inHand"]);
+					$cards[] = array("card"=>new PlayingCard(0, null), "inHand"=>true);
 				}
 			}
 			return new PlayerHand(PlayerHand::CRIB, $cards);

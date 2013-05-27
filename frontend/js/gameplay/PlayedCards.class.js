@@ -103,6 +103,7 @@ PlayedCards.prototype.play = function(card, player, initializing){
 
 	if(initializing === undefined || initializing == false){
 		card.loading(true);
+		var which = this;
 		ajaxCall(
 			"post",
 			{
@@ -118,6 +119,16 @@ PlayedCards.prototype.play = function(card, player, initializing){
 			},
 			function(data){
 				card.loading(false);
+				if(data["game"]["success"] !== true){
+					window.gamespace.statusMessage(data["game"]["error"]);
+					which.count -= card.getCount();
+					which.updateCountText();
+
+					window.gamespace.hands[window.player.id].add(card);
+
+					which.screenCards.length--;
+					which.cards.length--;
+				}
 			}
 		);
 	}
@@ -137,3 +148,43 @@ PlayedCards.prototype.successfulDrag = function(x, y){
 	var insideVertically = y > bbox.y && y < (bbox.y + bbox.height);
 	return insideHorizontally && insideVertically;
 };
+
+PlayedCards.prototype.poll = function(){
+	var which = window.gamespace.playedCards;
+	ajaxCall(
+		"get",
+		{
+			application: "game",
+			method: "getPlayedCards",
+			data: {
+				gameID: window.gameID
+			}
+		},
+		function(data){
+			if(data["game"]["error"] !== undefined){
+				console.log(data["game"]["error"]);
+				//window.history.go(0);
+			}else{
+				// array of cards = data["game"]
+				
+				if(which.screenCards.length === 0){
+					for(var i = 0; i < data["game"].length; ++i){
+						var anonymousCard = window.gamespace.hands[data["game"][i]["playedByID"]].remove(new PlayingCard());
+						anonymousCard.ele.parentNode.removeChild(anonymousCard.ele);
+
+						var card = new PlayingCard(data["game"][i]["number"], data["game"][i]["suit"]);
+						window.gamespace.hands[data["game"][i]["playedByID"]].add(card, true); // true for "do not animate"
+						window.gamespace.hands[data["game"][i]["playedByID"]].remove(card);
+						window.gamespace.playedCards.play(card, data["game"][i]["playedByID"], true);
+
+					}
+				}
+				var lastCardKnown = which.screenCards[which.screenCards.length-1];
+				for(var i = 0; i < data["game"].length; ++i){
+					//if()
+				}
+
+			}
+		}
+	);
+}

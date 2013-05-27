@@ -148,7 +148,7 @@ function PlayingCard(number, suit){
 		this.ele.appendChild(usePath);
 
 	}
-} 
+}
 
 
 PlayingCard.prototype.equals = function(other){

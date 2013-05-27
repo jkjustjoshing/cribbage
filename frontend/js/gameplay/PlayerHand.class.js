@@ -62,11 +62,7 @@ PlayerHand.prototype.add = function(card, doNotAnimate){
 
 		this.sort(true);
 
-		/*var which = this;
-		$(card.ele).animate({
-			svgTransform: "translate("+(which.coordinates.x + (which.cards.length-1)*35)+","+which.coordinates.y+")"
-		}, 400);
-*/	}
+	}
 
 	if(this.dragging){
 		var which = this;
