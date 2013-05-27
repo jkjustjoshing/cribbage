@@ -202,7 +202,13 @@
  			return $return;
  		}else{
  			//no error
- 			return array("success"=>true, "gamestate" => $gamespace->gamestate);
+ 			return array(
+ 				"success"=>true, 
+ 				"gamestate"=>$gamespace->gamestate,
+ 				"turn"=>$gamespace->turnID,
+				"scores"=>$gamespace->getScores(),
+				"backPinPositions"=>$gamespace->getScores()
+ 			);
  		}
 	}
 
@@ -249,7 +255,13 @@
 
  		$cards = $gamespace->getPlayedCards();
 
- 		return $cards;
+ 		return array(
+ 			"playedCards"=>$cards, 
+ 			"gamestate"=>$gamespace->gamestate,
+ 			"turn"=>$gamespace->turnID,
+ 			"scores"=>$gamespace->getScores(),
+ 			"backPinPositions"=>$gamespace->getScores()
+ 		);
 
 	}
 

@@ -165,23 +165,53 @@ PlayedCards.prototype.poll = function(){
 				console.log(data["game"]["error"]);
 				//window.history.go(0);
 			}else{
+				var playedCards = data["game"]["playedCards"];
 				// array of cards = data["game"]
-				
+
+				var i;
 				if(which.screenCards.length === 0){
-					for(var i = 0; i < data["game"].length; ++i){
-						var anonymousCard = window.gamespace.hands[data["game"][i]["playedByID"]].remove(new PlayingCard());
-						anonymousCard.ele.parentNode.removeChild(anonymousCard.ele);
-
-						var card = new PlayingCard(data["game"][i]["number"], data["game"][i]["suit"]);
-						window.gamespace.hands[data["game"][i]["playedByID"]].add(card, true); // true for "do not animate"
-						window.gamespace.hands[data["game"][i]["playedByID"]].remove(card);
-						window.gamespace.playedCards.play(card, data["game"][i]["playedByID"], true);
-
+					i = 0;
+				}else{
+					var lastCardKnown = which.screenCards[which.screenCards.length-1];
+					for(i = 0; i < playedCards.length; ++i){
+						if(playedCards[i]["suit"] === lastCardKnown.card.suit && playedCards[i]["number"] === lastCardKnown.card.number){
+							++i;
+							break;
+						}
 					}
 				}
-				var lastCardKnown = which.screenCards[which.screenCards.length-1];
-				for(var i = 0; i < data["game"].length; ++i){
-					//if()
+
+				for( ; i < playedCards.length; ++i){
+					var anonymousCard = window.gamespace.hands[playedCards[i]["playedByID"]].remove(new PlayingCard());
+					anonymousCard.ele.parentNode.removeChild(anonymousCard.ele);
+
+					var card = new PlayingCard(playedCards[i]["number"], playedCards[i]["suit"]);
+					window.gamespace.hands[playedCards[i]["playedByID"]].add(card, true); // true for "do not animate"
+					window.gamespace.hands[playedCards[i]["playedByID"]].remove(card);
+					window.gamespace.playedCards.play(card, playedCards[i]["playedByID"], true);
+
+				}
+
+				window.gamespace.turn = data["game"]["turn"];
+
+				if(window.gamespace.scoreboard.playerInfo[window.player.id].score !== data["game"]["scores"][window.player.id]){
+					// Player has a new score
+					if(window.gamespace.scoreboard.playerInfo[window.player.id].score !== data["game"]["backPinPositions"][window.player.id]){
+						window.gamespace.scoreboard.changeScore(window.player.id, data["game"]["backPinPositions"][window.player.id]);
+					}
+					window.gamespace.scoreboard.changeScore(window.player.id, data["game"]["scores"][window.player.id]);					
+				}
+				if(window.gamespace.scoreboard.playerInfo[window.opponent.id].score !== data["game"]["scores"][window.opponent.id]){
+					// Opponent has a new score
+					if(window.gamespace.scoreboard.playerInfo[window.opponent.id].score !== data["game"]["backPinPositions"][window.opponent.id]){
+						window.gamespace.scoreboard.changeScore(window.opponent.id, data["game"]["backPinPositions"][window.opponent.id]);
+					}
+					window.gamespace.scoreboard.changeScore(window.opponent.id, data["game"]["scores"][window.opponent.id]);					
+				}
+
+				if(window.gamespace.gamestate !== data["game"]["gamestate"]){
+					alert("Gamestate is now " + data["game"]["gamestate"]);
+					window.gamespace.gamestate = data["game"]["gamestate"];
 				}
 
 			}
