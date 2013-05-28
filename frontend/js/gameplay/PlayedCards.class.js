@@ -82,27 +82,33 @@ PlayedCards.prototype.play = function(card, player, initializing){
 	}
 	x += this.screenCards.length * 35;
 
-	this.container.appendChild(card.ele);
-	
-	if(card.ele.parentNode === null){
-		// Card not yet on page, just show
-		card.ele.setAttributeNS(null, "transform", "translate("+x+", "+y+")");
-	}else{
-		// Card on page - animate to position
-		$(card.ele).animate({
-			svgTransform: "translate("+x+", "+y+")"
-		}, 100);
+	if(card !== null){
+		this.container.appendChild(card.ele);
+
+		if(card.ele.parentNode === null){
+			// Card not yet on page, just show
+			card.ele.setAttributeNS(null, "transform", "translate("+x+", "+y+")");
+		}else{
+			// Card on page - animate to position
+			$(card.ele).animate({
+				svgTransform: "translate("+x+", "+y+")"
+			}, 100);
+		}
+		
+		// Add to object
+		this.screenCards[this.screenCards.length] = {card: card, playedByID: player};
+		this.cards[this.cards.length] = {card: card, playedByID: player};
+		this.count += card.getCount();
+
+		this.updateCountText();
 	}
 
-	// Add to object
-	this.screenCards[this.screenCards.length] = {card: card, playedByID: player};
-	this.cards[this.cards.length] = {card: card, playedByID: player};
-	this.count += card.getCount();
-
-	this.updateCountText();
-
 	if(initializing === undefined || initializing == false){
-		card.loading(true);
+		if(card !== null){
+			card.loading(true);
+		}else{
+			card = {number: 0, suit: ""};
+		}
 		var which = this;
 		ajaxCall(
 			"post",
@@ -118,7 +124,9 @@ PlayedCards.prototype.play = function(card, player, initializing){
 				}
 			},
 			function(data){
-				card.loading(false);
+				if(card.number !== 0){
+					card.loading(false);
+				}
 				if(data["game"]["success"] !== true){
 					window.gamespace.statusMessage(data["game"]["error"]);
 					which.count -= card.getCount();

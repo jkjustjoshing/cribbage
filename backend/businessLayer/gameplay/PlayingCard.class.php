@@ -32,9 +32,9 @@
 		public function __construct($number, $suit){
 			if(in_array($suit, self::$suits)){
 				$this->_suit = $suit;
-			}else if($suit === null){
+			}else if($suit === null || $suit === ""){
 				// Anonymous card being created
-				$this->_suit = $suit;
+				$this->_suit = null;
 			}else{
 				throw new Exception("Card can't be created with suit " . $suit . ".");
 			}

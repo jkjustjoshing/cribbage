@@ -74,11 +74,18 @@
 		 * @return int  The number of points from playing, or false if te card can't be played
 		 */
 		public function play($card, $playerID){
-			if($this->getCount() + $card->getCountValue() > 31){
-				return false;
+			if($card !== null){
+				if($this->getCount() + $card->getCountValue() > 31){
+					return false;
+				}
+				$result = $this->database->playCard($this->gameID, $playerID, array("number"=>$card->getNumber(), "suit"=>$card->getSuit()));
+			}else{
+				$result = $this->database->playCard($this->gameID, $playerID, null);
+			
+				return 0; // Return points if it's a point for a "go";
+
 			}
 
-			$result = $this->database->playCard($this->gameID, $playerID, array("number"=>$card->getNumber(), "suit"=>$card->getSuit()));
 
 			$points = $this->scoreIfAddingCard($card);
 			

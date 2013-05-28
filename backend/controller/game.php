@@ -194,8 +194,12 @@
 			return "Player " . $playerID . " doesn't have access to gameID " . $gameID . ".";
  		}
 
- 		$card = new PlayingCard($data["card"]["number"], $data["card"]["suit"]);
- 		
+ 		if($data["card"]["number"] === 0 || $data["card"]["suit"] === ""){
+ 			$card = null;
+ 		}else{
+ 			$card = new PlayingCard($data["card"]["number"], $data["card"]["suit"]);
+ 		}
+
  		$return = $gamespace->playCard($card);
 
  		if($return !== ""){

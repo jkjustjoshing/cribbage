@@ -162,6 +162,39 @@ PlayerHand.prototype.peggingMode = function(disable){
 				return which.peggingDraggingCallback(ele, x, y, which);
 			});
 		}
+
+		// Make "go" button
+		this.goEle = document.createElementNS(svgns, "g");
+		var goBox = document.createElementNS(svgns, "rect");
+		this.goEle.appendChild(goBox);
+		this.goEle.setAttributeNS(null, "transform", "translate(47, 585)");
+
+		goBox.setAttributeNS(null, "width", "40");
+		goBox.setAttributeNS(null, "height", "20");
+		goBox.setAttributeNS(null, "rx", "5");
+		goBox.setAttributeNS(null, "ry", "5");
+		goBox.setAttributeNS(null, "fill", "blue");
+		
+		var goText = document.createElementNS(svgns, "text");
+		this.goEle.appendChild(goText);
+
+		goText.setAttributeNS(null, "font-family", "Arial");
+		goText.setAttributeNS(null, "font-size", "20");
+		goText.setAttributeNS(null, "fill", window.textColor);
+		goText.setAttributeNS(null, "x", "6");
+		goText.setAttributeNS(null, "y", "17");
+		goText.appendChild(document.createTextNode("Go"));
+
+		this.ele.appendChild(this.goEle);
+
+		this.goEle.addEventListener("click", function(){
+			if(window.gamespace.turn !== window.player.id){
+				return;
+			}else{
+				window.gamespace.playedCards.play(null, window.player.id);
+			}
+		});
+
 	}else{
 		this.dragging = false;
 		for(var i = 0; i < this.cards.length; ++i){
@@ -179,7 +212,8 @@ PlayerHand.prototype.peggingDraggingCallback = function(ele, x, y, which){
 
 		var card = which.remove(new PlayingCard(cardID[0], cardID[1]), false);
 		window.gamespace.playedCards.play(card, window.player.id);
-
+		card.drag(false);
+		
 		which.sort(true);
 		return true;
 	}else{

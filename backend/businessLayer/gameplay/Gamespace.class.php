@@ -536,6 +536,8 @@
 				if($possible){
 					return "One of the cards in your hand can be played. You must use that card before going.";
 				}else{
+					$playedCards->play(null, $this->playerID);
+
 					// Switch turns
 					$database->switchTurn($this->gameID);
 
