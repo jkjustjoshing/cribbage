@@ -45,7 +45,7 @@
 			$runningCount = 0;
 			for($i = 0; $i < count($cards); ++$i){
 				$this->cards[] = array("card"=>$cards[$i]["card"], "playedByID"=>$cards[$i]["playedByID"]);
-				if($this->count + $cards[$i]["card"]->getCountValue() <= 31){
+				if($this->count + $cards[$i]["card"]->getCountValue() <= 31 && $cards[$i]["card"]->getCountValue() !== 0){
 					$this->screenCards[] = array("card"=>$cards[$i]["card"], "playedByID"=>$cards[$i]["playedByID"]);
 					$this->count += $cards[$i]["card"]->getCountValue();
 				}else{
@@ -81,7 +81,7 @@
 				$result = $this->database->playCard($this->gameID, $playerID, array("number"=>$card->getNumber(), "suit"=>$card->getSuit()));
 			}else{
 				$result = $this->database->playCard($this->gameID, $playerID, null);
-			
+				$this->screenCards = array();
 				return 0; // Return points if it's a point for a "go";
 
 			}
@@ -217,7 +217,8 @@
 
 		public function getCount(){
 			$runningCount = 0;
-			for($i = 0; $i < count($this->screenCards); ++$i){
+			$screenCardsSize = count($this->screenCards);
+			for($i = 0; $i < $screenCardsSize; ++$i){
 				$runningCount += $this->screenCards[$i]["card"]->getCountValue();
 			}
 

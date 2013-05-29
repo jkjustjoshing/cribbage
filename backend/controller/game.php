@@ -211,7 +211,8 @@
  				"gamestate"=>$gamespace->gamestate,
  				"turn"=>$gamespace->turnID,
 				"scores"=>$gamespace->getScores(),
-				"backPinPositions"=>$gamespace->getBackPinPositions()
+				"backPinPositions"=>$gamespace->getBackPinPositions(),
+				"playedCards"=>$gamespace->getPlayedCards()
  			);
  		}
 	}

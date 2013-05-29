@@ -193,9 +193,11 @@ Gamespace.prototype.constructState = function(){
 			break;
 		case "PEGGING":
 			which.hands[window.player.id].peggingMode(true);
-			var interval = setInterval(which.playedCards.poll, 5000);
+			var interval = setInterval(which.playedCards.poll, 2000);
+			which.setTurn(this.turn);
 			break;
 		case "VIEWING_HANDS":
+			which.setTurn(false); // Remove the turn indicator triangle
 			// Create button to mark being done
 			// Confirm each user's set of points, add to board
 			// Once all points have been confirmed, send server the ready message
@@ -266,11 +268,39 @@ Gamespace.prototype.animateDeal = function(){
 	);
 }
 
+Gamespace.prototype.setTurn = function(turn){
+	var falseColor = "#707070";
+
+	if(this.turnTriangles === undefined){
+		this.turnTriangles = {};
+		//this.turnTriangles[window.player.id];
+		var triangle = document.createElementNS(svgns, "path");
+		triangle.setAttributeNS(null, "fill", falseColor);
+		triangle.setAttributeNS(null, "d", "M -15,0 15,0 0,-12");
+		this.turnTriangles[window.player.id] = triangle.cloneNode();
+		this.turnTriangles[window.player.id].setAttributeNS(null, "transform", "translate(70,380) rotate(180,0,0)");
+		this.turnTriangles[window.opponent.id] = triangle;
+		this.turnTriangles[window.opponent.id].setAttributeNS(null, "transform", "translate(70,330)");
+		
+		document.getElementsByTagName("svg")[1].appendChild(this.turnTriangles[window.player.id]);
+		document.getElementsByTagName("svg")[1].appendChild(this.turnTriangles[window.opponent.id]);
+	}
+
+	if(turn !== false){
+		this.turn = turn;
+		this.turnTriangles[window.player.id].setAttributeNS(null, "fill", (window.player.id === this.turn ? window.textColor : falseColor));
+		this.turnTriangles[window.opponent.id].setAttributeNS(null, "fill", (window.opponent.id === this.turn ? window.textColor : falseColor));
+	}else{
+		this.turnTriangles[window.player.id].setAttributeNS(null, "fill", falseColor);
+		this.turnTriangles[window.opponent.id].setAttributeNS(null, "fill", falseColor);
+	}
+}
+
 window.coordinates = {
 	playerHand: {x:100, y:525},
 	opponentHand: {x:100, y:55},
 	deck: {x: 720, y: 280},
 	myCrib: {x: 580, y: 500},
 	opponentCrib: {x:580, y:20},
-	playedCards: {x: 50, y: 390}
+	playedCards: {x: 50, y: 350}
 }

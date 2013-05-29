@@ -22,7 +22,7 @@ function PlayedCards(cards, container, coordinates){
 	this.background.setAttributeNS(null, "rx", "10");
 	this.background.setAttributeNS(null, "ry", "10");
 	this.background.setAttributeNS(null, "x", "100");
-	this.background.setAttributeNS(null, "y", (coordinates.y-120));
+	this.background.setAttributeNS(null, "y", (coordinates.y-100));
 	this.background.setAttributeNS(null, "fill", "#444");
 	this.container.appendChild(this.background);
 
@@ -32,6 +32,7 @@ function PlayedCards(cards, container, coordinates){
 	var screenCards = [];
 	for(var i = 0; i < cards.length; ++i){
 		if(cards[i].suit !== null){
+			this.cards[i] = cards[i];
 			count += cards[i].number;
 			screenCards[screenCards.length] = {card: new PlayingCard(cards[i].number, cards[i].suit), playedByID: cards[i].playedByID};
 		}else{
@@ -75,8 +76,12 @@ PlayedCards.prototype.updateCountText = function(){
  * @param  {int} player The ID of the player who played this
  */
 PlayedCards.prototype.play = function(card, player, initializing){
+	if(!(card instanceof PlayingCard) && card !== null){
+		console.log("Can only play a PlayingCard object");
+		throw "Can only \"play\" a PlayingCard object";
+	}
 	var x = this.coordinates.x + 100;
-	var y = this.coordinates.y - 100;
+	var y = this.coordinates.y - 80;
 	if(window.player.id === player){
 		y += 20;
 	}
@@ -101,6 +106,8 @@ PlayedCards.prototype.play = function(card, player, initializing){
 		this.count += card.getCount();
 
 		this.updateCountText();
+	}else if(initializing === true){
+		this.cards[this.cards.length] = {card: new PlayingCard(), playedByID: player};
 	}
 
 	if(initializing === undefined || initializing == false){
@@ -129,17 +136,27 @@ PlayedCards.prototype.play = function(card, player, initializing){
 				}
 				if(data["game"]["success"] !== true){
 					window.gamespace.statusMessage(data["game"]["error"]);
-					which.count -= card.getCount();
-					which.updateCountText();
+					if(card.number !== 0){
+						which.count -= card.getCount();
+						which.updateCountText();
 
-					window.gamespace.hands[window.player.id].add(card);
+						window.gamespace.hands[window.player.id].add(card);
 
-					which.screenCards.length--;
+						which.screenCards.length--;
+					}
 					which.cards.length--;
 				}else{
 					// Success, update
-					window.gamespace.turn = data["game"]["turn"];
+					window.gamespace.setTurn(data["game"]["turn"]);
 
+					// If it was a go, clear the cards
+					if(card.number === 0 && data["game"]["playedCards"][data["game"]["playedCards"].length-1]["number"] === 0){
+						window.gamespace.playedCards.play(null, data["game"]["playedCards"][data["game"]["playedCards"].length-1]["playedByID"], true);
+						which.clearFromScreen();
+					}
+
+
+					// If the scores changed update them on the scoreboard
 					if(window.gamespace.scoreboard.playerInfo[window.player.id].score !== data["game"]["scores"][window.player.id]){
 						// Player has a new score
 						if(window.gamespace.scoreboard.playerInfo[window.player.id].score !== data["game"]["backPinPositions"][window.player.id]){
@@ -154,6 +171,10 @@ PlayedCards.prototype.play = function(card, player, initializing){
 						}
 						window.gamespace.scoreboard.changeScore(window.opponent.id, data["game"]["scores"][window.opponent.id]);					
 					}
+					// end updating scores
+					
+					// If the player "go"ed, show it!
+					
 
 					if(window.gamespace.gamestate !== data["game"]["gamestate"]){
 						alert("Gamestate is now " + data["game"]["gamestate"]);
@@ -170,6 +191,8 @@ PlayedCards.prototype.clearFromScreen = function(){
 		this.container.removeChild(this.screenCards[i].card.ele);
 	}
 	this.screenCards = [];
+	this.count = 0;
+	this.updateCountText();
 }
 
 PlayedCards.prototype.successfulDrag = function(x, y){
@@ -199,31 +222,22 @@ PlayedCards.prototype.poll = function(){
 				var playedCards = data["game"]["playedCards"];
 				// array of cards = data["game"]
 
-				var i;
-				if(which.screenCards.length === 0){
-					i = 0;
-				}else{
-					var lastCardKnown = which.screenCards[which.screenCards.length-1];
-					for(i = 0; i < playedCards.length; ++i){
-						if(playedCards[i]["suit"] === lastCardKnown.card.suit && playedCards[i]["number"] === lastCardKnown.card.number){
-							++i;
-							break;
-						}
+				for(var i = which.cards.length ; i < playedCards.length; ++i){
+					if(playedCards[i]["number"] === 0){
+						window.gamespace.playedCards.play(null, playedCards[i]["playedByID"], true);
+						which.clearFromScreen();
+					}else{
+						var anonymousCard = window.gamespace.hands[playedCards[i]["playedByID"]].remove(new PlayingCard());
+						anonymousCard.ele.parentNode.removeChild(anonymousCard.ele);
+
+						var card = new PlayingCard(playedCards[i]["number"], playedCards[i]["suit"]);
+						window.gamespace.hands[playedCards[i]["playedByID"]].add(card, true); // true for "do not animate"
+						window.gamespace.hands[playedCards[i]["playedByID"]].remove(card);
+						window.gamespace.playedCards.play(card, playedCards[i]["playedByID"], true);
 					}
 				}
 
-				for( ; i < playedCards.length; ++i){
-					var anonymousCard = window.gamespace.hands[playedCards[i]["playedByID"]].remove(new PlayingCard());
-					anonymousCard.ele.parentNode.removeChild(anonymousCard.ele);
-
-					var card = new PlayingCard(playedCards[i]["number"], playedCards[i]["suit"]);
-					window.gamespace.hands[playedCards[i]["playedByID"]].add(card, true); // true for "do not animate"
-					window.gamespace.hands[playedCards[i]["playedByID"]].remove(card);
-					window.gamespace.playedCards.play(card, playedCards[i]["playedByID"], true);
-
-				}
-
-				window.gamespace.turn = data["game"]["turn"];
+				window.gamespace.setTurn(data["game"]["turn"]);
 
 				if(window.gamespace.scoreboard.playerInfo[window.player.id].score !== data["game"]["scores"][window.player.id]){
 					// Player has a new score

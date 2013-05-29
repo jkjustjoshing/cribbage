@@ -415,7 +415,7 @@
 				);
 			if(!$database->putInCrib($this->gameID, $cards)){
 				// Failed, put cards back in hand
-				echo "pal bar";
+
 				$myHand->add($card1);
 				$myHand->add($card2);
 				$myHand->writeback($this->gameID, $this->playerID);
@@ -525,10 +525,12 @@
 			// If this is a null card, make sure that no other card can be played
 			if($card === null){
 
-				$hand = $this->getMyHand();
+				$hand = $this->getMyHand()->cardArray();
 				$cardArr = array();
 				foreach($hand as $card){
-					$cardArr[] = $card["card"];
+					if($card["inHand"] === 1){
+						$cardArr[] = new PlayingCard($card["number"], $card["suit"]);
+					}
 				}
 
 				$possible = $playedCards->test($cardArr);
@@ -536,16 +538,17 @@
 				if($possible){
 					return "One of the cards in your hand can be played. You must use that card before going.";
 				}else{
-					$playedCards->play(null, $this->playerID);
-
+					$result = "";
+					if($playedCards->getScreenCards()[count($playedCards->getScreenCards())-1]["playedByID"] === $this->playerID){
+						$playedCards->play(null, $this->playerID);
+						// If the last card that was played was mine, give me a point
+						$result = $this->updateScore($this->playerID, 1);
+					}
 					// Switch turns
 					$database->switchTurn($this->gameID);
+					$this->turnID = ($this->playerID === $this->player1ID ? $this->player2ID : $this->player1ID);
 
-					// If the last card that was played was mine, give me a point
-					$result = $this->updateScore($this->playerID, 1);
-					if($result !== ""){
-						return $result;
-					}
+					return $result;
 				}
 			}else{
 				// Make sure the card is in our hand
@@ -576,6 +579,7 @@
 
 					// Change whose turn it is
 					$database->switchTurn($this->gameID);
+					$this->turnID = ($this->playerID === $this->player1ID ? $this->player2ID : $this->player1ID);
 
 					return "";
 				}

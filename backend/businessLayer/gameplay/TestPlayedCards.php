@@ -1,4 +1,4 @@
-<?php
+2<?php
 
 	require_once("../../../frontend/config.php");
 	require_once("../../simpletest/autorun.php");
@@ -168,6 +168,44 @@
 			$playedCards = new PlayedCards($gameID);
 			$this->assertEqual($playedCards->getCount(), 0);
 			$this->assertEqual(count($playedCards->getAllCards()), 0);
+
+		}
+
+		function testTesting(){
+			echo "testTesting()<br />\n";
+
+			$this->start();
+
+			$playerDatabase = DataLayer::getPlayerInstance();
+
+			$player1 = $playerDatabase->getPlayer("josh1");
+			$player2 = $playerDatabase->getPlayer("josh2");
+
+			$gameID = Gamespace::getGameID($player1["id"], $player2["id"]);
+
+			$playedCards = new PlayedCards($gameID);
+
+			$result = $playedCards->play((new PlayingCard(10, "heart")), 1);
+			$result = $playedCards->play((new PlayingCard(10, "club")), 1);
+			$result = $playedCards->play((new PlayingCard(10, "diamond")), 1);
+			$this->assertEqual($playedCards->getCount(), 30);
+
+			$falseCards = array(
+					new PlayingCard(3, "diamond"),
+					new PlayingCard(5, "diamond"),
+					new PlayingCard(10, "diamond"),
+					new PlayingCard(9, "club")
+				);
+
+			$trueCards = array(
+					new PlayingCard(3, "diamond"),
+					new PlayingCard(5, "diamond"),
+					new PlayingCard(1, "diamond"),
+					new PlayingCard(9, "club")
+				);
+
+			$this->assertFalse($playedCards->test($falseCards));
+			$this->assertTrue($playedCards->test($trueCards));
 
 
 		}
