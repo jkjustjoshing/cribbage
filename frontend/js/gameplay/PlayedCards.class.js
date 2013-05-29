@@ -35,6 +35,10 @@ function PlayedCards(cards, container, coordinates){
 			count += cards[i].number;
 			screenCards[screenCards.length] = {card: new PlayingCard(cards[i].number, cards[i].suit), playedByID: cards[i].playedByID};
 		}else{
+			for(var j = 0; j < screenCards.length; ++j){
+				this.cards[this.cards.length] = screenCards[j];
+			}
+			this.cards[this.cards.length] = {card: new PlayingCard, playedByID: cards[i].playedByID};
 			count = 0;
 			screenCards = [];
 		}
@@ -195,7 +199,8 @@ PlayedCards.prototype.clearFromScreen = function(){
 }
 
 PlayedCards.prototype.successfulDrag = function(x, y){
-	if(window.gamespace.turn != window.player.id) return false;
+	// Commenting out next line so all drags get sent to the server, so the "Not your turn" message appears
+	// if(window.gamespace.turn != window.player.id) return false;
 	var bbox = this.background.getBBox();
 	var insideHorizontally = x > bbox.x && x < (bbox.x + bbox.width);
 	var insideVertically = y > bbox.y && y < (bbox.y + bbox.height);
