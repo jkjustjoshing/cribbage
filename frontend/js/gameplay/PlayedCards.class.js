@@ -199,8 +199,7 @@ PlayedCards.prototype.clearFromScreen = function(){
 }
 
 PlayedCards.prototype.successfulDrag = function(x, y){
-	// Commenting out next line so all drags get sent to the server, so the "Not your turn" message appears
-	// if(window.gamespace.turn != window.player.id) return false;
+	if(window.gamespace.turn != window.player.id) return false;
 	var bbox = this.background.getBBox();
 	var insideHorizontally = x > bbox.x && x < (bbox.x + bbox.width);
 	var insideVertically = y > bbox.y && y < (bbox.y + bbox.height);

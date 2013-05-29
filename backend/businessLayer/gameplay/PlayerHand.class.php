@@ -401,6 +401,20 @@ if($debug)				echo "</pre>";
 
 			return $arr;
 		}
+
+		/**
+		 * Indicates if the hand is empty as it relates to pegging.
+		 * Used to detect when pegging state should be exited
+		 * @return boolean Whether or not the hand is empty
+		 */
+		public function isEmpty(){
+			foreach($this->_cards as $card){
+				if($card["inHand"] === 1){
+					return false;
+				}
+			}
+			return true;
+		}
 		
 
 	}

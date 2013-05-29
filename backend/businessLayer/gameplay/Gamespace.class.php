@@ -563,6 +563,11 @@
 					return "You can't play that card because it makes the count go above 31";
 				}else{
 
+					// If we have reached 31, post a null card to reset the board
+					if($playedCards->getCount() === 31){
+						$playedCards->play(null, $this->playerID);
+					}
+
 					// Add points to the user
 					if($points !== 0){
 						$result = $this->updateScore($this->playerID, $points);
@@ -576,6 +581,11 @@
 					$myHand->peg($card);
 					$myHand->writeback($this->gameID, $this->playerID);
 
+					if($myHand->isEmpty()){
+						if($this->getOpponentHand()->isEmpty()){
+							$database->changeGameState($this->gameID, "VIEWING_HANDS");
+						}
+					}
 
 					// Change whose turn it is
 					$database->switchTurn($this->gameID);

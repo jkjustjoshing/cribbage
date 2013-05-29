@@ -6,7 +6,7 @@ delete from playerhands;
 delete from playedcards;
 insert into playerhands (gameID, playerID, playingcardID, inHand)
 	VALUES
-	(1, 1, 20, 1),
+	(1, 1, 1, 1),
 	(1, 1, 21, 1),
 	(1, 1, 22, 1),
 	(1, 1, 23, 1),
