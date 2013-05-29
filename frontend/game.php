@@ -110,7 +110,7 @@
 				<!-- Make the background -> 800x600 -->
 				<rect x="0" y="0" width="100%" height="100%" id="background" />
 				
-				<text id="statusMessage" x="100" y="260" font-family="Arial" font-size="20" fill="<?php echo $textColor; ?>"></text>
+				<text id="statusMessage" x="100" y="240" font-family="Arial" font-size="20" fill="<?php echo $textColor; ?>"></text>
 			</svg>
 		</div>
 		<div class="chat" id="gameChat">

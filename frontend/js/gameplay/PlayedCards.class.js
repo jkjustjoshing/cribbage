@@ -32,7 +32,6 @@ function PlayedCards(cards, container, coordinates){
 	var screenCards = [];
 	for(var i = 0; i < cards.length; ++i){
 		if(cards[i].suit !== null){
-			this.cards[i] = cards[i];
 			count += cards[i].number;
 			screenCards[screenCards.length] = {card: new PlayingCard(cards[i].number, cards[i].suit), playedByID: cards[i].playedByID};
 		}else{
