@@ -16,14 +16,13 @@ function Crib(cardArray, container, coordinates, dealer){
 	this.ele = container;
 	this.isChoosingCribMode = false;
 
-	this.coordinates = coordinates;
+	this.coordinates = coordinates[dealer];
+	this.masterCoordinates = coordinates;
 
 	this.padding = {x:10, y:5};
-	this.coordinates.x += this.padding.x;
-	this.coordinates.y += this.padding.y;
 	this.textBoxCoordinates = {};
-	this.textBoxCoordinates[window.player.id] = {x: 700, y:670};
-	this.textBoxCoordinates[window.opponent.id] = {x: 660, y:190};
+	this.textBoxCoordinates[window.player.id] = {x: 120, y: 170};
+	this.textBoxCoordinates[window.opponent.id] = {x: 90, y: 170};
 
 	this.setDealer(dealer);
 
@@ -141,6 +140,14 @@ Crib.prototype.remove = function(card){
  */
 Crib.prototype.setDealer = function(dealerID){
 	this.dealer = dealerID;
+
+	var cribMessage;
+	if(dealerID === window.player.id){
+		cribMessage = "My Crib";
+	}else{
+		cribMessage = window.opponent.username + "'s Crib";
+	}
+
 	// If there is no cribBox element create it
 	if(this.cribBox === undefined){
 		this.cribBox = document.createElementNS(svgns, "g");
@@ -158,29 +165,17 @@ Crib.prototype.setDealer = function(dealerID){
 		text.setAttributeNS(null, "font-family", "Arial");
 		text.setAttributeNS(null, "font-size", "20");
 		text.setAttributeNS(null, "fill", window.textColor);
-		if(dealerID === window.player.id){
-			text.appendChild(document.createTextNode("My Crib"));
-		}else{
-			text.appendChild(document.createTextNode( window.opponent.username + "'s Crib"));
-		}
+		text.appendChild(document.createTextNode(cribMessage));
+		
 		this.cribBox.appendChild(text);
 		this.ele.appendChild(this.cribBox);
 	}
+	
+	this.cribBox.setAttributeNS(null, "transform", "translate("+this.masterCoordinates[dealerID].x+", "+this.masterCoordinates[dealerID].y+")");
+	this.cribBox.childNodes[1].setAttributeNS(null, "x", this.textBoxCoordinates[dealerID].x);
+	this.cribBox.childNodes[1].setAttributeNS(null, "y", this.textBoxCoordinates[dealerID].y);
+	this.cribBox.childNodes[1].firstChild.nodeValue = cribMessage;
 
-	// Put the crib box either above or below the deck, indicating the dealer
-	if(dealerID === window.player.id){
-		// Put it below the deck
-		this.cribBox.childNodes[0].setAttributeNS(null, "y", this.coordinates.y - this.padding.y);
-		this.cribBox.childNodes[0].setAttributeNS(null, "x", this.coordinates.x - this.padding.x);
-		this.cribBox.childNodes[1].setAttributeNS(null, "x", this.textBoxCoordinates[window.player.id].x);
-		this.cribBox.childNodes[1].setAttributeNS(null, "y", this.textBoxCoordinates[window.player.id].y);
-	}else{
-		// Put it above the deck
-		this.cribBox.childNodes[0].setAttributeNS(null, "y", this.coordinates.y - this.padding.y);
-		this.cribBox.childNodes[0].setAttributeNS(null, "x", this.coordinates.x - this.padding.x);
-		this.cribBox.childNodes[1].setAttributeNS(null, "x", this.textBoxCoordinates[window.opponent.id].x);
-		this.cribBox.childNodes[1].setAttributeNS(null, "y", this.textBoxCoordinates[window.opponent.id].y);
-	}
 };
 
 /**
@@ -314,3 +309,5 @@ Crib.prototype.confirmSelection = function(){
 		cribText.addEventListener("click", this.confirmCrib, false);
 	}
 };
+
+Crib.prototype.clear = PlayerHand.prototype.clear;
