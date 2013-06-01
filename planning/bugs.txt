@@ -3,6 +3,6 @@ When the player has put 2 cards in the crib, then picks up one of the crib cards
 The crib doesn't poll for the other player putting their cards in, and for the player who first puts the cards in the state never changes.
 Cutting the cut card has a bad interface.
 Can't peg without reloading - probably has something to do with dragging being screwed up after crib dragging happens and then is disabled.
-
+No point given for last last card.
 
 

@@ -79,6 +79,9 @@ Scoreboard.prototype = {
 	 * @param {int} newScore The new score of the player, to update on the screen
 	 */
 	changeScore: function(playerID, newScore){
+		if(newScore === this.playerInfo[playerID].score){
+			return;
+		}
 		//Update the score in memory, update the pin locations on the screen
 		this.playerInfo[playerID].backPinPosition = this.playerInfo[playerID].score;
 		this.playerInfo[playerID].score = newScore;

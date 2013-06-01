@@ -74,6 +74,7 @@
 			self::$cookieExpire = time() + (60*60);
 			
 			if($token === ""){
+				if(!isset($_COOKIE[self::$cookieName])) throw new Exception("foo");
 				$token = $_COOKIE[self::$cookieName];
 			}
 

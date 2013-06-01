@@ -230,6 +230,24 @@
 			return false;
 		}
 
+		public function deleteHands($gameID){
+			// First remove the hand if it exists
+
+			$sql = "DELETE FROM playerhands
+			        WHERE gameID=?";
+			if($stmt = $this->mysqli->prepare($sql)){
+				//Bind parameter, execute, and bind result
+				$stmt->bind_param("i", $gameID);
+				if($stmt->execute() === false){
+					//failure
+					return false;
+				}
+				return true;
+			}else{
+				return false;
+			}
+		}
+
 		/**
 		 * Put an array of cards in the crib for the given game
 		 * @param  int $gameID The game in question

@@ -44,7 +44,7 @@ function Crib(cardArray, container, coordinates, dealer){
  * @param  {PlayingCard} card The card to add to the crib
  * @return {Boolean}      Whether or not the card was added
  */
-Crib.prototype.add = function(card){
+Crib.prototype.add = function(card, dragged, dontAnimate){
 	var which = this;
 
 	if(this.cards.length < 4){
@@ -54,33 +54,17 @@ Crib.prototype.add = function(card){
 			this.ele.appendChild(card.ele);
 		}
 		// Animate card to the crib
-		$(card.ele).animate({
-			svgTransform: "translate("+(this.coordinates.x + (this.cards.length-1)*35)+","+this.coordinates.y+")"
-		}, 100);
-	
-		// Make card draggable outside the crib
-		if(card.isVisible()){
-			/*card.drag(function(ele, x, y){
-				// Where is the card? If it's out of the crib move it.
-				if(!window.gamespace.crib.successfulDrag(x+50, y+70)){ //half the width, half the height of a card
-					// It's not in the crib - send it over!
-					var cardID = ele.getAttributeNS(null, "name").split("|");
-
-					var card = which.remove(new PlayingCard(cardID[0], cardID[1]), false);
-					window.gamespace.hands[window.player.id].add(card);
-
-					// 		If there are 2 cards there show button
-					// If it's not in crib animate back, then sort
-					which.sort(true);
-					return true;
-				}else{
-					which.sort(true);
-					return false;
-				}
-			});*/
+		if(dontAnimate){
+			card.ele.setAttributeNS(null, "transform", "translate("+(this.coordinates.x + (this.cards.length-1)*35)+","+this.coordinates.y+")");
+		}else{
+			$(card.ele).animate({
+				svgTransform: "translate("+(this.coordinates.x + (this.cards.length-1)*35)+","+this.coordinates.y+")"
+			}, 100);
 		}
 
-		this.confirmSelection();
+		if(dragged !== false){
+			this.confirmSelection();
+		}
 
 		return true;
 	}
@@ -125,7 +109,6 @@ Crib.prototype.sort = function(animate){
 
 Crib.prototype.cardRemove = PlayerHand.prototype.remove;
 Crib.prototype.remove = function(card){
-	alert("f");
 	var card = this.cardRemove(card);
 	this.confirmSelection();
 
@@ -311,3 +294,16 @@ Crib.prototype.confirmSelection = function(){
 };
 
 Crib.prototype.clear = PlayerHand.prototype.clear;
+
+Crib.prototype.viewingCards = function(cardArray){
+	// Remove all cards from screen
+	var cards = this.cards.slice(0);
+	for(var i = 0; i < cards.length; ++i){
+		this.cardRemove(cards[i]);
+	}
+
+	// Display new set of cards
+	for(var i = 0; i < cardArray.length; ++i){
+		this.add(new PlayingCard(cardArray[i].number, cardArray[i].suit), false, true);
+	}
+}

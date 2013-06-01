@@ -23,7 +23,7 @@
 		 * The IDs of the 2 players in this game
 		 * @var int
 		 */
-		private $player1ID, $player2ID;
+		public $player1ID, $player2ID;
 
 		/**
 		 * The ID of the logged in player
@@ -425,7 +425,9 @@
 			// If the other player's hand has 4 cards change the state to CUTTING_CARD
 			$crib = $this->getCrib();
 			if(count($crib->getCards()) === 4){
-				$database->changeGameState($this->gameID, "CUTTING_CARD");
+				if($database->changeGameState($this->gameID, "CUTTING_CARD")){
+					$this->gamestate = "CUTTING_CARD";
+				}
 			}
 		}
 
@@ -465,7 +467,10 @@
 				}
 
 			}else{
-				//Get the cut card and return it
+				// Return the cut card
+				return new PlayingCard($this->cutCard->number, $this->cutCard->suit);
+
+				/*//Get the cut card and return it
 				$card = $database->getCutCard($this->gameID);
 				if($card === false){
 					return "There was a database problem getting the cut card.";
@@ -475,7 +480,7 @@
 					}else{
 						return new PlayingCard(0, null);
 					}
-				}
+				}*/
 			}
 		}
 
@@ -583,7 +588,10 @@
 
 					if($myHand->isEmpty()){
 						if($this->getOpponentHand()->isEmpty()){
-							$database->changeGameState($this->gameID, "VIEWING_HANDS");
+							$playedCards->play(null, $this->playerID);
+							if($database->changeGameState($this->gameID, "VIEWING_HANDS")){
+								$this->gamestate = "VIEWING_HANDS";
+							}
 						}
 					}
 
@@ -599,7 +607,76 @@
 		}
 
 		public function doneViewing(){
+			$database = DataLayer::getGameplayInstance();
 			// Set the state to either WAITING_FOR_PLAYER# or DEALING
+			if($this->gamestate === "VIEWING_HANDS"){
+	 			if($this->playerID === $this->player1ID){
+	 				// We are player 1, waiting for player 2
+	 				if($database->changeGameState($this->gameID, "WAITING_PLAYER_2")){
+						$this->gamestate = "WAITING_PLAYER_2";
+						return "";
+					}else{
+						return "Failed to write to the database.";
+					}
+	 			}else{
+	 				// We are player 2, waiting for player 1
+	 				if($database->changeGameState($this->gameID, "WAITING_PLAYER_1")){
+						$this->gamestate = "WAITING_PLAYER_1";
+						return "";
+					}else{
+						return "Failed to write to the database.";
+					}
+	 			}
+	 		}else if($this->gamestate === "WAITING_PLAYER_1"){
+	 			if($this->playerID === $this->player1ID){
+	 				// We are player 1, can go back to dealing
+	 				return $this->resetGamespace();
+	 			}else{
+	 				// We are player 2, waiting for player 1
+	 				return "";
+	 			}
+	 		}else if($this->gamestate === "WAITING_PLAYER_2"){
+	 			if($this->playerID === $this->player1ID){
+	 				// We are player 1, can go back to dealing
+	 				return "";
+	 			}else{
+	 				// We are player 2, waiting for player 1
+	 				return $this->resetGamespace();
+	 			}
+	 		}else{
+				return "Can only do this when viewing cards.";
+	 		}
+				
+		}
+
+		private function resetGamespace(){
+			$database = DataLayer::getGameplayInstance();
+
+			$this->updateScore($this->playerID, $this->getMyHand()->totalPoints( $this->cutCard() ));
+			$this->updateScore($this->opponentID, $this->getOpponentHand()->totalPoints( $this->cutCard() ));
+			$this->updateScore($this->dealerID, $this->getCrib()->totalPoints( $this->cutCard() ));
+
+			$this->gamestate = "DEALING";
+			$database->changeGameState($this->gameID, "DEALING");
+
+			// Clear out the hands, clear out the deck, clear out the played cards, delete the cut card,
+			// swap the dealer, set turnID to the non dealer
+			
+			$database->deleteHands($this->gameID);
+			$database->deleteCardDeck($this->gameID);
+			$database->clearPlayedCards($this->gameID);
+			$database->setCutCard($this->gameID, array("number"=>0, "suit"=>""));
+			
+			$database->switchDealer($this->gameID);
+			$this->dealerID = ($this->dealerID === $this->player1ID ? $this->player2ID : $this->player1ID);
+
+			if($this->turnID === $this->dealerID){
+				$database->switchTurn($this->gameID);
+				$this->turnID = ($this->dealerID === $this->player1ID ? $this->player2ID : $this->player1ID);
+			}
+
+			return "";
+
 		}
 
 

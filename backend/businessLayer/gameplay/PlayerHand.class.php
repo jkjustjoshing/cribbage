@@ -210,7 +210,7 @@
 		 * @return The number of points in the hand with the given cut card
 		 */
 		public function totalPoints($cutCard, $debug = false){
-			if($this->numberOfCardsInHand() < 4){
+			if(count($this->_cards) < 4){
 				// Score can't be calculated with a smaller-than-full hand
 				return 0;
 			}

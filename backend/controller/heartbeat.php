@@ -8,6 +8,10 @@
 			return false;
 		}
 
+		if(!SecurityToken::isTokenSet()){
+			return false;
+		}
+
 		$playerID = SecurityToken::extract();
 
 		return Heartbeat::beat($playerID, $room);	

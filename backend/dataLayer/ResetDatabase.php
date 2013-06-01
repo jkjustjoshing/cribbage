@@ -63,8 +63,6 @@
 		player1backPinPosition TINYINT DEFAULT 0,
 		player2Score TINYINT DEFAULT 0,
 		player2backPinPosition TINYINT DEFAULT 0,
-		cribID INT NOT NULL,
-		" ./*FOREIGN KEY(cribID) REFERENCES playerhand(id),*/ "
 		turnID INT NOT NULL,
 		FOREIGN KEY(turnID) REFERENCES players(id),
 		dealerID INT NOT NULL,

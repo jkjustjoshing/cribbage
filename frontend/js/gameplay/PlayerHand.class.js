@@ -10,7 +10,7 @@ var svgns = "http://www.w3.org/2000/svg";
  * 
  * @param Array  cardArray An array of PlayingCard objects
  */
-function PlayerHand(cardArray, container, coordinates){	
+function PlayerHand(cardArray, container, coordinates, state){	
 	this.cards = [];
 	this.ele = container;
 
@@ -18,7 +18,7 @@ function PlayerHand(cardArray, container, coordinates){
 
 	for(var i = 0; i < cardArray.length; ++i){
 		if(!(cardArray[i] instanceof PlayingCard)){
-			if(cardArray[i]['inHand']){
+			if(cardArray[i]['inHand'] || cardArray[i]["inHand"] === null || state === "VIEWING_HANDS" || state === "WAITING_PLAYER_1" || state === "WAITING_PLAYER_2"){
 				var card = new PlayingCard(cardArray[i]["number"], cardArray[i]["suit"]);
 				this.add(card, true);
 			}
@@ -219,6 +219,14 @@ PlayerHand.prototype.peggingDraggingCallback = function(ele, x, y, which){
 	}else{
 		which.sort(true);
 		return false;
+	}
+}
+
+PlayerHand.prototype.clear = function(){
+	var cards = this.cards.slice(0); // Clone the array, so the length stays constant as we remove cards
+	for(var i = 0; i < cards.length; ++i){
+		var card = this.remove(cards[i]);
+		card.ele.parentNode.removeChild(card.ele);
 	}
 }
 

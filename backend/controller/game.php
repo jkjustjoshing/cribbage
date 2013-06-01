@@ -61,6 +61,22 @@
 		$result["gamestatus"] = $gamespace->gamestatus;
 		$result["cutCard"] = $gamespace->cutCard;
 		$result["playedCards"] = $gamespace->getPlayedCards();
+
+		$result["playerIndex"] = array($gamespace->player1ID=>1, $gamespace->player2ID=>2);
+
+		if($gamespace->gamestate === "VIEWING_HANDS" || $gamespace->gamestate === "WAITING_PLAYER_1" || $gamespace->gamestate === "WAITING_PLAYER_2"){
+			$cutCard = $gamespace->cutCard();
+
+	 		$myHand = $gamespace->getMyHand();
+	 		$opponentHand = $gamespace->getOpponentHand();
+	 		$crib = $gamespace->getCrib();
+
+	 		$result["handPoints"] = array(
+	 			$playerID => $myHand->totalPoints($cutCard),
+	 			$gamespace->getOpponentID() => $opponentHand->totalPoints($cutCard),
+	  			"crib" => $crib->totalPoints($cutCard)
+	 		);
+		}
 		
 		return $result;
 	}
@@ -301,6 +317,63 @@
  		}
 
 		return array("scores"=>$gamespace->getScores(), "backPinPositions"=>$gamespace->getBackPinPositions());
+	}
+
+	function getHandPoints($data){
+		$gameID = intval($data["gameID"]);
+
+		// Get security token to see who we are,
+		$playerID = SecurityToken::extract();
+
+		// Make sure user is allowed to see this game
+		try{
+			$gamespace = new Gamespace($gameID, $playerID);
+		}catch(Exception $e){
+			return "Player " . $playerID . " doesn't have access to gameID " . $gameID . ".";
+ 		}
+
+ 		$state = $gamespace->gamestate;
+ 		if($state !== "VIEWING_HANDS" && $state !== "WAITING_PLAYER_1" && $state !== "WAITING_PLAYER_2"){
+ 			return "Points can only be looked at during the correct point in the game.";
+ 		}
+
+ 		$cutCard = $gamespace->cutCard();
+
+ 		$myHand = $gamespace->getMyHand();
+ 		$opponentHand = $gamespace->getOpponentHand();
+ 		$crib = $gamespace->getCrib();
+
+ 		$result = array("handPoints"=>array(
+ 			$playerID => $myHand->totalPoints($cutCard),
+ 			$gamespace->getOpponentID() => $opponentHand->totalPoints($cutCard),
+  			"crib" => $crib->totalPoints($cutCard)
+ 		));
+
+		return $result;
+
+	}
+
+	function doneViewingHands($data){
+		$gameID = intval($data["gameID"]);
+
+		// Get security token to see who we are,
+		$playerID = SecurityToken::extract();
+
+		// Make sure user is allowed to see this game
+		try{
+			$gamespace = new Gamespace($gameID, $playerID);
+		}catch(Exception $e){
+			return "Player " . $playerID . " doesn't have access to gameID " . $gameID . ".";
+ 		}
+
+ 		$result = $gamespace->doneViewing();
+
+ 		if($result !== ""){
+ 			return $result;
+ 		}else{
+ 			// Get game state
+ 			return array("success"=>true, "gamestate"=>$gamespace->gamestate);
+ 		}
 	}
 
 ?>

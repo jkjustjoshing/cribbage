@@ -4,6 +4,8 @@ function Gamespace(data, svgEle){
 	this.gamestate = data.gamestate;
 	this.gamestatus = data.gamestatus;
 
+	this.svgEle = svgEle;
+
 	var playerInfo = {
 		score: data.scores[window.player.id],
 		id: window.player.id,
@@ -18,7 +20,7 @@ function Gamespace(data, svgEle){
 	};
 	this.scoreboard = new Scoreboard(playerInfo, opponentInfo);
 
-	this.cutCard = data.cutCard; // TODO create the card object, or set to undefined, pass to deck object??
+	this.cutCard = data.cutCard;
 	this.dealer = data.dealer;
 
 	this.playedCards = new PlayedCards(data.playedCards, document.getElementsByTagName("svg")[1], window.coordinates.playedCards);
@@ -27,8 +29,14 @@ function Gamespace(data, svgEle){
 	this.hands[window.player.id] = new PlayerHand(data.hands[window.player.id], svgEle, window.coordinates.playerHand);
 	this.hands[window.player.id].sort();
 	this.hands[window.opponent.id] = new PlayerHand(data.hands[window.opponent.id], svgEle, window.coordinates.opponentHand); 
+	this.hands[window.opponent.id].sort();
 
-	this.crib = new Crib(data.hands["crib"], svgEle, (this.dealer === window.player.id ? window.coordinates.myCrib : window.coordinates.opponentCrib), this.dealer);
+	this.playerIndex = data.playerIndex;
+
+	var cribCoordinates = [];
+	cribCoordinates[window.player.id] = window.coordinates.myCrib;
+	cribCoordinates[window.opponent.id] = window.coordinates.opponentCrib;
+	this.crib = new Crib(data.hands["crib"], svgEle, cribCoordinates, this.dealer);
 
 	if(this.cutCard.number !== null && this.cutCard.suit !== null){
 		this.cutCard = new PlayingCard(this.cutCard["number"], this.cutCard["suit"]);
@@ -192,23 +200,23 @@ Gamespace.prototype.constructState = function(){
 			}
 			break;
 		case "PEGGING":
+			which.statusMessage("");
 			which.hands[window.player.id].peggingMode(true);
 			var interval = setInterval(which.playedCards.poll, 2000);
 			which.setTurn(this.turn);
 			break;
 		case "VIEWING_HANDS":
-			which.setTurn(false); // Remove the turn indicator triangle
-			// Create button to mark being done
+			which.viewHands(true);
+
 			// Confirm each user's set of points, add to board
 			// Once all points have been confirmed, send server the ready message
 			// Move to appropriate stage based on the returned new state
 			break
 		case "WAITING_PLAYER_1":
-			// Not yet sure how to tell between this and WAITING_PLAYER_2
-			// Show message, poll server for being ready to move on to next state.
+			which.viewHands(which.playerIndex[window.player.id] === 1);
 			break;
 		case "WAITING_PLAYER_2":
-
+			which.viewHands(which.playerIndex[window.player.id] === 2);
 			break;
 		default:
 			// Just throw them out to the lobby
@@ -294,6 +302,194 @@ Gamespace.prototype.setTurn = function(turn){
 		this.turnTriangles[window.player.id].setAttributeNS(null, "fill", falseColor);
 		this.turnTriangles[window.opponent.id].setAttributeNS(null, "fill", falseColor);
 	}
+}
+
+Gamespace.prototype.viewHands = function(needToConfirmHand){
+	var which = this;
+	which.setTurn(false); // Remove the turn indicator triangle
+	
+	ajaxCall(
+		"get",
+		{
+			application: "game",
+			method: "getGameData",
+			data: {
+				gameID: window.gameID
+			}
+		},
+		function(data){
+			data = data["game"];
+
+			// Create new player hands 
+			var playerHand = which.hands[window.player.id];
+			for(var i = 0; i < data["hands"][window.player.id].length; ++i){
+				data["hands"][window.player.id][i].inHand = 1;
+			}
+			var newPlayerHand = new PlayerHand(data["hands"][window.player.id], playerHand.ele, playerHand.coordinates);
+			playerHand.clear();
+			newPlayerHand.sort();
+			which.hands[window.player.id] = newPlayerHand;
+
+			
+			var opponentHand = which.hands[window.opponent.id];
+			for(var i = 0; i < data["hands"][window.opponent.id].length; ++i){
+				data["hands"][window.opponent.id][i].inHand = 1;
+			}
+			var newOpponentHand = new PlayerHand(data["hands"][window.opponent.id], opponentHand.ele, opponentHand.coordinates);
+			opponentHand.clear();
+			newOpponentHand.sort();
+			which.hands[window.opponent.id] = newOpponentHand;
+			
+			which.crib.viewingCards(data["hands"]["crib"]);
+			which.crib.sort();
+
+			if(needToConfirmHand){
+				which.confirmHandView(data);
+			}
+		}
+	);		
+}
+
+Gamespace.prototype.confirmHandView = function(data){
+	var which = this;
+
+
+	var nonDealer = (window.player.id === which.dealer ? window.opponent : window.player);
+
+	var nonDealerScore = data["handPoints"][nonDealer.id];
+	which.statusMessage((nonDealer.id === window.player.id ? "Your" : (nonDealer.username + "'s")) + " hand scores "+nonDealerScore+" points.");
+	which.scoreboard.addPoints(nonDealer.id, nonDealerScore);
+
+	var goEle = document.createElementNS(svgns, "g");
+	var goBox = document.createElementNS(svgns, "rect");
+	goEle.appendChild(goBox);
+	
+	var coordinates = {
+		x: (nonDealer.id === window.player.id ? window.coordinates.playerHand.x : window.coordinates.opponentHand.x) + 50,
+		y: (nonDealer.id === window.player.id ? window.coordinates.playerHand.y : window.coordinates.opponentHand.y) + 60
+	};
+
+	goEle.setAttributeNS(null, "transform", "translate("+coordinates.x+","+coordinates.y+")");
+
+	goBox.setAttributeNS(null, "width", "80");
+	goBox.setAttributeNS(null, "height", "40");
+	goBox.setAttributeNS(null, "rx", "5");
+	goBox.setAttributeNS(null, "ry", "5");
+	goBox.setAttributeNS(null, "fill", "blue");
+	
+	var goText = document.createElementNS(svgns, "text");
+	goEle.appendChild(goText);
+
+	goText.setAttributeNS(null, "font-family", "Arial");
+	goText.setAttributeNS(null, "font-size", "30");
+	goText.setAttributeNS(null, "fill", window.textColor);
+	goText.setAttributeNS(null, "x", "15");
+	goText.setAttributeNS(null, "y", "30");
+	goText.appendChild(document.createTextNode("OK"));
+
+	which.svgEle.appendChild(goEle);
+
+	goEle.addEventListener("click", function(){
+		var dealer = (window.player.id === which.dealer ? window.player : window.opponent);
+		var dealerScore = data["handPoints"][dealer.id];
+		which.statusMessage((dealer.id === window.player.id ? "Your" : (dealer.username + "'s")) + " hand scores "+dealerScore+" points.");
+		which.scoreboard.addPoints(dealer.id, dealerScore);
+		var coordinates = {
+			x: (dealer.id === window.player.id ? window.coordinates.playerHand.x : window.coordinates.opponentHand.x) + 50,
+			y: (dealer.id === window.player.id ? window.coordinates.playerHand.y : window.coordinates.opponentHand.y) + 60
+		};
+
+		goEle.setAttributeNS(null, "transform", "translate("+coordinates.x+","+coordinates.y+")");
+
+		goEle.removeEventListener("click", arguments.callee);
+		goEle.addEventListener("click", function(){
+			var cribScore = data["handPoints"]["crib"];
+			which.statusMessage((dealer.id === window.player.id ? "Your" : (dealer.username + "'s")) + " crib scores "+cribScore+" points.");
+			which.scoreboard.addPoints(dealer.id, cribScore);
+			var coordinates = {
+				x: (dealer.id === window.player.id ? window.coordinates.myCrib.x : window.coordinates.opponentCrib.x) + 50,
+				y: (dealer.id === window.player.id ? window.coordinates.myCrib.y : window.coordinates.opponentCrib.y) + 60
+			};
+
+			goEle.setAttributeNS(null, "transform", "translate("+coordinates.x+","+coordinates.y+")");
+
+			goEle.removeEventListener("click", arguments.callee);
+			goEle.addEventListener("click", function(){
+
+
+				goEle.removeEventListener("click", arguments.callee);
+				goEle.parentNode.removeChild(goEle);
+
+				// Tell the server we're done looking
+				ajaxCall(
+					"post",
+					{
+						application: "game",
+						method: "doneViewingHands",
+						data: {
+							gameID: window.gameID
+						}
+					},
+					function(data){
+						data = data["game"];
+						if(data["error"] !== undefined){
+							which.statusMessage(data["error"] + " Refreshing page.");
+							setTimeout(function(){window.history.go(0);}, 1000);
+						}else{
+							if(data["gamestate"] === "DEALING"){
+								which.gamestate = "DEALING";
+								which.resetGamespace();
+								which.constructState();
+							}else{
+								which.statusMessage("Waiting for "+window.opponent.username+" to finish looking at the hands.");
+								var interval = setInterval(function(){
+									ajaxCall(
+										"get",
+										{
+											application: "game",
+											method: "getGameState",
+											data: {
+												gameID: window.gameID
+											}
+										},
+										function(data){
+											if(data["game"]["gamestate"] === "DEALING"){
+												clearInterval(interval);
+												which.gamestate = "DEALING";
+												which.resetGamespace();
+												which.constructState();
+											}
+										}
+									);
+								}, 2000);
+							}
+						}
+					}
+				);
+
+			}, false);
+
+		}, false);
+	},false);
+}
+
+Gamespace.prototype.resetGamespace = function(){
+	this.gamestate = "DEALING";
+
+	// Clear all objects, clear out the DOM
+	this.dealer = (this.dealer === window.player.id ? window.opponent.id : window.player.id);
+	this.cutCard = {suit:null, number:null};
+
+	this.playedCards.clearFromScreen();
+	this.playedCards.cards = [];
+	this.hands[window.player.id].clear();
+	this.hands[window.opponent.id].clear();
+
+	this.crib.clear();
+	this.crib.setDealer(this.dealer);
+
+
+
 }
 
 window.coordinates = {
