@@ -4,5 +4,7 @@ The crib doesn't poll for the other player putting their cards in, and for the p
 Cutting the cut card has a bad interface.
 Can't peg without reloading - probably has something to do with dragging being screwed up after crib dragging happens and then is disabled.
 No point given for last last card.
+After running "resetPegging.sql", playing Q, 10, J, and trying to "GO" incorrectly, another jack appears
+
 
 
