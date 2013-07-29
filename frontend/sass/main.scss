@@ -1,0 +1,30 @@
+// Kuler color scheme is at 
+// https://kuler.adobe.com/create/color-wheel/?base=2&rule=Monochromatic&selected=4&name=My%20Kuler%20Theme&mode=rgb&rgbvalues=0.14383557867537816,0.47493788000957954,0.5,0.5895151907360677,0.9711155328043253,1,0.2876711573507563,0.9498757600191591,1,0.3834453361591391,0.4917984312982223,0.5,0.23013692588060508,0.7599006080153273,0.8
+$background: #96F8FF;
+$header: #25797F;
+$subheader: #3BC2CC;
+$headerbackground: #49F2FF;
+$helpertext: #627D7F;
+
+@import 'login','lobby';
+
+@mixin corner-radius($radius) {
+    -webkit-border-radius: $radius;
+    -moz-border-radius: $radius;
+    border-radius: $radius;
+}
+
+h1 {
+    color: $header;
+    padding-left: 5px;
+}
+
+h2 {
+    //@include corner-radius(4px);
+    padding:3px 6px;
+    background: $subheader;
+}
+
+h3 {
+    background: $headerbackground;
+}
