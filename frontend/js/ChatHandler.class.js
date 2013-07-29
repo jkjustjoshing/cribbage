@@ -1,14 +1,10 @@
-function Chat(container, opponent){
-	this.$container = $(container);
-	this.opponentID = (opponent.id === undefined ? opponent : opponent.id);
-	this.opponentUsername = (opponent.id === undefined ? opponent : opponent.username);
-	
+function ChatHandler(playerID, opponentID){
+	this.playerID = (playerID.id === undefined ? playerID : playerID.id);
+	this.opponentID = (opponentID.id === undefined ? opponentID : opponentID.id);
+
 	var which = this;
 
-	this.$container.children("form").on("submit", function(){
-		return which.sendChat(this);
-	});
-	
+
 	setInterval(function(){	
 		data = {"opponentID": which.opponentID, "playerID":window.player["id"]};
 		if(which.lastSeenID !== undefined){
@@ -25,45 +21,55 @@ function Chat(container, opponent){
 		
 }
 
-Chat.prototype.createChatWindow = function(name, shouldINotDisplayTheEle){
-	var div = document.createElement("div");
-	div.setAttribute("class", "chat");
-	div.style.left = (window.chats.size()*200 + 5) + "px";
-	div.innerHTML = '<div class="name">'+name+'</div>' +
-					'<div class="challenge"></div>' +
-					'<div class="conversation">'+
-					'</div>' +
-					'<form class="send" action="" method="post">' +
-						'<input type="text" name="text" autocomplete="off" />' +
-					'</form>';
-	if(shouldINotDisplayTheEle !== true){
-		document.getElementById("lobbyContainer").appendChild(div);
-	}
-	return div;
+ChatHandler.prototype.listen = function(){
+	var which = this;
+	this.interval = setInterval(function(){
+		data = {"opponentID": which.opponentID, "playerID": which.playerID};
+		if(which.lastSeenID !== undefined){
+			data.lastSeenID = which.lastSeenID;
+		}	
+		ajaxCall("get", 
+			{
+				application: "chat",
+				method: "getChat", 
+				data: data
+			}, function(data){
+				//	which.receiveChats(data);
+				var returnVal = true;
+
+				window.currentTime = data["info"]["time"];
+				data = data["chat"];
+				
+				if(data["error"] != undefined){
+					// For chat errors just redirect to the login page
+					// the user is likely logged out
+					window.location = "login.php";
+					returnVal = false;
+				}
+				
+				var $chat = this.$container.children(".conversation");
+				
+				for(var i = data.length-1; i >= 0; --i){
+					var chatItem = data[i];
+					$chat.append(this.createChatItem(chatItem["posterID"], chatItem["posterUsername"], chatItem["timestamp"], chatItem["content"]));
+					this.lastSeenID = chatItem["id"];
+				}
+				
+				// Scroll the chat window to the bottom
+				if(data.length !== 0){
+					$chat.animate({"scrollTop": $chat[0].scrollHeight}, "slow");
+				}
+				
+				return returnVal;
+			}
+		);
+	}, 2000);
 }
 
-Chat.prototype.createChatItem = function(id, username, time, message){
-	var container = document.createElement("div");
-	$(container).attr("class", "chatItem chat"+id);
-	
-	var nameEle = document.createElement("div");
-	nameEle.setAttribute("class", "name");
-	$(nameEle).text(username);
 
-	var timeEle = document.createElement("div");
-	timeEle.setAttribute("class", "time");
-	$(timeEle).text(getTimeString(time))
-	
-	var messageEle = document.createElement("div");
-	messageEle.setAttribute("class", "message");
-	$(messageEle).text(message);
-	
-	container.appendChild(nameEle);
-	container.appendChild(timeEle);
-	container.appendChild(messageEle);
-	
-	return container;
-}
+/**
+ * Chat handler
+ */
 
 Chat.prototype.sendChat = function(whichFormEle){
 	data = {"opponentID": this.opponentID, "playerID":window.player["id"], "content":$(whichFormEle).children("input").val()};
