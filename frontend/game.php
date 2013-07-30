@@ -103,7 +103,7 @@
 	</head>
 	<body>
 		<div id="gameContainer">
-			<?php include(dirname(__FILE__) . "/svg/board.svg");?>
+			<?php include(dirname(__FILE__) . "/svg/board.php");?>
 			
 			<svg xmlns="http://www.w3.org/2000/svg" 
 				version="1.1"  width="900px" height="700px" id="table">
