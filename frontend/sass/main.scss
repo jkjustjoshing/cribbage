@@ -6,7 +6,10 @@ $subheader: #3BC2CC;
 $headerbackground: #49F2FF;
 $helpertext: #627D7F;
 
-@import 'login','lobby';
+$onlinePlayersWidth: 300px;
+
+
+@import 'login','lobby', 'chat';
 
 @mixin corner-radius($radius) {
     -webkit-border-radius: $radius;
@@ -26,5 +29,6 @@ h2 {
 }
 
 h3 {
-    background: $headerbackground;
+    color: $subheader;
+    padding: 3px 6px;
 }

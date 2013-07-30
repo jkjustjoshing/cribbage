@@ -1,0 +1,47 @@
+#lobbyContainer{
+	width: 100%;
+
+	@media screen and (max-width: 700px) {
+		width: 700%;
+	}
+}
+
+#logout {
+	color: black;
+	text-decoration: underline;
+	float: right;
+}
+
+
+#onlinePlayers {
+	position:fixed;
+	right:0px;
+	top:0px;
+	height:100%;
+	width: $onlinePlayersWidth;
+	border-left: 1px solid black;
+	overflow:auto;
+
+	h2 {
+		font-size:23px;
+		margin:0px;
+	}
+
+	ul {
+		list-style: none;
+		padding: 0px;
+		margin: 0px;
+		li {
+			margin: 0px;
+			margin-top: 1px;
+			padding:10px;
+			background: lighten($helpertext, 10%);
+			cursor: pointer;
+
+			&:hover {
+				background: lighten($helpertext, 20%);
+			}
+
+		}
+	}
+}

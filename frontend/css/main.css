@@ -1,0 +1,184 @@
+#login > h1 {
+  text-align: center; }
+#login .container {
+  padding: 20px;
+  padding-bottom: 5px;
+  margin: 0 auto 20px;
+  width: 500px;
+  border: 1px solid #BBB;
+  border-radius: 6px;
+  background: #49f2ff; }
+  @media screen and (max-width: 540px) {
+    #login .container {
+      width: 90%;
+      padding: 5%; } }
+#login form.signup {
+  display: none; }
+#login form a.alternateLink {
+  float: right;
+  margin: 30px 0px; }
+#login form label div {
+  margin: 5px 0px;
+  float: left;
+  width: 20%; }
+#login form label .input {
+  width: 80%;
+  float: left;
+  background: #96f8ff; }
+  #login form label .input:focus {
+    background: #c9fbff; }
+#login form button {
+  background: #25797f;
+  margin-top: 20px; }
+#login #footer {
+  color: #627d7f;
+  text-align: center; }
+
+#lobbyContainer {
+  width: 100%; }
+  @media screen and (max-width: 700px) {
+    #lobbyContainer {
+      width: 700%; } }
+
+#logout {
+  color: black;
+  text-decoration: underline;
+  float: right; }
+
+#onlinePlayers {
+  position: fixed;
+  right: 0px;
+  top: 0px;
+  height: 100%;
+  width: 300px;
+  border-left: 1px solid black;
+  overflow: auto; }
+  #onlinePlayers h2 {
+    font-size: 23px;
+    margin: 0px; }
+  #onlinePlayers ul {
+    list-style: none;
+    padding: 0px;
+    margin: 0px; }
+    #onlinePlayers ul li {
+      margin: 0px;
+      margin-top: 1px;
+      padding: 10px;
+      background: #7b9799;
+      cursor: pointer; }
+      #onlinePlayers ul li:hover {
+        background: #98aeaf; }
+
+.chat#lobbyChat {
+  right: 300px; }
+
+.chat#gameChat {
+  right: 0; }
+
+.chat#lobbyChat, .chat#gameChat {
+  position: fixed;
+  bottom: 0px;
+  height: 321px;
+  width: 300px;
+  border-left: 1px solid black;
+  overflow: auto; }
+  .chat#lobbyChat .send, .chat#gameChat .send {
+    width: 285px; }
+
+#chatContainer {
+  position: absolute;
+  bottom: 0px;
+  padding: 0;
+  margin: 0;
+  width: 700px; }
+
+.chat {
+  float: left;
+  height: 357px;
+  width: 200px;
+  border: 1px solid black;
+  margin: 0 0 0 2px;
+  padding: 0; }
+  .chat > .name {
+    background: #25797f;
+    color: #96f8ff;
+    font-size: 14pt;
+    padding: 8px;
+    padding-left: 10px;
+    height: 20px; }
+    .chat > .name .close {
+      background-image: url("../close.png");
+      opacity: 1;
+      width: 20px;
+      height: 20px; }
+  .chat .challenge {
+    background: #36b1ba;
+    padding: 8px;
+    padding-left: 10px;
+    height: 20px; }
+    .chat .challenge .yes, .chat .challenge .no {
+      background-image: url("../x_check.png");
+      width: 15px;
+      height: 15px;
+      float: right; }
+    .chat .challenge .yes {
+      background-position: 15px 0px; }
+    .chat .challenge .no {
+      background-position: 0px 0px; }
+    .chat .challenge a {
+      width: 100%;
+      height: 100%;
+      text-align: center;
+      display: block;
+      color: black; }
+  .chat .conversation {
+    overflow: auto;
+    height: 250px; }
+  .chat .send {
+    display: block;
+    height: 35px;
+    width: 185px;
+    bottom: 0px;
+    left: 0px;
+    padding: 0;
+    margin: 0 4px; }
+    .chat .send input {
+      height: 25px;
+      width: 100%;
+      margin: 0;
+      padding: 2px; }
+
+.chatItem {
+  margin: 5px 0px; }
+  .chatItem .name {
+    font-weight: bold;
+    margin: 0 10px 0 2px;
+    float: left; }
+  .chatItem .time {
+    padding: 0;
+    font-size: 7pt;
+    visibility: hidden;
+    clear: left;
+    text-align: center;
+    width: 100%;
+    margin: 0 auto;
+    color: #627d7f; }
+  .chatItem .message {
+    float: left;
+    padding: 0px; }
+  .chatItem:hover {
+    background: #ecfeff; }
+    .chatItem:hover .time {
+      visibility: visible; }
+
+h1 {
+  color: #25797f;
+  padding-left: 5px; }
+
+h2 {
+  padding: 3px 6px;
+  background: #3bc2cc; }
+
+h3 {
+  color: #3bc2cc;
+  padding: 3px 6px; }

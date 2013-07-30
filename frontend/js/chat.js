@@ -1,9 +1,19 @@
 function Chat(container, opponent){
-	this.$container = $(container);
 	this.opponentID = (opponent.id === undefined ? opponent : opponent.id);
 	this.opponentUsername = (opponent.id === undefined ? opponent : opponent.username);
 	
 	var which = this;
+
+	if(container === null){
+		this.$container = this.createChatWindow(opponent.username, false);
+	}else{
+		this.$container = $(container);
+	}
+
+	var which = this;
+	this.$container.find(".close").on("click", function(){
+		which.$container.css("display", "none");
+	});
 
 	this.$container.children("form").on("submit", function(){
 		return which.sendChat(this);
@@ -22,22 +32,62 @@ function Chat(container, opponent){
 			}, function(data){which.receiveChats(data);}
 		);
 	}, 2000);
-		
+	
+}
+
+Chat.prototype.show = function(){
+	this.$container.css("display", "block");
+}
+
+Chat.prototype.hide = function(){
+	this.$container.css("display", "none");
 }
 
 Chat.prototype.createChatWindow = function(name, shouldINotDisplayTheEle){
 	var div = document.createElement("div");
 	div.setAttribute("class", "chat");
-	div.style.left = (window.chats.size()*200 + 5) + "px";
-	div.innerHTML = '<div class="name">'+name+'</div>' +
-					'<div class="challenge"></div>' +
-					'<div class="conversation">'+
-					'</div>' +
-					'<form class="send" action="" method="post">' +
-						'<input type="text" name="text" autocomplete="off" />' +
-					'</form>';
+//	div.style.left = (window.chats.size()*200 + 5) + "px";
+
+	var nameEle = document.createElement("div");
+	nameEle.setAttribute("class", "name");
+	nameEle.appendChild(document.createTextNode(name));
+	div.appendChild(nameEle);
+
+	var close = document.createElement("div");
+	close.setAttribute("class", "close");
+	nameEle.appendChild(close);
+
+
+		// div.innerHTML = '<div class="name">'+name+'<div class="close"></div></div>' +
+		// 			'<div class="challenge"></div>' +
+		// 			'<div class="conversation">'+
+		// 			'</div>' +
+		// 			'<form class="send" action="" method="post">' +
+		// 				'<input type="text" name="text" autocomplete="off" />' +
+		// 			'</form>';
+
+	var challenge = document.createElement("div");
+	challenge.setAttribute("class", "challenge");
+	div.appendChild(challenge);
+
+	var conversation = document.createElement("div");
+	conversation.setAttribute("class", "conversation");
+	div.appendChild(conversation);
+
+	var form = document.createElement("form");
+	form.setAttribute("class", "send");
+	form.setAttribute("action", "");
+	form.setAttribute("method", "post");
+	div.appendChild(form);
+
+	var input = document.createElement("input");
+	input.setAttribute("type", "text");
+	input.setAttribute("name", "text");
+	input.setAttribute("autocomplete", "off");
+	form.appendChild(input);
+
 	if(shouldINotDisplayTheEle !== true){
-		document.getElementById("lobbyContainer").appendChild(div);
+		document.getElementById("chatContainer").appendChild(div);
 	}
 	return div;
 }
@@ -48,7 +98,7 @@ Chat.prototype.createChatItem = function(id, username, time, message){
 	
 	var nameEle = document.createElement("div");
 	nameEle.setAttribute("class", "name");
-	$(nameEle).text(username);
+	$(nameEle).text(username + ": ");
 
 	var timeEle = document.createElement("div");
 	timeEle.setAttribute("class", "time");
@@ -59,8 +109,8 @@ Chat.prototype.createChatItem = function(id, username, time, message){
 	$(messageEle).text(message);
 	
 	container.appendChild(nameEle);
-	container.appendChild(timeEle);
 	container.appendChild(messageEle);
+	container.appendChild(timeEle);
 	
 	return container;
 }
@@ -128,11 +178,11 @@ Chat.prototype.updateChallengeMessage = function(){
 
 function getTimeString(postTime){
 	var jsDate = new Date(postTime*1000);
-	var daysSince = Math.round(hoursSince/24);
+	//var daysSince = Math.round(hoursSince/24);
 	var str;
 	var month = ['Jan','Feb','March','April','May','June','July','Aug','Sept','Oct','Nov','Dec'];
 	str = month[jsDate.getMonth()] + ' ' + jsDate.getDate();
-	str += ', ' + jsDate.getFullYear() + ' at ';
+	str += ', ' + jsDate.getFullYear() + ', ';
 	var hours = jsDate.getHours()%12;
 	if(hours === 0){
 		hours = 12;

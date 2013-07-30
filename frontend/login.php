@@ -76,7 +76,7 @@
     	<label for="username"><div>username</div><input id="username" type="text" class="input-block-level input" name="username" /></label>
     	<label for="password"><div>password</div><input id="password" type="password" class="input-block-level input" name="password" /></label>
     	<button class="btn btn-large btn-primary" type="submit">Sign in</button>
-    	<a class="alternateLink" href="javascript://" onclick="toggleSignup()">Sign up</a>
+    	<a class="alternateLink" href="javascript:toggleSignup()">Sign up</a>
     	<input type="hidden" name="signin" />
     </form>
     <form class="signup" method="post" action="">
@@ -92,7 +92,7 @@
     	<label for="password"><div>password</div><input id="password" name="password" type="password" class="input-block-level input" placeholder="at least <?php echo Player::MIN_PASSWORD_CHARS; ?> characters" /></label>	
     	<label for="email"><div>email</div><input id="email" name="email" type="text" class="input-block-level input" placeholder="must be valid" /></label>
     	<button class="btn btn-large btn-primary" type="submit">Create account</button>
-    	<a class="alternateLink" href="javascript://" onclick="toggleSignup()">I have an account</a>
+    	<a class="alternateLink" href="javascript:toggleSignup()">I have an account</a>
     	<input type="hidden" name="signup" />
     </form>
 

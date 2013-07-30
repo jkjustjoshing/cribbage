@@ -14,8 +14,8 @@
 */
 .chat#lobbyChat, .chat#gameChat {
   position: fixed;
-  left: 0px;
-  top: 200px;
+  right: 0px;
+  top: 0px;
   height: 100%;
   width: 200px;
   border: 2px solid black;
@@ -80,3 +80,16 @@
     font-size: 10pt; }
   .chatItem .message {
     clear: left; }
+
+#lobbyContainer {
+  position: fixed;
+  left: 0px;
+  top: 0px;
+  height: 100%;
+  padding: 0px; }
+
+#onlinePlayers {
+  float: left;
+  height: 100%;
+  width: 200px;
+  border: 1px solid black; }
