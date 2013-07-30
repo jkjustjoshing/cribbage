@@ -1,3 +1,8 @@
+<?php
+	$color1 = "#ff3636";
+	$color2 = "#3636ff";
+?>
+
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="100" height="522" x="0" y="0" id="scoreboard">
 	
 	<!-- Border Rectangle -->	
@@ -14,8 +19,8 @@
 				
 				<!-- A red and a blue background, without the dots -->
 				<g id="1_background">
-					<rect id="red_box" width="10" height="10" x="-5" y="-5" fill="#ff3636" />
-					<rect id="blue_box" width="10" height="10" x="5" y="-5" fill="#3636ff" />
+					<rect id="red_box" width="10" height="10" x="-5" y="-5" fill="<?php echo $color1; ?>" />
+					<rect id="blue_box" width="10" height="10" x="5" y="-5" fill="<?php echo $color2; ?>" />
 				</g>
 
 				<!-- 2 opposing dots, without the background color (for the turns) -->
@@ -55,8 +60,8 @@
 		<use xlink:href="#1_background" transform="translate(40,7) rotate(180,0,0) scale(1,1.6)" />
 
 		<!-- Smooth background to the turn -->
-		<path d="M -45,0 a 45,45 0 1,1 90,0" fill="#ff3636"/>
-		<path d="M -35,0 a 35,35 0 1,1 70,0" fill="#3636ff"/>
+		<path d="M -45,0 a 45,45 0 1,1 90,0" fill="<?php echo $color1; ?>"/>
+		<path d="M -35,0 a 35,35 0 1,1 70,0" fill="<?php echo $color2; ?>"/>
 		<path d="M -25,0 a 25,25 0 1,1 50,0" fill="#aaa"/>
 
 		<!-- Position a pair of background-less dots to prepare for repeated rotation -->
@@ -79,8 +84,8 @@
 	<g transform="translate(67.5,490)"><!-- small turn -->
 
 		<!-- Smooth background to the turn -->
-		<path d="M -27.5,0 a 27.5,27.5 0 1,0 55,0" fill="#ff3636"/>
-        <path d="M -17.5,0 a 17.5,17.5 0 1,0 35,0" fill="#3636ff"/>
+		<path d="M -27.5,0 a 27.5,27.5 0 1,0 55,0" fill="<?php echo $color1; ?>"/>
+        <path d="M -17.5,0 a 17.5,17.5 0 1,0 35,0" fill="<?php echo $color2; ?>"/>
         <path d="m -7.5,0 a 7.5,7.5 0 1,0 15,0" fill="#aaa"/>
 
 		<!-- Filler background at the start of the curve -->

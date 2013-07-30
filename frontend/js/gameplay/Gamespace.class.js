@@ -88,10 +88,8 @@ Gamespace.prototype.constructState = function(){
 						}
 					);
 				}, 2500);
-			}
-			// If dealing, listeners will be set up by the deck object
-			else{
-
+			}else{
+				// If dealing, listeners will be set up by the deck object
 			}
 			break;
 		case "CHOOSING_CRIB":

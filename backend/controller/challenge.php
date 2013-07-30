@@ -85,7 +85,7 @@
 		$otherPlayerID = $challengerID+$challengeeID-$playerID;
 		if(!$database->isUserHere($otherPlayerID, 0)){// Is other user even in the lobby?
 			$database->updateChallengeStatus($challengerID, $challengeeID, "CANCELLED");
-			return "Player " . $otherPlayerID . " is no longer online.";
+			return array("success" => true, "offline" => true);
 		}
 		
 		$success = $database->updateChallengeStatus($challengerID, $challengeeID, $newStatus);

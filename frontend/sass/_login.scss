@@ -1,0 +1,60 @@
+#login {
+
+	&>h1 {
+		text-align: center;
+	}
+
+	.container {
+		$max-width: 500px;
+		$padding: 20px;
+	    padding:$padding;
+	    padding-bottom: 5px;
+	    margin: 0 auto 20px;
+	    width: $max-width;
+	    border: 1px solid #BBB;
+	    border-radius:6px;
+	    background: $headerbackground;
+
+		@media screen and (max-width: $max-width + $padding + $padding) {
+			width: 90%;
+			padding: 5%;
+		}
+	}
+
+	form.signup {
+	    display:none;
+	}
+
+	form a.alternateLink {
+	    float:right;
+	    margin: 30px 0px;
+	}
+
+	form label div {
+	    margin:5px 0px;
+	    float:left;
+	    width:20%;
+	}
+
+	form label .input {
+	    width:80%;
+	    float:left;
+	    background: $background;
+
+	    &:focus {
+	    	background: lighten($background, 10%);
+	    }
+	}
+
+	form button {
+		background: $header;
+		margin-top:20px;
+	}
+
+
+	#footer {
+		color: $helpertext;
+		text-align: center;
+	}
+
+}

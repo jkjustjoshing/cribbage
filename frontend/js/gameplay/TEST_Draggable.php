@@ -19,6 +19,17 @@
 				left:150px;
 				padding-right:200px;
 			}
+
+			text {
+				-webkit-touch-callout: none;
+				-webkit-user-select: none;
+				-khtml-user-select: none;
+				-moz-user-select: none;
+				-ms-user-select: none;
+				user-select: none;
+				cursor: default;
+			}
+			
 		</style>
 	</head>
 	<body>
@@ -26,8 +37,10 @@
 						<svg xmlns="http://www.w3.org/2000/svg" 
 				version="1.1"  width="900px" height="700px" id="table">
 				<!-- Make the background -> 800x600 -->
-				<rect x="0" y="0" width="100%" height="100%" id="background" />
-				
+
+				<rect x="0" y="0" width="100%" height="100%" id="background" fill="grey" />
+				<rect x="20" y="20" width="200" height="200" fill="blue" />
+				<rect x="400" y="400" width="200" height="200" fill="red" />
 				<text id="statusMessage0" x="100" y="240" font-family="Arial" font-size="20" fill="brown">foofers</text>
 				<text id="statusMessage1" x="100" y="240" font-family="Arial" font-size="20" fill="brown">foofers</text>
 				<text id="statusMessage2" x="100" y="240" font-family="Arial" font-size="20" fill="brown">foofers</text>
@@ -55,20 +68,30 @@
 			for(var i = 0; i < 13; ++i){
 				var draggable = new Draggable(document.getElementById("statusMessage"+i));
 				//draggable.addTarget(targetCoordinates, successCoordinates, callback(true/false success))
-				draggable.addTarget(
-					{
-						x: 20,
-						y: 20,
+
+				draggable.addTarget({
+					coordinates: {
+							x: 20,
+							y: 20,
+							width: 200,
+							height:200
+					}, 
+					success: function(element, target){
+						this.removeTarget(target);
+					}
+				});
+
+				draggable.addTarget({
+					coordinates:{
+						x: 400,
+						y: 400,
 						width: 200,
 						height:200
 					}, 
-					function(){
-						console.log("yay "+i);
-					},
-					function(){
-						console.log("boo "+i);
+					success: function(element, target){
+						this.removeTarget(target);
 					}
-				);
+				});
 			}
 		</script>
 

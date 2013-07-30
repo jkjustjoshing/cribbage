@@ -1,0 +1,168 @@
+$height: 20px;
+$padding: 8px;
+$sendHeight: 35px;
+$conversationHeight: 250px;
+$chatWidth: 200px;
+
+.chat#lobbyChat, .chat#gameChat {
+	position:fixed;
+	bottom:0px;
+	width: $onlinePlayersWidth;
+	border-left: 1px solid black;
+
+	.send {
+		width: $onlinePlayersWidth - 15px;
+	}
+}
+
+#chatContainer {
+	position: absolute;
+	bottom: 0px;
+	padding: 0;
+	margin: 0;
+	width: 700px;
+}
+
+.chat {
+	background: white;
+	float: left;
+	height: (($height + (2 * $padding)) * 2) + $sendHeight + $conversationHeight;
+	width: $chatWidth;
+
+	border: 1px solid black;
+	margin:0 0 0 2px;
+	padding:0;
+
+	&>.name {
+		background: $header;
+		color: $background;
+		font-size: 14pt;
+		padding: $padding;
+		padding-left: 10px;
+		height: $height;
+
+		.close {
+			background-image: url('../close.png');
+			opacity: 1;
+			width: 20px;
+			height: 20px;
+		}
+	}
+
+	.challenge {
+		background: lighten($header, 15%);
+		padding: $padding;
+		padding-left: 10px;
+		height: $height;
+
+		.yes, .no {
+			background-image: url('../x_check.png');
+			width: 15px;
+			height: 15px;
+			float: right;
+		}
+
+		.yes {
+			background-position: 15px 0px;
+		}
+
+		.no {
+			background-position: 0px 0px;
+		}
+
+		a {
+			width: 100%;
+			height: 100%;
+			text-align: center;
+			display: block;
+			color: black;
+		}
+
+	}
+
+	.conversation {
+		overflow: auto;
+		height: $conversationHeight;
+	}
+
+	.send {
+		display: block;
+		height: $sendHeight;
+		width: $chatWidth - 15px;
+		bottom: 0px;
+		left: 0px;
+		padding: 0;
+		margin: 0 4px;
+		
+		input {
+			height: $sendHeight - 10px;
+			width: 100%;
+			margin: 0;
+			padding: 2px;
+		}
+	}
+}
+
+.chatItem{
+	margin:5px 0px;
+
+	// &:nth-child(odd){
+	// 	background:white;
+	// }
+	
+	// &:nth-child(even){
+	// 	background:lighten($helpertext, 15%);
+	// }
+	
+	.name {
+		font-weight: bold;
+		margin: 0 10px 0 2px;
+		float:left;
+	}
+
+	.time {
+		padding: 0;
+		font-size: 7pt;
+		visibility: hidden;
+		clear: left;
+		text-align: center;
+		width: 100%;
+		margin: 0 auto;
+		color: $helpertext;
+	}
+
+	.message {
+		float:left;
+		padding: 0px;
+	}
+
+	&:hover {
+		background: lighten($headerbackground, 32%);
+
+		.time {
+			visibility: visible;
+		}
+	}
+}
+
+.chat#lobbyChat {
+	right:$onlinePlayersWidth;
+	height: ($height + (2 * $padding)) + $sendHeight + $conversationHeight;
+}
+
+.chat#gameChat {
+	right:0;
+	height: 100%;
+
+	.conversation {
+		height: 100%;
+	}
+	.conversationParent {
+		height: 100%;
+		margin-bottom: $sendHeight;
+	}
+
+	.send {
+		position: absolute;
+	}
+}

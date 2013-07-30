@@ -22,6 +22,7 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1.0">
 		<!-- Bootstrap -->
 		<link href="bootstrap/css/bootstrap.min.css" rel="stylesheet" media="screen">
+		<link href="css/main.css" rel="stylesheet" media="screen">
 		<script type="text/javascript" src="js/jquery.min.js"></script>
 		
 		<script type="text/javascript">
@@ -32,7 +33,6 @@
 		<script type="text/javascript" src="js/chat.js"></script>
 		<script type="text/javascript" src="js/ajax.js"></script>
 		<script type="text/javascript" src="js/challenge.js"></script>
-		<link type="text/css" rel="stylesheet" href="css/chat.css" />
 		<script type="text/javascript">
 			$(document).ready(function(){
 				window.chats = [];
@@ -46,23 +46,28 @@
 					}
 					return length;
 				}
+
+				setInterval(function(){Challenge.prototype.displayOnlinePlayers();}, 3000);
 			});
 		</script>
 		
 	</head>
-	<body>
+	<body id="lobby">
+		<h1>Cribbage Lobby</h1>
+		<h3>Click on an online player to chat and to challenge them to a game</h3>
 		<div id="lobbyContainer">
 			<div id="onlinePlayers">
 				<h2>Online Players</h2>
-				<ul></ul>
+				<ul>
+					<li style="background:#bbb;"><span id="onlinePlayer_me">&nbsp;</span><a href="logout.php" id="logout">Logout</a></li>
+				</ul>
+			</div>
+			<div id="chatContainer">
 			</div>
 		</div>
 
-		<div id="logout" style="position:absolute;left:300px;">
-			<a href="logout.php">Logout</a>
-		</div>
-
 		<div class="chat" id="lobbyChat">
+			<div class="name">Lobby Group Chat</div>
 			<div class="conversation">
 			
 			</div>
