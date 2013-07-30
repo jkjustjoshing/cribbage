@@ -69,19 +69,11 @@
       #onlinePlayers ul li:hover {
         background: #98aeaf; }
 
-.chat#lobbyChat {
-  right: 300px; }
-
-.chat#gameChat {
-  right: 0; }
-
 .chat#lobbyChat, .chat#gameChat {
   position: fixed;
   bottom: 0px;
-  height: 321px;
   width: 300px;
-  border-left: 1px solid black;
-  overflow: auto; }
+  border-left: 1px solid black; }
   .chat#lobbyChat .send, .chat#gameChat .send {
     width: 285px; }
 
@@ -93,6 +85,7 @@
   width: 700px; }
 
 .chat {
+  background: white;
   float: left;
   height: 357px;
   width: 200px;
@@ -170,6 +163,21 @@
     background: #ecfeff; }
     .chatItem:hover .time {
       visibility: visible; }
+
+.chat#lobbyChat {
+  right: 300px;
+  height: 321px; }
+
+.chat#gameChat {
+  right: 0;
+  height: 100%; }
+  .chat#gameChat .conversation {
+    height: 100%; }
+  .chat#gameChat .conversationParent {
+    height: 100%;
+    margin-bottom: 35px; }
+  .chat#gameChat .send {
+    position: absolute; }
 
 h1 {
   color: #25797f;

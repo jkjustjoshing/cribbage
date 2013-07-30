@@ -53,7 +53,7 @@
 		<script src="js/jquery.min.js"></script>
 		<script type="text/javascript" src="js/chat.js"></script>
 		<script type="text/javascript" src="js/ajax.js"></script>
-		<link type="text/css" rel="stylesheet" href="css/chat.css" />
+		<link type="text/css" rel="stylesheet" href="css/main.css" />
 		<link type="text/css" rel="stylesheet" href="css/game.css" />
 		<script type="text/javascript" src="js/jquery.svg.min.js"></script>
 		<script type="text/javascript" src="js/jquery.svganim.js"></script>
@@ -114,12 +114,11 @@
 			</svg>
 		</div>
 		<div class="chat" id="gameChat">
-			<div class="conversation">
-		
-			</div>
 			<form class="send" action="" method="post">
 				<input type="text" name="text" />
 			</form>
+			<div class="conversation">
+			</div>
 		</div>
 	</body>
 </html>

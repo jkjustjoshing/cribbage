@@ -4,22 +4,11 @@ $sendHeight: 35px;
 $conversationHeight: 250px;
 $chatWidth: 200px;
 
-
-.chat#lobbyChat {
-	right:$onlinePlayersWidth;
-}
-
-.chat#gameChat {
-	right:0;
-}
-
 .chat#lobbyChat, .chat#gameChat {
 	position:fixed;
 	bottom:0px;
-	height: ($height + (2 * $padding)) + $sendHeight + $conversationHeight;
 	width: $onlinePlayersWidth;
 	border-left: 1px solid black;
-	overflow:auto;
 
 	.send {
 		width: $onlinePlayersWidth - 15px;
@@ -35,6 +24,7 @@ $chatWidth: 200px;
 }
 
 .chat {
+	background: white;
 	float: left;
 	height: (($height + (2 * $padding)) * 2) + $sendHeight + $conversationHeight;
 	width: $chatWidth;
@@ -152,5 +142,27 @@ $chatWidth: 200px;
 		.time {
 			visibility: visible;
 		}
+	}
+}
+
+.chat#lobbyChat {
+	right:$onlinePlayersWidth;
+	height: ($height + (2 * $padding)) + $sendHeight + $conversationHeight;
+}
+
+.chat#gameChat {
+	right:0;
+	height: 100%;
+
+	.conversation {
+		height: 100%;
+	}
+	.conversationParent {
+		height: 100%;
+		margin-bottom: $sendHeight;
+	}
+
+	.send {
+		position: absolute;
 	}
 }
