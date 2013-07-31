@@ -51,11 +51,6 @@ function Gamespace(data, svgEle){
 
 	// End Initialize values
 
-	
-	// Run the game
-	this.constructState();
-
-
 }
 
 /**
@@ -64,6 +59,8 @@ function Gamespace(data, svgEle){
  * The previous state must be cleaned up before this method is called.
  */
 Gamespace.prototype.constructState = function(){
+	console.log("Constructing game state - " + this.gamestate);
+
 	var which = this;
 	switch(which.gamestate){
 		case "DEALING":
@@ -119,20 +116,24 @@ Gamespace.prototype.constructState = function(){
 							// Animate cards to crib from opponent hand
 							var card = which.hands[window.opponent.id].remove(new PlayingCard());
 							which.crib.add(card);
-
-							var card = which.hands[window.opponent.id].remove(new PlayingCard());
-							which.crib.add(card);
-
 							which.crib.sort();
-						}
 
-						if(data["game"]["crib"].length == 4){
-							// If the crib has 4 cards stop the polling
-							clearInterval(interval);
+							// Make the second card go to the hand 0.5 seconds after the first
+							setTimeout(function(){
+								var card = which.hands[window.opponent.id].remove(new PlayingCard());
+								which.crib.add(card);
 
-							// Move to cutting card state
-							which.gamestate = "CUTTING_CARD";
-							which.constructState();
+								which.crib.sort();
+
+								if(data["game"]["crib"].length == 4){
+									// If the crib has 4 cards stop the polling
+									clearInterval(interval);
+
+									// Move to cutting card state
+									which.gamestate = "CUTTING_CARD";
+									which.constructState();
+								}
+							}, 500);
 						}
 					}
 				);

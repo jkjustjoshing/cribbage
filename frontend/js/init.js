@@ -24,6 +24,8 @@ $(document).ready(function(){
 
 			window.gamespace = new Gamespace(data, document.getElementsByTagName("svg")[1]);
 
+			window.gamespace.constructState();
+
 		}
 	);
 

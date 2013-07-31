@@ -110,9 +110,6 @@ Challenge.prototype.displayOnlinePlayers = function(){
 					});
 					$li.text(data[i].username);
 					$onlinePlayersContainer.append($li);
-				}else{
-					window.player.username = data[i].username;
-					$('#onlinePlayer_me').text(window.player.username);
 				}
 			}
 

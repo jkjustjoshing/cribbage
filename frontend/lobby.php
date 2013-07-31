@@ -3,6 +3,7 @@
 
 	require_once(BACKEND_DIRECTORY . "/SecurityToken.class.php");
 	require_once(BACKEND_DIRECTORY . "/businessLayer/Chat.class.php");
+	require_once(BACKEND_DIRECTORY . "/businessLayer/Player.class.php");
 		
 	if(SecurityToken::isTokenSet()){
 		$userID = SecurityToken::extract();
@@ -10,6 +11,8 @@
 			// Token was set, but something was wrong. Logged out.
 			// Show login screen with error message
 			header("Location: login.php");
+		}else{
+			$player = new Player($userID);
 		}
 	}else{
 		header("Location: login.php");
@@ -26,7 +29,8 @@
 		<script type="text/javascript" src="js/jquery.min.js"></script>
 		
 		<script type="text/javascript">
-			window.player = {"id":<?php echo $userID; ?>};
+			window.player = 
+				{"id" : <?php echo $userID; ?> , "username" : '<?php echo $player->username; ?>'};
 		</script>
 		
 		<!-- My scripts/styles -->
@@ -59,7 +63,7 @@
 			<div id="onlinePlayers">
 				<h2>Online Players</h2>
 				<ul>
-					<li style="background:#bbb;"><span id="onlinePlayer_me">&nbsp;</span><a href="logout.php" id="logout">Logout</a></li>
+					<li style="background:#bbb;"><span id="onlinePlayer_me"><?php echo $player->username; ?></span><a href="logout.php" id="logout">Logout</a></li>
 				</ul>
 			</div>
 			<div id="chatContainer">

@@ -1,9 +1,30 @@
+/*
+	targetObject = {
+		coordinates
+			x
+			y
+			width
+			height
+		target
+		success
+		failure
+	}
+ */
+
+
 /**
  * Facilitates the dragging of an object into a set of coordinates.
- * @param DOMElement element The element to drag
+ * @param DOMElement/Object parameter Either the element to drag or an object
+ * with the fields "element", holding the element, and "object", holding an object
+ * that can be accessed from the success/failure callbacks as "this.object".
  */
-function Draggable(element){
-	this.element = element;
+function Draggable(parameter){
+	if(parameter.element){
+		this.element = parameter.element;
+		this.object = parameter.object;
+	}else{
+		this.element = parameter;
+	}
 
 	this.bbox = this.element.getBBox();
 
@@ -25,16 +46,31 @@ Draggable.prototype.draggingObject = undefined;
 
 Draggable.prototype.addTarget = function(data){
 	var targetCoordinates;
-	if(data["coordinates"] !== undefined){
+	if(data["coordinates"] !== undefined && data["target"] !== undefined){
+		throw "Must only pass either a coordinates value or a target value";
+	}else if(data["coordinates"] !== undefined){
 		targetCoordinates = data["coordinates"];
 	}else if(data["target"] !== undefined){ // Add target coordinates based on a target's bounding box
-		if(target.get){
-			target = target.get();
+		if(data["target"].get){
+			data["target"] = data["target"].get();
 		}
-		var bbox = target.getBBox();
+
+		var bbox = data["target"].getBBox();
+
+		// Get coordinates of transform translate as well
+		var transform = data["target"].getAttributeNS(null, "transform");
+		var transformX = parseInt(transform.substring("translate(".length + transform.indexOf("translate("), transform.indexOf(",")));
+		var transformY = parseInt(transform.substring(transform.indexOf(",")+1, transform.indexOf(")")));	
+		if(Number.isNaN(transformX)){
+			transformX = 0;
+		}
+		if(Number.isNaN(transformY)){
+			transformY = 0
+		}
+
 		targetCoordinates = {
-			x: bbox.x,
-			y: bbox.y,
+			x: bbox.x+transformX,
+			y: bbox.y+transformY,
 			width: bbox.width,
 			height: bbox.height
 		};
@@ -77,6 +113,7 @@ Draggable.prototype.addTarget = function(data){
 		coordinates: targetCoordinates,
 		success: successCallback,
 		failure: failureCallback,
+		target: data["target"]
 	};
 
 	if(this.targets.length === 0){
@@ -88,35 +125,39 @@ Draggable.prototype.addTarget = function(data){
 }
 
 Draggable.prototype.removeTarget = function(data){
-	var targetCoordinates;
-	if(data["coordinates"] !== undefined){
+	var targetCoordinates, target;
+	if(data["coordinates"] !== undefined && data["target"] !== undefined){
+		throw "Must only pass either a coordinates value or a target value";
+	}else if(data["coordinates"] !== undefined){
 		targetCoordinates = data["coordinates"];
-	}else if(data["target"] !== undefined){ // Add target coordinates based on a target's bounding box
-		if(target.get){
-			target = target.get();
+	
+		for(var i = 0; i < this.targets.length; ++i){
+			if(
+				this.targets[i].coordinates.x === targetCoordinates.x &&
+				this.targets[i].coordinates.y === targetCoordinates.y &&
+				this.targets[i].coordinates.width === targetCoordinates.width &&
+				this.targets[i].coordinates.height === targetCoordinates.height
+				){
+				this.targets.splice(i,1);
+				break;
+			}
 		}
-		var bbox = target.getBBox();
-		targetCoordinates = {
-			x: bbox.x,
-			y: bbox.y,
-			width: bbox.width,
-			height: bbox.height
-		};
+
+	}else if(data["target"] !== undefined){ // Add target coordinates based on a target's bounding box
+		if(data["target"].get){
+			data["target"] = data["target"].get();
+		}
+		target = data["target"];
+
+		for(var i = 0; i < this.targets.length; ++i){
+			console.log(this.targets[i]);
+			if(target === this.targets[i].target){
+				this.targets.splice(i,1);
+				break;
+			}
+		}
 	}else{
 		throw "Must pass a target element or coordinates";
-	}
-
-	for(var i = 0; i < this.targets.length; ++i){
-		console.log(this.targets[i]);
-		if(
-			this.targets[i].coordinates.x === targetCoordinates.x &&
-			this.targets[i].coordinates.y === targetCoordinates.y &&
-			this.targets[i].coordinates.width === targetCoordinates.width &&
-			this.targets[i].coordinates.height === targetCoordinates.height
-			){
-			this.targets.splice(i,1);
-			break;
-		}
 	}
 
 	if(this.targets.length === 0){
@@ -183,6 +224,11 @@ Draggable.prototype.mousedownCallback = function(event){
 		x: eleX,
 		y: eleY
 	};
+
+	// Bring item dragging to front of DOM
+	var parentNode = which.element.parentNode;
+	parentNode.removeChild(which.element);
+	parentNode.appendChild(which.element);
 }
 
 Draggable.prototype.mousemoveCallback = function(event){

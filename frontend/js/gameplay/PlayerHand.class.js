@@ -116,10 +116,42 @@ PlayerHand.prototype.chooseCrib = function(disable){
 	if(disable === undefined || disable === true){
 		var which = this;
 		this.dragging = true;
-		// Set local mousedown listener
+		// Allow cards to be dragged to the crib box
 		for(var i = 0; i < this.cards.length; ++i){
-			this.cards[i].drag(function(ele, x, y){
-				return which.cribDraggingCallback(ele, x, y, which);
+			// Old method
+			// this.cards[i].drag(function(ele, x, y){
+			// 	return which.cribDraggingCallback(ele, x, y, which);
+			// });
+		
+			// New method
+			this.cards[i].dragHandler = new Draggable({
+				element: which.cards[i].ele,
+				object: which.cards[i]
+			});
+			this.cards[i].dragHandler.addTarget({
+				target: window.gamespace.crib.cribBox,
+				success: function(){
+					// Put in crib, and allow to be dragged out
+					window.gamespace.crib.add(this.object);
+					which.remove(this.object);
+					which.sort(true);
+
+					this.addTarget({
+						coordinates: {
+							x: window.coordinates.playerHand.x,
+							y: window.coordinates.playerHand.y,
+							width: 240,
+							height: 140
+						},
+						success: function(){
+							// Put back in hand, remove from crib
+							
+						}	
+					});
+					this.removeTarget({
+						target: window.gamespace.crib.cribBox
+					});
+				}
 			});
 		}
 	}else{

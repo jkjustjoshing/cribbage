@@ -173,14 +173,16 @@ PlayingCard.prototype.isVisible = function(){
 };
 
 PlayingCard.prototype.drag = function(callback){
+	console.log("function");
+	console.log(callback);
 	if(this.draggable === undefined){
 		this.draggable = new Draggable(this.ele);
 	}
 
-	this.draggable.addTarget({
-		target:
-		success: callback
-	});
+	// this.draggable.addTarget({
+	// 	target:
+	// 	success: callback
+	// });
 
 	var which = this;
 	var dragging = false;

@@ -23,7 +23,7 @@ function PlayedCards(cards, container, coordinates){
 	this.background.setAttributeNS(null, "ry", "10");
 	this.background.setAttributeNS(null, "x", "100");
 	this.background.setAttributeNS(null, "y", (coordinates.y-100));
-	this.background.setAttributeNS(null, "fill", "#444");
+	this.background.setAttributeNS(null, "fill", "#627D7F");
 	this.container.appendChild(this.background);
 
 

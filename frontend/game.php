@@ -57,13 +57,14 @@
 		<link type="text/css" rel="stylesheet" href="css/game.css" />
 		<script type="text/javascript" src="js/jquery.svg.min.js"></script>
 		<script type="text/javascript" src="js/jquery.svganim.js"></script>
-		<script type="text/javascript" src="js/gameplay/Scoreboard.class-ck.js"></script>
+		<script type="text/javascript" src="js/gameplay/Scoreboard.class.js"></script>
 		<script type="text/javascript" src="js/gameplay/PlayingCard.class.js"></script>
 		<script type="text/javascript" src="js/gameplay/PlayerHand.class.js"></script>
 		<script type="text/javascript" src="js/gameplay/CardDeck.class.js"></script>
 		<script type="text/javascript" src="js/gameplay/Gamespace.class.js"></script>
 		<script type="text/javascript" src="js/gameplay/Crib.class.js"></script>
 		<script type="text/javascript" src="js/gameplay/PlayedCards.class.js"></script>
+		<script type="text/javascript" src="js/gameplay/Draggable.class.js"></script>
 		<script type="text/javascript" src="js/init.js"></script>
 		<script type="text/javascript">
 
