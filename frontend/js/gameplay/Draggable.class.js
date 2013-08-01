@@ -36,7 +36,7 @@ function Draggable(parameter){
 	// for each target for the object
 	this.targets = [];
 
-	this.setEvents();
+	this.eventsSet = false;
 }
 
 Draggable.prototype.instances = [];
@@ -45,6 +45,10 @@ Draggable.prototype.draggingObject = undefined;
 
 
 Draggable.prototype.addTarget = function(data){
+	if(!this.eventsSet){
+		this.setEvents();
+	}
+
 	var targetCoordinates;
 	if(data["coordinates"] !== undefined && data["target"] !== undefined){
 		throw "Must only pass either a coordinates value or a target value";

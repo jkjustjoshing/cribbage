@@ -148,6 +148,13 @@ function PlayingCard(number, suit){
 		this.ele.appendChild(usePath);
 
 	}
+
+	var which = this;
+	this.dragHandler = new Draggable({
+		element: which.ele,
+		object: which
+	});
+
 }
 
 

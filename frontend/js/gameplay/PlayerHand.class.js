@@ -144,19 +144,7 @@ PlayerHand.prototype.chooseCrib = function(disable){
 
 		// Allow cards to be dragged to the crib box
 		for(var i = 0; i < this.cards.length; ++i){
-			// Old method
-			// this.cards[i].drag(function(ele, x, y){
-			// 	return which.cribDraggingCallback(ele, x, y, which);
-			// });
-		
-			// New method
-			this.cards[i].dragHandler = new Draggable({
-				element: which.cards[i].ele,
-				object: which.cards[i]
-			});
-
 			moveToCrib(this.cards[i]);
-
 		}
 	}else{
 		this.dragging = false;
@@ -173,8 +161,18 @@ PlayerHand.prototype.peggingMode = function(disable){
 		this.dragging = true;
 		// Set local mousedown listener
 		for(var i = 0; i < this.cards.length; ++i){
-			this.cards[i].drag(function(ele, x, y){
-				return which.peggingDraggingCallback(ele, x, y, which);
+			this.cards[i].dragHandler.addTarget({
+				target: window.gamespace.playedCards.background,
+				success: function(){
+					// Dragged into played cards area - what to do?
+					var card = this.object;
+					which.remove(card, false);
+					window.gamespace.playedCards.play(card, window.player.id);
+					this.removeTarget({
+						target: window.gamespace.playedCards.background
+					});
+					which.sort(true);
+				}
 			});
 		}
 
@@ -215,25 +213,6 @@ PlayerHand.prototype.peggingMode = function(disable){
 		for(var i = 0; i < this.cards.length; ++i){
 			this.cards[i].drag(false);
 		}
-	}
-}
-
-// Where is the card? If it's in the crib move it.
-PlayerHand.prototype.peggingDraggingCallback = function(ele, x, y, which){
-	if(window.gamespace.playedCards.successfulDrag(x+50, y+70)){ //half the width, half the height of a card
-		
-		// It's in the crib - send it over!
-		var cardID = ele.getAttributeNS(null, "name").split("|");
-
-		var card = which.remove(new PlayingCard(cardID[0], cardID[1]), false);
-		window.gamespace.playedCards.play(card, window.player.id);
-		card.drag(false);
-		
-		which.sort(true);
-		return true;
-	}else{
-		which.sort(true);
-		return false;
 	}
 }
 
