@@ -457,7 +457,8 @@
 				if($result === false){
 					return "There was a database error setting the cut card.";
 				}else{
-					
+					$this->cutCard = array("number"=>$cutCard->getNumber(), "suit"=>$cutCard->getSuit());
+
 					// Change the state to PEGGING
 					if($database->changeGameState($this->gameID, "PEGGING")){
 						$this->gamestate = "PEGGING";
@@ -468,7 +469,7 @@
 
 			}else{
 				// Return the cut card
-				return new PlayingCard($this->cutCard->number, $this->cutCard->suit);
+				return new PlayingCard($this->cutCard["number"], $this->cutCard["suit"]);
 
 				/*//Get the cut card and return it
 				$card = $database->getCutCard($this->gameID);
