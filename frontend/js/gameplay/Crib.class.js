@@ -173,7 +173,7 @@ Crib.prototype.choosingCribMode = function(isChoosingCribMode){
 	if(this.isChoosingCribMode === false){
 		for(var i = 0; i < this.cards.length; ++i){
 			if(this.cards[i].isVisible()){
-				this.cards[i].drag(false);
+				this.cards[i].dragHandler.removeAllTargets();
 			}
 		}
 		this.confirmSelection();
@@ -181,20 +181,6 @@ Crib.prototype.choosingCribMode = function(isChoosingCribMode){
 		this.cribBox.childNodes[0].setAttributeNS(null, "stroke", window.textColor);
 	}
 }
-
-/**
- * Is a card dragged to the passed (x,y) coordinate inside the crib box?
- * @param  {int} x The x coordinate for the card being dragged
- * @param  {int} y The y coordinate for the card being dragged
- * @return {boolean}   Whether or not the card was inside the crib box
- */
-Crib.prototype.successfulDrag = function(x, y){
-	if(window.gamespace.hands[window.player.id].length <= 4) return false;
-	var bbox = this.cribBox.childNodes[0].getBBox();
-	var insideHorizontally = x > bbox.x && x < (bbox.x + bbox.width);
-	var insideVertically = y > bbox.y && y < (bbox.y + bbox.height);
-	return insideHorizontally && insideVertically;
-};
 
 Crib.prototype.hide = function(){
 	for(var i = 0; i < this.cards.length; ++i){
@@ -222,64 +208,6 @@ Crib.prototype.confirmSelection = function(){
 	}else{
 		cribTextString = window.opponent.username + "'s Crib";
 	}
-	
-
-	if(this.confirmCrib === undefined){
-		var which = this;
-		this.confirmCrib = function(){
-			// Tell the player hand to disable dragging
-			window.gamespace.hands[window.player.id].chooseCrib(false);
-
-			// Disable dragging myself, change back text of crib
-			which.choosingCribMode(false);
-			
-			var visibleCards = [];
-			for(var i = 0; i < which.cards.length; ++i){
-				if(which.cards[i].isVisible()){
-					visibleCards[visibleCards.length] = which.cards[i];
-				}
-			}
-
-			// Send the crib info to the server
-			ajaxCall(
-				"post",
-				{
-					application: "game",
-					method: "putInCrib",
-					data: {
-						gameID: window.gameID,
-						cards: [
-							{
-								suit: visibleCards[0].suit,
-								number: visibleCards[0].number
-							},
-							{
-								suit: visibleCards[1].suit,
-								number: visibleCards[1].number
-							}
-						]
-					}
-				},
-				function(data){
-					data = data["game"];
-
-					if(data.success === true){
-						which.hide();
-						which.sort();
-						window.gamespace.statusMessage("Waiting for " + window.opponent.username + " to put 2 cards in the crib.");
-						cribText.removeEventListener("click", which.confirmCrib);
-						cribText.firstChild.nodeValue = (which.dealer === window.player.id ? "My Crib" : (window.opponent.username + "'s Crib"));
-
-					}else{
-						alert(data.error);
-					}
-				}
-			);
-
-			// 		Callback - set up interval to check for gamestate change
-			// 		When gamestate changes tell the gamestate object to setup the next state
-		};
-	}
 
 	if(visibleCards.length !== 2){
 		this.cribBox.childNodes[0].setAttributeNS(null, "stroke", "red");
@@ -291,6 +219,61 @@ Crib.prototype.confirmSelection = function(){
 		cribText.firstChild.nodeValue = "Click to confirm";
 		cribText.addEventListener("click", this.confirmCrib, false);
 	}
+};
+
+Crib.prototype.confirmCrib = function(){
+	var which = window.gamespace.crib;
+	// Tell the player hand to disable dragging
+	window.gamespace.hands[window.player.id].chooseCrib(false);
+
+	// Disable dragging myself, change back text of crib
+	which.choosingCribMode(false);
+	
+	var visibleCards = [];
+	for(var i = 0; i < which.cards.length; ++i){
+		if(which.cards[i].isVisible()){
+			visibleCards[visibleCards.length] = which.cards[i];
+		}
+	}
+
+	// Send the crib info to the server
+	ajaxCall(
+		"post",
+		{
+			application: "game",
+			method: "putInCrib",
+			data: {
+				gameID: window.gameID,
+				cards: [
+					{
+						suit: visibleCards[0].suit,
+						number: visibleCards[0].number
+					},
+					{
+						suit: visibleCards[1].suit,
+						number: visibleCards[1].number
+					}
+				]
+			}
+		},
+		function(data){
+			data = data["game"];
+
+			if(data.success === true){
+				which.hide();
+				which.sort();
+				window.gamespace.statusMessage("Waiting for " + window.opponent.username + " to put 2 cards in the crib.");
+				which.cribBox.childNodes[1].removeEventListener("click", which.confirmCrib);
+				which.cribBox.childNodes[1].firstChild.nodeValue = (which.dealer === window.player.id ? "My Crib" : (window.opponent.username + "'s Crib"));
+
+			}else{
+				alert(data.error);
+			}
+		}
+	);
+
+	// 		Callback - set up interval to check for gamestate change
+	// 		When gamestate changes tell the gamestate object to setup the next state
 };
 
 Crib.prototype.clear = PlayerHand.prototype.clear;

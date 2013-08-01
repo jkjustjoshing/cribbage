@@ -78,35 +78,72 @@ Draggable.prototype.addTarget = function(data){
 		throw "Must pass a target element or coordinates";
 	}
 
-	var successCallback = data["success"];
-	var failureCallback = data["failure"];
 
-	if(failureCallback === undefined){
-		// If there is no failure callback, make the element snap back to where it was
-		failureCallback = function(element, target){
-			if(this.attributeInit.x !== 0 || this.attributeInit.y !== 0){
-				if($.svg){
-					$(this.element).animate({
-						svgX: this.attributeInit.x,
-						svgY: this.attributeInit.y
-					});
-				}else{
-					this.element.setAttributeNS(null, "x", this.attributeInit.x);
-					this.element.setAttributeNS(null, "y", this.attributeInit.y);
-				}
+	// Function to snap back dragged object to where it started
+	var snapback = function(element, target){
+		if(this.attributeInit.x !== 0 || this.attributeInit.y !== 0){
+			if($.svg){
+				$(this.element).animate({
+					svgX: this.attributeInit.x,
+					svgY: this.attributeInit.y
+				});
+			}else{
+				this.element.setAttributeNS(null, "x", this.attributeInit.x);
+				this.element.setAttributeNS(null, "y", this.attributeInit.y);
 			}
+		}
 
-			if(this.transformInit.x !== 0 || this.transformInit.y !== 0){
-				if($.svg){
-					// Animate if just transform is set
-					$(this.element).animate({
-						svgTransform: "translate("+this.transformInit.x+","+this.transformInit.y+")"
-					});
+		if(this.transformInit.x !== 0 || this.transformInit.y !== 0){
+			if($.svg){
+				// Animate if just transform is set
+				$(this.element).animate({
+					svgTransform: "translate("+this.transformInit.x+","+this.transformInit.y+")"
+				});
+			}else{
+				this.element.setAttributeNS(null, "transform", "translate("+this.transformInit.x+","+this.transformInit.y+")");
+			}
+		}
+	}
+
+	
+
+	var successCallback = data["success"];
+	var failureCallback;
+
+	if(data["success"] === "snapback"){
+		successCallback = snapback;
+	}else if(data["success"][0] !== undefined){
+		// Array-like - multiple callbacks
+		successCallback = function(){
+			for(var i = 0; i < data["success"].length; ++i){
+				if(data["success"][i] === "snapback"){
+					snapback();
 				}else{
-					this.element.setAttributeNS(null, "transform", "translate("+this.transformInit.x+","+this.transformInit.y+")");
+					data["success"][i]();
 				}
 			}
 		}
+	}else{
+		successCallback = data["success"];
+	}
+
+
+	if(data["failure"] === undefined || data["failure"] === "snapback"){
+		// If there is no failure callback, make the element snap back to where it was
+		failureCallback = snapback;
+	}else if(data["failure"][0] !== undefined){
+		// Array-like - multiple callbacks
+		failureCallback = function(){
+			for(var i = 0; i < data["failure"].length; ++i){
+				if(data["failure"][i] === "snapback"){
+					snapback();
+				}else{
+					data["failure"][i]();
+				}			
+			}
+		}
+	}else{
+		failureCallback = data["failure"];
 	}
 
 	var targetObj = {
@@ -164,6 +201,11 @@ Draggable.prototype.removeTarget = function(data){
 		console.log(this);
 		this.element.removeEventListener("mousedown", this.mousedownCallback, false);
 	}
+}
+
+Draggable.prototype.removeAllTargets = function(){
+	this.targets = [];
+	this.element.removeEventListener("mousedown", this.mousedownCallback, false);
 }
 
 Draggable.prototype.setEvents = function(){

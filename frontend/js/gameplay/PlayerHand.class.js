@@ -63,13 +63,6 @@ PlayerHand.prototype.add = function(card, doNotAnimate){
 		this.sort(true);
 
 	}
-
-	if(this.dragging){
-		var which = this;
-		card.drag(function(ele, x, y){
-			return which.draggingCallback(ele, x, y, which);
-		})
-	}
 }
 
 /**
@@ -116,6 +109,39 @@ PlayerHand.prototype.chooseCrib = function(disable){
 	if(disable === undefined || disable === true){
 		var which = this;
 		this.dragging = true;
+		
+
+		var moveToCrib = function(card){
+			card.dragHandler.addTarget({
+				target: window.gamespace.crib.cribBox,
+				success: function(){
+					// Put in crib, and allow to be dragged out
+					window.gamespace.crib.add(this.object);
+					which.remove(this.object);
+					which.sort(true);
+
+					this.removeTarget({
+						target: window.gamespace.crib.cribBox
+					});
+
+					// Add target to remove from crib. Failure is actually success (outside crib box)
+					this.addTarget({
+						target: window.gamespace.crib.cribBox,
+						success: "snapback",
+						failure: function(){
+							// Put back in hand, remove from crib
+							which.add(this.object);
+							window.gamespace.crib.remove(this.object);
+							which.sort(true);
+							this.removeTarget({target: window.gamespace.crib.cribBox});
+							moveToCrib(this.object);
+						}	
+					});
+				}
+			});
+		}; // end moveToCrib()
+
+
 		// Allow cards to be dragged to the crib box
 		for(var i = 0; i < this.cards.length; ++i){
 			// Old method
@@ -128,58 +154,15 @@ PlayerHand.prototype.chooseCrib = function(disable){
 				element: which.cards[i].ele,
 				object: which.cards[i]
 			});
-			this.cards[i].dragHandler.addTarget({
-				target: window.gamespace.crib.cribBox,
-				success: function(){
-					// Put in crib, and allow to be dragged out
-					window.gamespace.crib.add(this.object);
-					which.remove(this.object);
-					which.sort(true);
 
-					this.addTarget({
-						coordinates: {
-							x: window.coordinates.playerHand.x,
-							y: window.coordinates.playerHand.y,
-							width: 240,
-							height: 140
-						},
-						success: function(){
-							// Put back in hand, remove from crib
-							
-						}	
-					});
-					this.removeTarget({
-						target: window.gamespace.crib.cribBox
-					});
-				}
-			});
+			moveToCrib(this.cards[i]);
+
 		}
 	}else{
 		this.dragging = false;
 		for(var i = 0; i < this.cards.length; ++i){
-			this.cards[i].drag(false);
+			this.cards[i].dragHandler.removeAllTargets();
 		}
-	}
-}
-
-
-// Where is the card? If it's in the crib move it.
-PlayerHand.prototype.cribDraggingCallback = function(ele, x, y, which){
-	if(window.gamespace.crib.successfulDrag(x+50, y+70)){ //half the width, half the height of a card
-		
-		// It's in the crib - send it over!
-		var cardID = ele.getAttributeNS(null, "name").split("|");
-
-		var card = which.remove(new PlayingCard(cardID[0], cardID[1]), false);
-		window.gamespace.crib.add(card);
-
-		// If there are 2 cards there show button
-		// If it's not in crib animate back, then sort
-		which.sort(true);
-		return true;
-	}else{
-		which.sort(true);
-		return false;
 	}
 }
 

@@ -92,7 +92,6 @@ Gamespace.prototype.constructState = function(){
 		case "CHOOSING_CRIB":
 			// Set event listeners on my cards
 			which.crib.choosingCribMode(true);
-			which.statusMessage("Drag 2 cards into the crib from your hand.");
 			which.hands[window.player.id].chooseCrib();
 
 			if(which.hands[window.player.id].cards.length == 6){
@@ -100,6 +99,7 @@ Gamespace.prototype.constructState = function(){
 			}else{
 				which.statusMessage("Waiting for " + window.opponent.username + " to put 2 cards in the crib.");
 			}
+
 			// Poll for other player submitting crib cards to update view
 			var interval = setInterval(function(){
 				ajaxCall(
@@ -118,22 +118,22 @@ Gamespace.prototype.constructState = function(){
 							which.crib.add(card);
 							which.crib.sort();
 
+							var card = which.hands[window.opponent.id].remove(new PlayingCard());
+							which.crib.add(card);
+
 							// Make the second card go to the hand 0.5 seconds after the first
 							setTimeout(function(){
-								var card = which.hands[window.opponent.id].remove(new PlayingCard());
-								which.crib.add(card);
-
 								which.crib.sort();
-
-								if(data["game"]["crib"].length == 4){
-									// If the crib has 4 cards stop the polling
-									clearInterval(interval);
-
-									// Move to cutting card state
-									which.gamestate = "CUTTING_CARD";
-									which.constructState();
-								}
 							}, 500);
+						}
+
+						if(data["game"]["crib"].length == 4){
+							// If the crib has 4 cards stop the polling
+							clearInterval(interval);
+
+							// Move to cutting card state
+							which.gamestate = "CUTTING_CARD";
+							which.constructState();
 						}
 					}
 				);
