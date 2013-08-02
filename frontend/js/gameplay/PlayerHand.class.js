@@ -158,20 +158,21 @@ PlayerHand.prototype.peggingMode = function(disable){
 	// Set global drag/mousup listeners (this.ele is the SVG element containing the hand)
 	if(disable === undefined || disable === true){
 		var which = this;
-		this.dragging = true;
 		// Set local mousedown listener
 		for(var i = 0; i < this.cards.length; ++i){
 			this.cards[i].dragHandler.addTarget({
 				target: window.gamespace.playedCards.background,
 				success: function(){
-					// Dragged into played cards area - what to do?
-					var card = this.object;
-					which.remove(card, false);
-					window.gamespace.playedCards.play(card, window.player.id);
-					this.removeTarget({
-						target: window.gamespace.playedCards.background
-					});
-					which.sort(true);
+					// If it's actually my turn, play the card
+					if(window.gamespace.turn === window.player.id){
+						// Dragged into played cards area - what to do?
+						var card = this.object;
+						which.remove(card, false);
+						window.gamespace.playedCards.play(card, window.player.id);
+						which.sort(true);
+					}else{
+						this.snapback();
+					}
 				}
 			});
 		}
@@ -209,10 +210,10 @@ PlayerHand.prototype.peggingMode = function(disable){
 		});
 
 	}else{
-		this.dragging = false;
 		for(var i = 0; i < this.cards.length; ++i){
-			this.cards[i].drag(false);
+			this.cards[i].dragHandler.removeAllTargets();
 		}
+		this.ele.removeChild(this.goEle.parentNode);
 	}
 }
 

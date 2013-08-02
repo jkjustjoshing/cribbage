@@ -80,8 +80,7 @@ PlayedCards.prototype.updateCountText = function(){
  */
 PlayedCards.prototype.play = function(card, player, initializing){
 	if(!(card instanceof PlayingCard) && card !== null){
-		console.log("Can only play a PlayingCard object");
-		throw "Can only \"play\" a PlayingCard object";
+		throw 'Can only "play" a PlayingCard object';
 	}
 	var x = this.coordinates.x + 100;
 	var y = this.coordinates.y - 80;
@@ -144,11 +143,19 @@ PlayedCards.prototype.play = function(card, player, initializing){
 						which.updateCountText();
 
 						window.gamespace.hands[window.player.id].add(card);
+						window.gamespace.hands[window.player.id].sort(true);
 
 						which.screenCards.length--;
 					}
 					which.cards.length--;
 				}else{
+
+					if(card.dragHandler !== undefined){
+						card.dragHandler.removeTarget({
+							target: window.gamespace.playedCards.background
+						});
+					}
+
 					// Success, update
 					window.gamespace.setTurn(data["game"]["turn"]);
 
@@ -180,8 +187,8 @@ PlayedCards.prototype.play = function(card, player, initializing){
 					
 
 					if(window.gamespace.gamestate !== data["game"]["gamestate"]){
-						alert("Gamestate is now " + data["game"]["gamestate"]);
 						window.gamespace.gamestate = data["game"]["gamestate"];
+						window.gamespace.constructState();
 					}
 				}
 			}
@@ -258,8 +265,8 @@ PlayedCards.prototype.poll = function(){
 				}
 
 				if(window.gamespace.gamestate !== data["game"]["gamestate"]){
-					alert("Gamestate is now " + data["game"]["gamestate"]);
 					window.gamespace.gamestate = data["game"]["gamestate"];
+					window.gamespace.constructState();
 				}
 
 			}

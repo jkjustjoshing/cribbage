@@ -16,17 +16,23 @@
  * Facilitates the dragging of an object into a set of coordinates.
  * @param DOMElement/Object parameter Either the element to drag or an object
  * with the fields "element", holding the element, and "object", holding an object
- * that can be accessed from the success/failure callbacks as "this.object".
+ * that can be accessed from the success/failure callbacks as "this.element" and 
+ * "this.object", respectively.
  */
 function Draggable(parameter){
 	if(parameter.element){
 		this.element = parameter.element;
 		this.object = parameter.object;
+		if(parameter.bbox){
+			this.bbox = parameter.bbox;
+		}else{
+			this.bbox = this.element.getBBox();
+		}
 	}else{
 		this.element = parameter;
+		this.bbox = this.element.getBBox();
 	}
 
-	this.bbox = this.element.getBBox();
 
 	this.dragging = false;
 	this.element.setAttributeNS(null, "data-draggableIndex", Draggable.prototype.instances.length);
@@ -81,47 +87,19 @@ Draggable.prototype.addTarget = function(data){
 	}else{
 		throw "Must pass a target element or coordinates";
 	}
-
-
-	// Function to snap back dragged object to where it started
-	var snapback = function(element, target){
-		if(this.attributeInit.x !== 0 || this.attributeInit.y !== 0){
-			if($.svg){
-				$(this.element).animate({
-					svgX: this.attributeInit.x,
-					svgY: this.attributeInit.y
-				});
-			}else{
-				this.element.setAttributeNS(null, "x", this.attributeInit.x);
-				this.element.setAttributeNS(null, "y", this.attributeInit.y);
-			}
-		}
-
-		if(this.transformInit.x !== 0 || this.transformInit.y !== 0){
-			if($.svg){
-				// Animate if just transform is set
-				$(this.element).animate({
-					svgTransform: "translate("+this.transformInit.x+","+this.transformInit.y+")"
-				});
-			}else{
-				this.element.setAttributeNS(null, "transform", "translate("+this.transformInit.x+","+this.transformInit.y+")");
-			}
-		}
-	}
-
 	
 
 	var successCallback = data["success"];
 	var failureCallback;
 
 	if(data["success"] === "snapback"){
-		successCallback = snapback;
+		successCallback = this.snapback;
 	}else if(data["success"][0] !== undefined){
 		// Array-like - multiple callbacks
 		successCallback = function(){
 			for(var i = 0; i < data["success"].length; ++i){
 				if(data["success"][i] === "snapback"){
-					snapback();
+					this.snapback();
 				}else{
 					data["success"][i]();
 				}
@@ -134,13 +112,13 @@ Draggable.prototype.addTarget = function(data){
 
 	if(data["failure"] === undefined || data["failure"] === "snapback"){
 		// If there is no failure callback, make the element snap back to where it was
-		failureCallback = snapback;
+		failureCallback = this.snapback;
 	}else if(data["failure"][0] !== undefined){
 		// Array-like - multiple callbacks
 		failureCallback = function(){
 			for(var i = 0; i < data["failure"].length; ++i){
 				if(data["failure"][i] === "snapback"){
-					snapback();
+					this.snapback();
 				}else{
 					data["failure"][i]();
 				}			
@@ -163,6 +141,32 @@ Draggable.prototype.addTarget = function(data){
 
 
 	this.targets[this.targets.length] = targetObj;
+}
+
+Draggable.prototype.snapback = function(){
+	// Function to snap back dragged object to where it started
+	if(this.attributeInit.x !== 0 || this.attributeInit.y !== 0){
+		if($.svg){
+			$(this.element).animate({
+				svgX: this.attributeInit.x,
+				svgY: this.attributeInit.y
+			});
+		}else{
+			this.element.setAttributeNS(null, "x", this.attributeInit.x);
+			this.element.setAttributeNS(null, "y", this.attributeInit.y);
+		}
+	}
+
+	if(this.transformInit.x !== 0 || this.transformInit.y !== 0){
+		if($.svg){
+			// Animate if just transform is set
+			$(this.element).animate({
+				svgTransform: "translate("+this.transformInit.x+","+this.transformInit.y+")"
+			});
+		}else{
+			this.element.setAttributeNS(null, "transform", "translate("+this.transformInit.x+","+this.transformInit.y+")");
+		}
+	}
 }
 
 Draggable.prototype.removeTarget = function(data){
@@ -300,6 +304,16 @@ Draggable.prototype.mousemoveCallback = function(event){
 
 Draggable.prototype.mouseupCallback = function(event){
 	var which = Draggable.prototype.draggingObject;
+	
+	if(which === undefined){
+		return;
+	}
+
+	which.bbox = which.element.getBBox();
+	if(which.bbox.width == 0 && which.bbox.height == 0){
+		which.bbox = which.element.childNodes[0].getBBox();
+	}
+
 	if(which !== undefined){
 		Draggable.prototype.draggingObject = undefined;
 		which.dragging = false;
