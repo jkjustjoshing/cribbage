@@ -64,6 +64,7 @@ Gamespace.prototype.constructState = function(){
 	var which = this;
 	switch(which.gamestate){
 		case "DEALING":
+			which.statusMessage("");
 			which.deck.setDealer(which.dealer, which.gamestate);
 			which.crib.setDealer(which.dealer, which.gamestate);
 			// If not dealing, poll for information
@@ -201,7 +202,7 @@ Gamespace.prototype.constructState = function(){
 		case "PEGGING":
 			which.statusMessage("");
 			which.hands[window.player.id].peggingMode(true);
-			var interval = setInterval(which.playedCards.poll, 2000);
+			which.playedCards.startPolling();
 			which.setTurn(this.turn);
 			break;
 		case "VIEWING_HANDS":
@@ -219,8 +220,8 @@ Gamespace.prototype.constructState = function(){
 			break;
 		default:
 			// Just throw them out to the lobby
-			alert("Invalid state, Gamespace.class");
-			window.location("lobby.php");
+			alert("Uh oh! Something went wrong! The game doesn't know what state it is in. Try reopening the game.");
+			window.close();
 	}
 }
 
@@ -298,15 +299,30 @@ Gamespace.prototype.setTurn = function(turn){
 		this.turnTriangles[window.player.id].setAttributeNS(null, "fill", (window.player.id === this.turn ? window.textColor : falseColor));
 		this.turnTriangles[window.opponent.id].setAttributeNS(null, "fill", (window.opponent.id === this.turn ? window.textColor : falseColor));
 	}else{
-		this.turnTriangles[window.player.id].setAttributeNS(null, "fill", falseColor);
-		this.turnTriangles[window.opponent.id].setAttributeNS(null, "fill", falseColor);
+		var trianglePlayer = this.turnTriangles[window.player.id];
+		var triangleOpponent = this.turnTriangles[window.opponent.id];
+		trianglePlayer.parentNode.removeChild(trianglePlayer);
+		triangleOpponent.parentNode.removeChild(triangleOpponent);
+		this.turnTriangles = undefined;
 	}
 }
 
 Gamespace.prototype.viewHands = function(needToConfirmHand){
 	var which = this;
+	
+	// Remove the turn indicator arrows	
 	which.setTurn(false); // Remove the turn indicator triangle
 	
+	// Remove the count text
+	which.playedCards.updateCountText(null);
+
+	// Remove "go" button
+	var hand = which.hands[window.player.id];
+	if(hand.goEle !== undefined){
+		hand.goEle.parentNode.removeChild(hand.goEle);
+		hand.goEle = undefined;
+	}
+
 	ajaxCall(
 		"get",
 		{
@@ -321,29 +337,31 @@ Gamespace.prototype.viewHands = function(needToConfirmHand){
 
 			// Create new player hands 
 			var playerHand = which.hands[window.player.id];
+			playerHand.clear();
 			for(var i = 0; i < data["hands"][window.player.id].length; ++i){
 				data["hands"][window.player.id][i].inHand = 1;
+				var suit = data["hands"][window.player.id][i].suit;
+				var number = data["hands"][window.player.id][i].number;
+				playerHand.add(new PlayingCard(number, suit), true);
 			}
-			var newPlayerHand = new PlayerHand(data["hands"][window.player.id], playerHand.ele, playerHand.coordinates);
-			playerHand.clear();
-			newPlayerHand.sort();
-			which.hands[window.player.id] = newPlayerHand;
-
+			playerHand.sort();
 			
 			var opponentHand = which.hands[window.opponent.id];
 			for(var i = 0; i < data["hands"][window.opponent.id].length; ++i){
 				data["hands"][window.opponent.id][i].inHand = 1;
+				var suit = data["hands"][window.opponent.id][i].suit;
+				var number = data["hands"][window.opponent.id][i].number;
+				opponentHand.add(new PlayingCard(number, suit), true);
 			}
-			var newOpponentHand = new PlayerHand(data["hands"][window.opponent.id], opponentHand.ele, opponentHand.coordinates);
-			opponentHand.clear();
-			newOpponentHand.sort();
-			which.hands[window.opponent.id] = newOpponentHand;
+			opponentHand.sort();
 			
 			which.crib.viewingCards(data["hands"]["crib"]);
 			which.crib.sort();
 
 			if(needToConfirmHand){
 				which.confirmHandView(data);
+			}else{
+				which.statusMessage("Waiting for " + window.opponent.username + " to finish looking at the hands.");
 			}
 		}
 	);		
@@ -477,7 +495,9 @@ Gamespace.prototype.resetGamespace = function(){
 
 	// Clear all objects, clear out the DOM
 	this.dealer = (this.dealer === window.player.id ? window.opponent.id : window.player.id);
+	
 	this.cutCard = {suit:null, number:null};
+	this.deck.updateCutCard(new PlayingCard());
 
 	this.playedCards.clearFromScreen();
 	this.playedCards.cards = [];

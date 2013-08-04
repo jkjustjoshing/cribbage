@@ -12,7 +12,7 @@
 		const RETURN_VAL = true;
 
 		public static function create($userID, $return = false){
-			self::$cookieExpire = time() + (60*60);
+			self::$cookieExpire = time() + (60*60*5);
 		
 			$userAgent = $_SERVER["HTTP_USER_AGENT"];
 			$ip = $_SERVER["REMOTE_ADDR"];

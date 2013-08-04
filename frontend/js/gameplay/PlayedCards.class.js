@@ -52,9 +52,14 @@ function PlayedCards(cards, container, coordinates){
 
 }
 
-PlayedCards.prototype.updateCountText = function(){
+PlayedCards.prototype.updateCountText = function(nullIfReset){
 
-	if(this.countEle === undefined){
+	if(nullIfReset === null){
+		if(this.countEle !== undefined){
+			this.countEle.parentNode.removeChild(this.countEle);
+			this.countEle = undefined;
+		}
+	}else if(this.countEle === undefined){
 		this.countEle = document.createElementNS(svgns, "g");
 		this.countEle.setAttributeNS(null, "transform", "translate("+this.coordinates.x+", "+this.coordinates.y+")")
 		var text = document.createElementNS(svgns, "text");
@@ -166,20 +171,22 @@ PlayedCards.prototype.play = function(card, player, initializing){
 					}
 
 
+					var scoreboard = window.gamespace.scoreboard;
+
 					// If the scores changed update them on the scoreboard
-					if(window.gamespace.scoreboard.playerInfo[window.player.id].score !== data["game"]["scores"][window.player.id]){
+					if(scoreboard.playerInfo[window.player.id].score !== data["game"]["scores"][window.player.id]){
 						// Player has a new score
-						if(window.gamespace.scoreboard.playerInfo[window.player.id].score !== data["game"]["backPinPositions"][window.player.id]){
-							window.gamespace.scoreboard.changeScore(window.player.id, data["game"]["backPinPositions"][window.player.id]);
+						if(scoreboard.playerInfo[window.player.id].score !== data["game"]["backPinPositions"][window.player.id]){
+							scoreboard.changeScore(window.player.id, data["game"]["backPinPositions"][window.player.id]);
 						}
-						window.gamespace.scoreboard.changeScore(window.player.id, data["game"]["scores"][window.player.id]);					
+						scoreboard.changeScore(window.player.id, data["game"]["scores"][window.player.id]);					
 					}
-					if(window.gamespace.scoreboard.playerInfo[window.opponent.id].score !== data["game"]["scores"][window.opponent.id]){
+					if(scoreboard.playerInfo[window.opponent.id].score !== data["game"]["scores"][window.opponent.id]){
 						// Opponent has a new score
-						if(window.gamespace.scoreboard.playerInfo[window.opponent.id].score !== data["game"]["backPinPositions"][window.opponent.id]){
-							window.gamespace.scoreboard.changeScore(window.opponent.id, data["game"]["backPinPositions"][window.opponent.id]);
+						if(scoreboard.playerInfo[window.opponent.id].score !== data["game"]["backPinPositions"][window.opponent.id]){
+							changeScore(window.opponent.id, data["game"]["backPinPositions"][window.opponent.id]);
 						}
-						window.gamespace.scoreboard.changeScore(window.opponent.id, data["game"]["scores"][window.opponent.id]);					
+						scoreboard.changeScore(window.opponent.id, data["game"]["scores"][window.opponent.id]);					
 					}
 					// end updating scores
 					
@@ -213,7 +220,14 @@ PlayedCards.prototype.successfulDrag = function(x, y){
 	return insideHorizontally && insideVertically;
 };
 
-PlayedCards.prototype.poll = function(){
+PlayedCards.prototype.startPolling = function(){
+	var which = this;
+	var interval = setInterval(function(){
+		which.poll(interval);
+	}, 200);
+}
+
+PlayedCards.prototype.poll = function(intervalToClearWhenStateChanges){
 	var which = window.gamespace.playedCards;
 	ajaxCall(
 		"get",
@@ -247,8 +261,6 @@ PlayedCards.prototype.poll = function(){
 					}
 				}
 
-				window.gamespace.setTurn(data["game"]["turn"]);
-
 				if(window.gamespace.scoreboard.playerInfo[window.player.id].score !== data["game"]["scores"][window.player.id]){
 					// Player has a new score
 					if(window.gamespace.scoreboard.playerInfo[window.player.id].score !== data["game"]["backPinPositions"][window.player.id]){
@@ -264,9 +276,14 @@ PlayedCards.prototype.poll = function(){
 					window.gamespace.scoreboard.changeScore(window.opponent.id, data["game"]["scores"][window.opponent.id]);					
 				}
 
-				if(window.gamespace.gamestate !== data["game"]["gamestate"]){
+				if(window.gamespace.gamestate !== data["game"]["gamestate"] || window.gamespace.gamestate === "VIEWING_HANDS" 
+					|| window.gamespace.gamestate.indexOf("WAITING_PLAYER") !== -1){
 					window.gamespace.gamestate = data["game"]["gamestate"];
+					// Stop from updating whose turn it is
+					clearInterval(intervalToClearWhenStateChanges);
 					window.gamespace.constructState();
+				}else{
+					window.gamespace.setTurn(data["game"]["turn"]);
 				}
 
 			}

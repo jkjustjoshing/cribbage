@@ -137,6 +137,9 @@ PlayerHand.prototype.chooseCrib = function(disable){
 							moveToCrib(this.object);
 						}	
 					});
+				},
+				failure: function(){
+					window.gamespace.hands[window.player.id].sort(true);
 				}
 			});
 		}; // end moveToCrib()
@@ -173,6 +176,9 @@ PlayerHand.prototype.peggingMode = function(disable){
 					}else{
 						this.snapback();
 					}
+				},
+				failure: function(){
+					window.gamespace.hands[window.player.id].sort(true);
 				}
 			});
 		}

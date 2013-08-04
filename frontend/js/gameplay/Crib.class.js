@@ -16,7 +16,7 @@ function Crib(cardArray, container, coordinates, dealer){
 	this.ele = container;
 	this.isChoosingCribMode = false;
 
-	this.coordinates = coordinates[dealer];
+	this.coordinates = coordinates;
 	this.masterCoordinates = coordinates;
 
 	this.padding = {x:10, y:5};
@@ -55,10 +55,10 @@ Crib.prototype.add = function(card, dragged, dontAnimate){
 		}
 		// Animate card to the crib
 		if(dontAnimate){
-			card.ele.setAttributeNS(null, "transform", "translate("+(this.coordinates.x + (this.cards.length-1)*35)+","+this.coordinates.y+")");
+			card.ele.setAttributeNS(null, "transform", "translate("+(this.coordinates[this.dealer].x + (this.cards.length-1)*35)+","+this.coordinates[this.dealer].y+")");
 		}else{
 			$(card.ele).animate({
-				svgTransform: "translate("+(this.coordinates.x + (this.cards.length-1)*35)+","+this.coordinates.y+")"
+				svgTransform: "translate("+(this.coordinates[this.dealer].x + (this.cards.length-1)*35)+","+this.coordinates[this.dealer].y+")"
 			}, 100);
 		}
 
@@ -90,10 +90,10 @@ Crib.prototype.sort = function(animate){
 		if(this.cards[i] !== undefined){
 			if(animate === true){
 				$(this.cards[i].ele).animate({
-					svgTransform: "translate("+(this.coordinates.x + i*35)+","+this.coordinates.y+")"
+					svgTransform: "translate("+(this.coordinates[this.dealer].x + i*35)+","+this.coordinates[this.dealer].y+")"
 				}, 400);
 			}else{
-				this.cards[i].ele.setAttributeNS(null, "transform", "translate("+(this.coordinates.x + i*35)+","+this.coordinates.y+")");
+				this.cards[i].ele.setAttributeNS(null, "transform", "translate("+(this.coordinates[this.dealer].x + i*35)+","+this.coordinates[this.dealer].y+")");
 			}
 
 			if(i !== 0){
@@ -281,8 +281,9 @@ Crib.prototype.clear = PlayerHand.prototype.clear;
 Crib.prototype.viewingCards = function(cardArray){
 	// Remove all cards from screen
 	var cards = this.cards.slice(0);
-	for(var i = 0; i < cards.length; ++i){
-		this.cardRemove(cards[i]);
+	for(var i = cards.length-1; i >= 0; --i){
+		var card = this.cardRemove(cards[i]); //Only removes from memory
+		card.ele.parentNode.removeChild(card.ele);
 	}
 
 	// Display new set of cards
