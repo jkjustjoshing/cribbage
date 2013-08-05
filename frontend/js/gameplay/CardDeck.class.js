@@ -130,4 +130,9 @@ CardDeck.prototype.updateCutCard = function(card){
 	cutCard.setAttributeNS(null, "transform", "translate("+((this.deckHeight-1)*2)+",0)");
 	cutCard.appendChild(card.ele);
 	this.ele.appendChild(cutCard);
+	if(card.number == 11){
+		window.gamespace.statusMessage("The dealer gets 2 points when a Jack gets cut.");
+	}else{
+		window.gamespace.statusMessage("");
+	}
 }

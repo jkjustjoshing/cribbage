@@ -200,7 +200,6 @@ Gamespace.prototype.constructState = function(){
 			}
 			break;
 		case "PEGGING":
-			which.statusMessage("");
 			which.hands[window.player.id].peggingMode(true);
 			which.playedCards.startPolling();
 			which.setTurn(this.turn);
@@ -507,7 +506,9 @@ Gamespace.prototype.resetGamespace = function(){
 	this.crib.clear();
 	this.crib.setDealer(this.dealer);
 
+}
 
+Gamespace.prototype.declareWinner = function(winnerID){
 
 }
 
