@@ -457,6 +457,13 @@
 				if($result === false){
 					return "There was a database error setting the cut card.";
 				}else{
+
+					// If a Jack was cut, give the dealer 2 points
+					if($cutCard->getNumber() === 11){
+						$this->updateScore($this->dealerID, 2);	
+					}
+
+
 					$this->cutCard = array("number"=>$cutCard->getNumber(), "suit"=>$cutCard->getSuit());
 
 					// Change the state to PEGGING
