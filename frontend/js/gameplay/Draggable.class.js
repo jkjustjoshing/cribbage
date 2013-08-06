@@ -25,12 +25,9 @@ function Draggable(parameter){
 		this.object = parameter.object;
 		if(parameter.bbox){
 			this.bbox = parameter.bbox;
-		}else{
-			this.bbox = this.element.getBBox();
 		}
 	}else{
 		this.element = parameter;
-		this.bbox = this.element.getBBox();
 	}
 
 
@@ -51,6 +48,12 @@ Draggable.prototype.draggingObject = undefined;
 
 
 Draggable.prototype.addTarget = function(data){
+	
+	// Not doing this onload to fix a bug in Firefox where getBBox can't be called before item is rendered
+	if(this.bbox === undefined){
+		this.bbox = this.element.getBBox();
+	}
+
 	if(!this.eventsSet){
 		this.setEvents();
 	}
@@ -69,13 +72,17 @@ Draggable.prototype.addTarget = function(data){
 
 		// Get coordinates of transform translate as well
 		var transform = data["target"].getAttributeNS(null, "transform");
-		var transformX = parseInt(transform.substring("translate(".length + transform.indexOf("translate("), transform.indexOf(",")));
-		var transformY = parseInt(transform.substring(transform.indexOf(",")+1, transform.indexOf(")")));	
-		if(Number.isNaN(transformX)){
-			transformX = 0;
-		}
-		if(Number.isNaN(transformY)){
-			transformY = 0
+		var transformX = 0;
+		var transformY = 0;
+		if(transform !== null){
+			transformX = parseInt(transform.substring("translate(".length + transform.indexOf("translate("), transform.indexOf(",")));
+			transformY = parseInt(transform.substring(transform.indexOf(",")+1, transform.indexOf(")")));	
+			if(isNaN(transformX)){
+				transformX = 0;
+			}
+			if(isNaN(transformY)){
+				transformY = 0
+			}
 		}
 
 		targetCoordinates = {
@@ -249,19 +256,19 @@ Draggable.prototype.mousedownCallback = function(event){
 	var transform = this.getAttributeNS(null, "transform");
 	var initX = parseInt(transform.substring("translate(".length + transform.indexOf("translate("), transform.indexOf(",")));
 	var initY = parseInt(transform.substring(transform.indexOf(",")+1, transform.indexOf(")")));	
-	if(Number.isNaN(initX)){
+	if(isNaN(initX)){
 		initX = 0;
 	}
-	if(Number.isNaN(initY)){
+	if(isNaN(initY)){
 		initY = 0
 	}
 
 	var eleX = parseInt(this.getAttributeNS(null, "x"));
 	var eleY = parseInt(this.getAttributeNS(null, "y"));
-	if(Number.isNaN(eleX)){
+	if(isNaN(eleX)){
 		eleX = 0;
 	}
-	if(Number.isNaN(eleY)){
+	if(isNaN(eleY)){
 		eleY = 0
 	}
 
