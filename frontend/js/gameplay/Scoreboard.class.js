@@ -19,19 +19,19 @@ var svgns = "http://www.w3.org/2000/svg";
  * @param {object} player1Info The "score", "id", "username", and "backPinPosition" for player 1
  * @param {object} player2Info The "score", "id", "username", and "backPinPosition" for player 2
  */
-function Scoreboard(player1Info, player2Info){
+function Scoreboard(player1Info, player2Info, scoreboardEle, gameEle){
 	var i, circle;
-	this.playerInfo = [];
+	this.playerInfo = {};
 	this.playerInfo[player1Info.id] = player1Info;
 	this.playerInfo[player2Info.id] = player2Info;
 
 	// Essentially figures out who is red and who is blue
 	if(this.playerInfo[player1Info.id].index === undefined){
-		this.playerInfo[player1Info.id].index = 0;
-		this.playerInfo[player2Info.id].index = 1;
+		this.playerInfo[(player1Info.id > player2Info.id ? player1Info.id : player2Info.id)].index = 0;
+		this.playerInfo[(player1Info.id > player2Info.id ? player2Info.id : player1Info.id)].index = 1;
 	}
 
-	// Create the pegs for each user
+	// Create the pegs for player 1
 	this.playerInfo[player1Info.id].pins = [];
 	for(i = 0; i < 2; ++i){
 		circle = document.createElementNS(svgns, "circle");
@@ -41,12 +41,10 @@ function Scoreboard(player1Info, player2Info){
 		circle.setAttributeNS(null, "fill", "black");
 
 		this.playerInfo[player1Info.id].pins[i] = circle;
-		document.getElementById("scoreboard").appendChild(circle);
+		scoreboardEle.appendChild(circle);
 	}
-	var realScore = this.playerInfo[player1Info.id].score;
-	this.changeScore(player1Info.id, this.playerInfo[player1Info.id].backPinPosition);
-	this.changeScore(player1Info.id, realScore);
 
+	// Create the pegs for player 2
 	this.playerInfo[player2Info.id].pins = [];
 	for(i = 0; i < 2; ++i){
 		circle = document.createElementNS(svgns, "circle");
@@ -56,11 +54,74 @@ function Scoreboard(player1Info, player2Info){
 		circle.setAttributeNS(null, "fill", "black");
 
 		this.playerInfo[player2Info.id].pins[i] = circle;
-		document.getElementById("scoreboard").appendChild(circle);
+		scoreboardEle.appendChild(circle);
 	}
+
+
+	// Create text for user's scores
+	var xCoordinate = 45;
+	var player1Score = document.createElementNS(svgns, "text");
+	player1Score.setAttributeNS(null, "font-family", "Arial");
+	player1Score.setAttributeNS(null, "font-size", "20");
+	player1Score.setAttributeNS(null, "fill", "red");
+	player1Score.setAttributeNS(null, "x", xCoordinate);
+	var player1ScoreWord = document.createElementNS(svgns, "text");
+	player1ScoreWord.setAttributeNS(null, "font-family", "Arial");
+	player1ScoreWord.setAttributeNS(null, "font-size", "20");
+	player1ScoreWord.setAttributeNS(null, "text-decoration", "underline");
+	player1ScoreWord.setAttributeNS(null, "fill", "red");
+	player1ScoreWord.setAttributeNS(null, "x", xCoordinate-17);
+	player1ScoreWord.appendChild(document.createTextNode("Score"));
+	
+	var player2Score = document.createElementNS(svgns, "text");
+	player2Score.setAttributeNS(null, "font-family", "Arial");
+	player2Score.setAttributeNS(null, "font-size", "20");
+	player2Score.setAttributeNS(null, "fill", "#22f");
+	player2Score.setAttributeNS(null, "x", xCoordinate);
+	var player2ScoreWord = document.createElementNS(svgns, "text");
+	player2ScoreWord.setAttributeNS(null, "font-family", "Arial");
+	player2ScoreWord.setAttributeNS(null, "font-size", "20");
+	player2ScoreWord.setAttributeNS(null, "text-decoration", "underline");
+	player2ScoreWord.setAttributeNS(null, "fill", "#22f");
+	player2ScoreWord.setAttributeNS(null, "x", xCoordinate-17);
+	player2ScoreWord.appendChild(document.createTextNode("Score"));
+
+
+	this.playerInfo[window.player.id].scoreText = (this.playerInfo[window.player.id].index === 0 ? player1Score : player2Score);
+	this.playerInfo[window.opponent.id].scoreText = (this.playerInfo[window.opponent.id].index === 0 ? player1Score : player2Score);
+	this.playerInfo[window.player.id].scoreTextWord = (this.playerInfo[window.player.id].index === 0 ? player1ScoreWord : player2ScoreWord);
+	this.playerInfo[window.opponent.id].scoreTextWord = (this.playerInfo[window.opponent.id].index === 0 ? player1ScoreWord : player2ScoreWord);
+
+	// Set the score text
+	this.playerInfo[window.player.id].scoreText.appendChild(document.createTextNode(this.playerInfo[window.player.id].score));
+	this.playerInfo[window.opponent.id].scoreText.appendChild(document.createTextNode(this.playerInfo[window.opponent.id].score));
+
+
+	var heightDifference = 25;
+	var playerY = 630;
+	var opponentY = 150;
+	this.playerInfo[window.player.id].scoreText.setAttributeNS(null, "y", playerY);
+	this.playerInfo[window.player.id].scoreTextWord.setAttributeNS(null, "y", playerY - heightDifference);
+	this.playerInfo[window.opponent.id].scoreText.setAttributeNS(null, "y", opponentY);
+	this.playerInfo[window.opponent.id].scoreTextWord.setAttributeNS(null, "y", opponentY - heightDifference);
+
+
+	gameEle.appendChild(this.playerInfo[window.player.id].scoreText);
+	gameEle.appendChild(this.playerInfo[window.opponent.id].scoreText);
+	gameEle.appendChild(this.playerInfo[window.player.id].scoreTextWord);
+	gameEle.appendChild(this.playerInfo[window.opponent.id].scoreTextWord);
+
+
+	// Update the initial scores
+	var realScore = this.playerInfo[player1Info.id].score;
+	this.changeScore(player1Info.id, this.playerInfo[player1Info.id].backPinPosition);
+	this.changeScore(player1Info.id, realScore);
+
 	realScore = this.playerInfo[player2Info.id].score;
 	this.changeScore(player2Info.id, this.playerInfo[player2Info.id].backPinPosition);
 	this.changeScore(player2Info.id, realScore);
+
+	
 
 	window.console.log("Error - Scoreboard object doesn't work once pegging hits 121 due to the SVG object not having a winning peg. scoreboard.js, line ~57.");
 
@@ -79,17 +140,21 @@ Scoreboard.prototype = {
 	 * @param {int} newScore The new score of the player, to update on the screen
 	 */
 	changeScore: function(playerID, newScore){
-		if(newScore === this.playerInfo[playerID].score){
+		if(newScore === this.playerInfo[playerID].score && newScore !== 0){
 			return;
 		}
-		//Update the score in memory, update the pin locations on the screen
+		//Update the score in memory
 		this.playerInfo[playerID].backPinPosition = this.playerInfo[playerID].score;
 		this.playerInfo[playerID].score = newScore;
 
+		// Update the pin positions on screen
 		var tempPin = this.playerInfo[playerID].pins[0];
 		this.playerInfo[playerID].pins[0] = this.playerInfo[playerID].pins[1];
 		this.playerInfo[playerID].pins[1] = tempPin;
 		this.movePiece(this.playerInfo[playerID].pins[0], this.coordinates[this.playerInfo[playerID].index][newScore]);
+		
+		// Update the text score
+		this.playerInfo[playerID].scoreText.firstChild.nodeValue = newScore;
 	},
 
 	/**
@@ -108,6 +173,10 @@ Scoreboard.prototype = {
 		}
 
 		this.changeScore(playerID, newScore);
+
+		if(newScore === 121){
+			window.gamespace.declareWinner(playerID);
+		}
 	},
 
 	/**

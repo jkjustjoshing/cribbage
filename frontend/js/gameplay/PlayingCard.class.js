@@ -152,7 +152,7 @@ function PlayingCard(number, suit){
 	var which = this;
 	this.dragHandler = new Draggable({
 		element: which.ele,
-		object: which,
+		object: which
 	});
 
 }

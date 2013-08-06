@@ -84,6 +84,11 @@ PlayedCards.prototype.updateCountText = function(nullIfReset){
  * @param  {int} player The ID of the player who played this
  */
 PlayedCards.prototype.play = function(card, player, initializing){
+	//
+	if(window.gamespace){
+		window.gamespace.statusMessage("");
+	}
+
 	if(!(card instanceof PlayingCard) && card !== null){
 		throw 'Can only "play" a PlayingCard object';
 	}
@@ -151,8 +156,8 @@ PlayedCards.prototype.play = function(card, player, initializing){
 						window.gamespace.hands[window.player.id].sort(true);
 
 						which.screenCards.length--;
+						which.cards.length--;
 					}
-					which.cards.length--;
 				}else{
 
 					if(card.dragHandler !== undefined){
@@ -167,7 +172,10 @@ PlayedCards.prototype.play = function(card, player, initializing){
 					// If it was a go, clear the cards
 					if(card.number === 0 && data["game"]["playedCards"][data["game"]["playedCards"].length-1]["number"] === 0){
 						window.gamespace.playedCards.play(null, data["game"]["playedCards"][data["game"]["playedCards"].length-1]["playedByID"], true);
+						window.gamespace.statusMessage(window.opponent.username + ' - "Go"');	
+						
 						which.clearFromScreen();
+					
 					}
 
 
@@ -194,8 +202,10 @@ PlayedCards.prototype.play = function(card, player, initializing){
 					
 
 					if(window.gamespace.gamestate !== data["game"]["gamestate"]){
-						window.gamespace.gamestate = data["game"]["gamestate"];
-						window.gamespace.constructState();
+						setTimeout(function(){
+							window.gamespace.gamestate = data["game"]["gamestate"];
+							window.gamespace.constructState();
+						}, 1000);
 					}
 				}
 			}
@@ -204,12 +214,17 @@ PlayedCards.prototype.play = function(card, player, initializing){
 }
 
 PlayedCards.prototype.clearFromScreen = function(){
-	for(var i = 0; i < this.screenCards.length; ++i){
-		this.container.removeChild(this.screenCards[i].card.ele);
-	}
-	this.screenCards = [];
-	this.count = 0;
-	this.updateCountText();
+	var which = this;
+	setTimeout(function(){
+		(function(){
+			for(var i = 0; i < this.screenCards.length; ++i){
+				this.container.removeChild(this.screenCards[i].card.ele);
+			}
+			this.screenCards = [];
+			this.count = 0;
+			this.updateCountText();
+		}).call(which);
+	}, 1000);
 }
 
 PlayedCards.prototype.successfulDrag = function(x, y){
@@ -278,10 +293,15 @@ PlayedCards.prototype.poll = function(intervalToClearWhenStateChanges){
 
 				if(window.gamespace.gamestate !== data["game"]["gamestate"] || window.gamespace.gamestate === "VIEWING_HANDS" 
 					|| window.gamespace.gamestate.indexOf("WAITING_PLAYER") !== -1){
-					window.gamespace.gamestate = data["game"]["gamestate"];
+					
 					// Stop from updating whose turn it is
 					clearInterval(intervalToClearWhenStateChanges);
-					window.gamespace.constructState();
+					
+					setTimeout(function(){
+						window.gamespace.gamestate = data["game"]["gamestate"];
+						window.gamespace.constructState();
+					}, 1000);
+
 				}else{
 					window.gamespace.setTurn(data["game"]["turn"]);
 				}

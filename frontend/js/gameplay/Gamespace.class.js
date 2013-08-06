@@ -18,7 +18,7 @@ function Gamespace(data, svgEle){
 		username: window.opponent.username,
 		backPinPosition: data.backPinPositions[window.opponent.id]
 	};
-	this.scoreboard = new Scoreboard(playerInfo, opponentInfo);
+	this.scoreboard = new Scoreboard(playerInfo, opponentInfo, document.getElementById("scoreboard"), this.svgEle);
 
 	this.cutCard = data.cutCard;
 	this.dealer = data.dealer;
@@ -89,6 +89,10 @@ Gamespace.prototype.constructState = function(){
 			}else{
 				// If dealing, listeners will be set up by the deck object
 			}
+
+			// Set lock for viewing hands - not elegant way to do it but it works
+			which.alreadyViewingHands = false;
+
 			break;
 		case "CHOOSING_CRIB":
 			// Set event listeners on my cards
@@ -284,8 +288,12 @@ Gamespace.prototype.setTurn = function(turn){
 		var triangle = document.createElementNS(svgns, "path");
 		triangle.setAttributeNS(null, "fill", falseColor);
 		triangle.setAttributeNS(null, "d", "M -15,0 15,0 0,-12");
-		this.turnTriangles[window.player.id] = triangle.cloneNode();
+		this.turnTriangles[window.player.id] = triangle;
 		this.turnTriangles[window.player.id].setAttributeNS(null, "transform", "translate(70,380) rotate(180,0,0)");
+
+		triangle = document.createElementNS(svgns, "path");
+		triangle.setAttributeNS(null, "fill", falseColor);
+		triangle.setAttributeNS(null, "d", "M -15,0 15,0 0,-12");
 		this.turnTriangles[window.opponent.id] = triangle;
 		this.turnTriangles[window.opponent.id].setAttributeNS(null, "transform", "translate(70,330)");
 		
@@ -308,6 +316,13 @@ Gamespace.prototype.setTurn = function(turn){
 
 Gamespace.prototype.viewHands = function(needToConfirmHand){
 	var which = this;
+	
+	// Set lock
+	if(which.alreadyViewingHands){
+		return;
+	}else{
+		which.alreadyViewingHands = true;
+	}
 	
 	// Remove the turn indicator arrows	
 	which.setTurn(false); // Remove the turn indicator triangle
@@ -346,6 +361,7 @@ Gamespace.prototype.viewHands = function(needToConfirmHand){
 			playerHand.sort();
 			
 			var opponentHand = which.hands[window.opponent.id];
+			opponentHand.clear();
 			for(var i = 0; i < data["hands"][window.opponent.id].length; ++i){
 				data["hands"][window.opponent.id][i].inHand = 1;
 				var suit = data["hands"][window.opponent.id][i].suit;
@@ -361,6 +377,29 @@ Gamespace.prototype.viewHands = function(needToConfirmHand){
 				which.confirmHandView(data);
 			}else{
 				which.statusMessage("Waiting for " + window.opponent.username + " to finish looking at the hands.");
+				var interval = setInterval(function(){
+					ajaxCall(
+						"get",
+						{
+							application: "game",
+							method: "getGameData",
+							data: {
+								gameID: window.gameID
+							}
+						},
+						function(data){
+							data = data["game"];
+
+							if(data.gamestate !== "VIEWING_HANDS" && data.gamestate.indexOf("WAITING_PLAYER_") === -1){
+								// Game state not for viewing
+								clearInterval(interval);
+								which.gamestate = data.gamestate;
+								which.resetGamespace();
+								which.constructState();
+							}
+						}
+					);
+				}, 2000);
 			}
 		}
 	);		
@@ -376,36 +415,36 @@ Gamespace.prototype.confirmHandView = function(data){
 	which.statusMessage((nonDealer.id === window.player.id ? "Your" : (nonDealer.username + "'s")) + " hand scores "+nonDealerScore+" points.");
 	which.scoreboard.addPoints(nonDealer.id, nonDealerScore);
 
-	var goEle = document.createElementNS(svgns, "g");
-	var goBox = document.createElementNS(svgns, "rect");
-	goEle.appendChild(goBox);
+	var okEle = document.createElementNS(svgns, "g");
+	var okBox = document.createElementNS(svgns, "rect");
+	okEle.appendChild(okBox);
 	
 	var coordinates = {
 		x: (nonDealer.id === window.player.id ? window.coordinates.playerHand.x : window.coordinates.opponentHand.x) + 50,
 		y: (nonDealer.id === window.player.id ? window.coordinates.playerHand.y : window.coordinates.opponentHand.y) + 60
 	};
 
-	goEle.setAttributeNS(null, "transform", "translate("+coordinates.x+","+coordinates.y+")");
+	okEle.setAttributeNS(null, "transform", "translate("+coordinates.x+","+coordinates.y+")");
 
-	goBox.setAttributeNS(null, "width", "80");
-	goBox.setAttributeNS(null, "height", "40");
-	goBox.setAttributeNS(null, "rx", "5");
-	goBox.setAttributeNS(null, "ry", "5");
-	goBox.setAttributeNS(null, "fill", "blue");
+	okBox.setAttributeNS(null, "width", "80");
+	okBox.setAttributeNS(null, "height", "40");
+	okBox.setAttributeNS(null, "rx", "5");
+	okBox.setAttributeNS(null, "ry", "5");
+	okBox.setAttributeNS(null, "fill", "blue");
 	
-	var goText = document.createElementNS(svgns, "text");
-	goEle.appendChild(goText);
+	var okText = document.createElementNS(svgns, "text");
+	okEle.appendChild(okText);
 
-	goText.setAttributeNS(null, "font-family", "Arial");
-	goText.setAttributeNS(null, "font-size", "30");
-	goText.setAttributeNS(null, "fill", window.textColor);
-	goText.setAttributeNS(null, "x", "15");
-	goText.setAttributeNS(null, "y", "30");
-	goText.appendChild(document.createTextNode("OK"));
+	okText.setAttributeNS(null, "font-family", "Arial");
+	okText.setAttributeNS(null, "font-size", "30");
+	okText.setAttributeNS(null, "fill", window.textColor);
+	okText.setAttributeNS(null, "x", "15");
+	okText.setAttributeNS(null, "y", "30");
+	okText.appendChild(document.createTextNode("OK"));
 
-	which.svgEle.appendChild(goEle);
+	which.svgEle.appendChild(okEle);
 
-	goEle.addEventListener("click", function(){
+	okEle.addEventListener("click", function(){
 		var dealer = (window.player.id === which.dealer ? window.player : window.opponent);
 		var dealerScore = data["handPoints"][dealer.id];
 		which.statusMessage((dealer.id === window.player.id ? "Your" : (dealer.username + "'s")) + " hand scores "+dealerScore+" points.");
@@ -415,10 +454,10 @@ Gamespace.prototype.confirmHandView = function(data){
 			y: (dealer.id === window.player.id ? window.coordinates.playerHand.y : window.coordinates.opponentHand.y) + 60
 		};
 
-		goEle.setAttributeNS(null, "transform", "translate("+coordinates.x+","+coordinates.y+")");
+		okEle.setAttributeNS(null, "transform", "translate("+coordinates.x+","+coordinates.y+")");
 
-		goEle.removeEventListener("click", arguments.callee);
-		goEle.addEventListener("click", function(){
+		okEle.removeEventListener("click", arguments.callee);
+		okEle.addEventListener("click", function(){
 			var cribScore = data["handPoints"]["crib"];
 			which.statusMessage((dealer.id === window.player.id ? "Your" : (dealer.username + "'s")) + " crib scores "+cribScore+" points.");
 			which.scoreboard.addPoints(dealer.id, cribScore);
@@ -427,14 +466,14 @@ Gamespace.prototype.confirmHandView = function(data){
 				y: (dealer.id === window.player.id ? window.coordinates.myCrib.y : window.coordinates.opponentCrib.y) + 60
 			};
 
-			goEle.setAttributeNS(null, "transform", "translate("+coordinates.x+","+coordinates.y+")");
+			okEle.setAttributeNS(null, "transform", "translate("+coordinates.x+","+coordinates.y+")");
 
-			goEle.removeEventListener("click", arguments.callee);
-			goEle.addEventListener("click", function(){
+			okEle.removeEventListener("click", arguments.callee);
+			okEle.addEventListener("click", function(){
 
 
-				goEle.removeEventListener("click", arguments.callee);
-				goEle.parentNode.removeChild(goEle);
+				okEle.removeEventListener("click", arguments.callee);
+				okEle.parentNode.removeChild(okEle);
 
 				// Tell the server we're done looking
 				ajaxCall(
