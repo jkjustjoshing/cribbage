@@ -89,9 +89,9 @@
 		}
 		
 		$success = $database->updateChallengeStatus($challengerID, $challengeeID, $newStatus);
-		
+	
 		if($success){
-			if($newStatus == "ACCEPTED") return array("success" => true, "gameID" => Gamespace::createGame($challengeeID, $challengerID));
+			if($newStatus == "ACCEPTED") return array("success" => true, "gameID" => Gamespace::getGameID($challengeeID, $challengerID));
 			else return array("success" => true);
 		}else{
 			return "There was a database error changing the status of the challenge.";
