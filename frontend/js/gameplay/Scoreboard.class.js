@@ -143,6 +143,11 @@ Scoreboard.prototype = {
 		if(newScore === this.playerInfo[playerID].score && newScore !== 0){
 			return;
 		}
+
+		if(!(window.gamespace && window.gamespace.gamestate === "IN_PROGRESS")){
+			return;
+		}
+
 		//Update the score in memory
 		this.playerInfo[playerID].backPinPosition = this.playerInfo[playerID].score;
 		this.playerInfo[playerID].score = newScore;
@@ -327,7 +332,9 @@ Scoreboard.prototype.coordinates = [
 		[45,100], // 117
 		[45,90], // 118
 		[45,80], // 119
-		[45,70]  // 120
+		[45,70], // 120
+
+		[50,70]  // 120
 	],
 
 
@@ -468,6 +475,8 @@ Scoreboard.prototype.coordinates = [
 		[55,100], // 117
 		[55,90], // 118
 		[55,80], // 119
-		[55,70]  // 120
+		[55,70], // 120
+
+		[50,70]  // 121
 	]
 ];

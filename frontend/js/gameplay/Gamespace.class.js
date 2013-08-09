@@ -61,6 +61,10 @@ function Gamespace(data, svgEle){
 Gamespace.prototype.constructState = function(){
 	console.log("Constructing game state - " + this.gamestate);
 
+	if(this.gamestatus !== "IN_PROGRESS"){
+		return;
+	}
+
 	var which = this;
 	switch(which.gamestate){
 		case "DEALING":
@@ -548,7 +552,48 @@ Gamespace.prototype.resetGamespace = function(){
 }
 
 Gamespace.prototype.declareWinner = function(winnerID){
+	// Stop the game - there is a winner!
+	this.gamestatus = "FINISHED";
 
+	// Announce the win
+	if(winnerID === window.player.id){
+		this.statusMessage("Congratulations, you won!");
+	}else{
+		this.statusMessage("Unfortunately " + window.opponent.username + " beat you. Better luck next time!");
+	}
+
+	switch(this.gamestate){
+		case "DEALING":
+		case: "CHOOSING_CRIB":
+			// Never should have a winner in this state, since no points should be given out.
+			// Reload the page
+			this.statusMessage("Something went wrong. Reloading the page...");
+			setTimeout(function(){window.history.go(0);}, 1500);
+
+			break;
+		case "CUTTING_CARD":
+
+			// Winner if cut card is jack. No polling should be happening, since the polling would have stopped when the card is cut.
+			break;
+		case "PEGGING":
+
+			// Stop the polling, if polling is happening.
+			// Stop cards from being draggable
+
+			break;
+		case "VIEWING_HANDS":
+		case: "WAITING_PLAYER_1":
+		case: "WAITING_PLAYER_2":
+
+			// Let continue viewing hands, but the scoreboard won't let any more points being added.
+
+			break;
+		default:
+			// Just throw them out to the lobby
+			alert("Uh oh! Something went wrong! The game doesn't know what state it is in. Try reopening the game.");
+			window.close();
+			break;
+	}
 }
 
 window.coordinates = {
