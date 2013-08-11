@@ -18,7 +18,7 @@ function Gamespace(data, svgEle){
 		username: window.opponent.username,
 		backPinPosition: data.backPinPositions[window.opponent.id]
 	};
-	this.scoreboard = new Scoreboard(playerInfo, opponentInfo, document.getElementById("scoreboard"), this.svgEle);
+	this.scoreboard = new Scoreboard(playerInfo, opponentInfo, document.getElementById("scoreboard"), this.svgEle, this);
 
 	this.cutCard = data.cutCard;
 	this.dealer = data.dealer;

@@ -19,8 +19,9 @@ var svgns = "http://www.w3.org/2000/svg";
  * @param {object} player1Info The "score", "id", "username", and "backPinPosition" for player 1
  * @param {object} player2Info The "score", "id", "username", and "backPinPosition" for player 2
  */
-function Scoreboard(player1Info, player2Info, scoreboardEle, gameEle){
+function Scoreboard(player1Info, player2Info, scoreboardEle, gameEle, gamespace){
 	var i, circle;
+	this.gamespace = gamespace === undefined ? window.gamespace : gamespace;
 	this.playerInfo = {};
 	this.playerInfo[player1Info.id] = player1Info;
 	this.playerInfo[player2Info.id] = player2Info;
@@ -140,7 +141,7 @@ Scoreboard.prototype = {
 			return;
 		}
 
-		if(!(window.gamespace && window.gamespace.gamestate === "IN_PROGRESS")){
+		if(this.gamespace.gamestatus !== "IN_PROGRESS"){
 			return;
 		}
 
@@ -176,7 +177,7 @@ Scoreboard.prototype = {
 		this.changeScore(playerID, newScore);
 
 		if(newScore === 121){
-			window.gamespace.declareWinner(playerID);
+			this.gamespace.declareWinner(playerID);
 		}
 	},
 
@@ -330,7 +331,7 @@ Scoreboard.prototype.coordinates = [
 		[45,80], // 119
 		[45,70], // 120
 
-		[50,70]  // 120
+		[50,50]  // 120
 	],
 
 
@@ -473,6 +474,6 @@ Scoreboard.prototype.coordinates = [
 		[55,80], // 119
 		[55,70], // 120
 
-		[50,70]  // 121
+		[50,50]  // 121
 	]
 ];
