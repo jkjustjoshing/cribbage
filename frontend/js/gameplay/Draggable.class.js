@@ -202,7 +202,6 @@ Draggable.prototype.removeTarget = function(data){
 		target = data["target"];
 
 		for(var i = 0; i < this.targets.length; ++i){
-			console.log(this.targets[i]);
 			if(target === this.targets[i].target){
 				this.targets.splice(i,1);
 				break;
@@ -213,7 +212,6 @@ Draggable.prototype.removeTarget = function(data){
 	}
 
 	if(this.targets.length === 0){
-		console.log(this);
 		this.element.removeEventListener("mousedown", this.mousedownCallback, false);
 	}
 }

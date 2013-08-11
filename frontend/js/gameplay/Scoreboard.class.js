@@ -121,10 +121,6 @@ function Scoreboard(player1Info, player2Info, scoreboardEle, gameEle){
 	this.changeScore(player2Info.id, this.playerInfo[player2Info.id].backPinPosition);
 	this.changeScore(player2Info.id, realScore);
 
-	
-
-	window.console.log("Error - Scoreboard object doesn't work once pegging hits 121 due to the SVG object not having a winning peg. scoreboard.js, line ~57.");
-
 }
 
 /**

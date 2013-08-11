@@ -213,7 +213,7 @@ Crib.prototype.confirmSelection = function(){
 		this.cribBox.childNodes[0].setAttributeNS(null, "stroke", "red");
 		cribText.removeChild(cribText.firstChild);
 		cribText.appendChild(document.createTextNode(cribTextString));
-		cribText.removeEventListener("click", this.confirmCrib); console.log("This line doesn't work!!!!");
+		cribText.removeEventListener("click", this.confirmCrib);
 	}else{
 		this.cribBox.childNodes[0].setAttributeNS(null, "stroke", "green");
 		cribText.firstChild.nodeValue = "Click to confirm";
