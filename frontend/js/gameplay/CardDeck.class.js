@@ -25,12 +25,12 @@ function CardDeck(container, cutCard){
 		if(i == 6 && which.cutCard !== undefined && which.cutCard !== null){
 			// Display the cut card
 			cards[i] = document.createElementNS(svgns, "g");
-			cards[i].setAttributeNS(null, "transform", "translate("+(i*2)+",0)");
+			cards[i].setAttributeNS(null, "transform", "translate(-"+(i*2)+",0)");
 			cards[i].appendChild(cutCard.ele);
 			setTimeout(function(){which.ele.appendChild(cards[alt_i]);++alt_i;}, (i*60));
 		}else{
 			cards[i] = document.createElementNS(svgns, "g");
-			cards[i].setAttributeNS(null, "transform", "translate("+(i*2)+",0)");
+			cards[i].setAttributeNS(null, "transform", "translate(-"+(i*2)+",0)");
 			cards[i].appendChild((new PlayingCard().ele));
 			setTimeout(function(){which.ele.appendChild(cards[alt_i]);++alt_i;}, (i*60));
 		}
@@ -124,15 +124,66 @@ CardDeck.prototype.deal = function(){
 }
 
 CardDeck.prototype.updateCutCard = function(card){
+	var which = this;
+
 	this.cutCard = card;
+	setTimeout(function(){
+		which.updateCutCardView.call(which);
+	}, 500);
+}
+
+CardDeck.prototype.updateCutCardView = function(){
 	this.ele.removeChild(this.ele.lastChild);
-	cutCard = document.createElementNS(svgns, "g");
-	cutCard.setAttributeNS(null, "transform", "translate("+((this.deckHeight-1)*2)+",0)");
-	cutCard.appendChild(card.ele);
+	var cutCard = document.createElementNS(svgns, "g");
+	cutCard.setAttributeNS(null, "transform", "translate(-"+((this.deckHeight-1)*2)+",0)");
+	cutCard.appendChild(this.cutCard.ele);
 	this.ele.appendChild(cutCard);
-	if(card.number == 11){
+	if(this.cutCard.number == 11){
 		window.gamespace.statusMessage("The dealer gets 2 points when a Jack gets cut.");
 	}else{
 		window.gamespace.statusMessage("");
 	}
+}
+
+CardDeck.prototype.pickCutCard = function(callback){
+	var which = this;
+	var cards = [];
+
+	var clickCallback = function(){
+		var idArr = this.getAttributeNS(null, "id").split("|");
+		var id = parseInt(idArr[1]);
+
+		for(var i = 0; i < 40; ++i){
+			cards[i].ele.removeEventListener("click", clickCallback, false);
+			$(cards[i].ele).animate({
+				svgTransform: "translate(0, 0)"
+			}, {
+				duration:500,
+				complete:function(){
+					this.parentNode.removeChild(this);
+				}
+			});
+		}
+
+		callback(id);
+	}
+
+
+	// Create 40 cards, spread them out
+	setTimeout(function(){
+		var spaceBetweenCards = 5;
+		var increment = (which.deckHeight*2)/40;
+		for(var i = 0; i < 40; ++i){
+			cards[i] = new PlayingCard();
+			cards[i].ele.setAttributeNS(null, "transform", "translate(-"+(increment*i)+",0)");
+			cards[i].ele.setAttributeNS(null, "id", "cutTheDeck|"+i);
+			which.ele.appendChild(cards[i].ele);
+
+			cards[i].ele.addEventListener("click", clickCallback, false);
+
+			$(cards[i].ele).animate({
+				svgTransform: "translate(-"+ (16 * (i)) +", 0)"
+			}, 500);
+		}
+	}, 450);
 }

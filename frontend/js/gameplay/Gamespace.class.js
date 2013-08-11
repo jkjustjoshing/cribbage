@@ -175,8 +175,8 @@ Gamespace.prototype.constructState = function(){
 
 			if(which.dealer == window.opponent.id){
 				which.statusMessage("Pick a cut card.");
-				setTimeout(function(){
-					var cutCardIndex = prompt("Pick a cut card");
+				
+				which.deck.pickCutCard(function(cutCardIndex){
 					ajaxCall(
 						"post",
 						{
@@ -189,7 +189,9 @@ Gamespace.prototype.constructState = function(){
 						},
 						cutCardCallback
 					);
-				}, 2000);
+				});
+
+				
 			}else{
 				which.statusMessage("Waiting for " + window.opponent.username + " to pick the cut card.");
 				var interval = setInterval(function(){
@@ -564,7 +566,7 @@ Gamespace.prototype.declareWinner = function(winnerID){
 
 	switch(this.gamestate){
 		case "DEALING":
-		case: "CHOOSING_CRIB":
+		case "CHOOSING_CRIB":
 			// Never should have a winner in this state, since no points should be given out.
 			// Reload the page
 			this.statusMessage("Something went wrong. Reloading the page...");
@@ -582,8 +584,8 @@ Gamespace.prototype.declareWinner = function(winnerID){
 
 			break;
 		case "VIEWING_HANDS":
-		case: "WAITING_PLAYER_1":
-		case: "WAITING_PLAYER_2":
+		case "WAITING_PLAYER_1":
+		case "WAITING_PLAYER_2":
 
 			// Let continue viewing hands, but the scoreboard won't let any more points being added.
 
