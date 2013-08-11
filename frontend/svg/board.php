@@ -103,4 +103,19 @@
 		
 	</g>
 
+	<!-- Winning peg -->
+	<g transform="translate(50, 50)">
+		<circle r="4" cx="0" cy="0" fill="grey" />
+		<defs>
+			<path id="textCurve"
+				d="M -11.5,-0.5 A12,12 0 0,1 12,0"/>
+		</defs>
+
+		<text font-size="10">
+			<textPath xlink:href="#textCurve">
+				Winner
+			</textPath>
+		</text>
+
+	</g>
 </svg>
