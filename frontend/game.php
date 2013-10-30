@@ -121,5 +121,6 @@
 			<div class="conversation">
 			</div>
 		</div>
+    <?php include("analytics.php"); ?>
 	</body>
 </html>

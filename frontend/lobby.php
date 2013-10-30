@@ -79,5 +79,6 @@
 				<input type="text" name="text" autocomplete="off" />
 			</form>
 		</div>
+    <?php include("analytics.php"); ?>
 	</body>
 </html>

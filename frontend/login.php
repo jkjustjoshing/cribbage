@@ -108,5 +108,6 @@
 		$("form.signup #password").on("blur", function(){checkPassword(this)});
 		$("form.signup #username").on("blur", function(){checkUsername(this)});
     </script>
+    <?php include("analytics.php"); ?>
   </body>
 </html>
